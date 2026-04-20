@@ -306,6 +306,29 @@
   .rfs-val.lic    { color: #FFD600; }
   .rfs-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
   .rfs-sep { width: 1px; height: 28px; background: var(--border); }
+  /* Per-model breakdown inside region footer */
+  .rfs-breakdown {
+    width: 100%; margin-top: .75rem; padding-top: .75rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center;
+  }
+  .rfs-breakdown-lbl {
+    font-size: 9px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.07em; width: 100%; margin-bottom: 2px;
+  }
+  .rfs-model-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 4px; font-size: 10px; font-weight: 700;
+    font-family: 'Syne', sans-serif; letter-spacing: 0.03em;
+    border: 1px solid transparent;
+  }
+  .rfs-model-chip.rubrik { background: rgba(0,180,216,0.1); color: var(--rc); border-color: rgba(0,180,216,0.3); }
+  .rfs-model-chip.dell   { background: rgba(179,136,255,0.1); color: #B388FF; border-color: rgba(179,136,255,0.3); }
+  .rfs-model-count {
+    background: rgba(255,255,255,0.12); border-radius: 3px;
+    padding: 0 5px; font-size: 10px; font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
 </style>
 </head>
 <body>
@@ -460,7 +483,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v5';
+const STORAGE_KEY = 'rubrik_dashboard_v6';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -870,6 +893,7 @@ function buildRegionSummary(p) {
     if (!sites.length) return;
 
     let regionClusters = 0, regionLic = 0, regionRubrik = 0, regionDell = 0;
+    const modelTally = {};  // model name -> { count, vendor }
 
     // Pre-compute per-site cluster data for totals
     const siteData = sites.map(({ s, si }) => {
@@ -894,6 +918,8 @@ function buildRegionSummary(p) {
       clusters.push({ wl:'IT', model:itModel, cap:itCap, vendor:itVendor, pct:itPct });
       regionClusters++; regionLic += itCap;
       if (itVendor === 'dell') regionDell++; else regionRubrik++;
+      modelTally[itModel] = modelTally[itModel] || { count:0, vendor:itVendor };
+      modelTally[itModel].count++;
 
       // Absorbed notes for IT
       const absorbed = [];
@@ -908,6 +934,8 @@ function buildRegionSummary(p) {
         clusters.push({ wl:'OT', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
         if (v === 'dell') regionDell++; else regionRubrik++;
+        modelTally[m] = modelTally[m] || { count:0, vendor:v };
+        modelTally[m].count++;
       }
 
       // ICS standalone
@@ -918,6 +946,8 @@ function buildRegionSummary(p) {
         clusters.push({ wl:'ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
         if (v === 'dell') regionDell++; else regionRubrik++;
+        modelTally[m] = modelTally[m] || { count:0, vendor:v };
+        modelTally[m].count++;
       }
 
       return { s, si, clusters, absorbed };
@@ -1007,9 +1037,26 @@ function buildRegionSummary(p) {
         <div class="rfs-lbl">Licensed Capacity</div>
       </div>`;
 
+    // Build model breakdown chips
+    const modelOrder = [...APPLIANCES.map(([m])=>m), ...DELL_APPLIANCES.map(([m])=>m)];
+    const sortedModels = Object.keys(modelTally).sort((a,b) => {
+      const ai = modelOrder.indexOf(a), bi = modelOrder.indexOf(b);
+      return (ai===-1?999:ai) - (bi===-1?999:bi);
+    });
+    let breakdownHtml = '';
+    if (sortedModels.length) {
+      breakdownHtml = '<div class="rfs-breakdown"><div class="rfs-breakdown-lbl">Appliance / Node breakdown</div>';
+      sortedModels.forEach(mdl => {
+        const { count, vendor } = modelTally[mdl];
+        breakdownHtml += `<span class="rfs-model-chip ${vendor}"><span class="rfs-model-count">${count}x</span>${mdl}</span>`;
+      });
+      breakdownHtml += '</div>';
+    }
+
     foot.innerHTML = `
       <div class="region-footer-title">${flag} ${label} Region Total</div>
-      <div class="region-footer-stats">${statsHtml}</div>`;
+      <div class="region-footer-stats">${statsHtml}</div>
+      ${breakdownHtml}`;
     container.appendChild(foot);
   });
 }
