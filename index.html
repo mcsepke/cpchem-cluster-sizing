@@ -517,7 +517,7 @@
       </div>
       <div class="ctl-group">
         <div class="ctl-lbl" style="color:#A5D6A7">Software License Discount</div>
-        <div class="ctl-row"><input type="range" id="disc-lic" min="0" max="60" step="1" value="0" style="background:var(--border-mid)"><span class="ctl-val disc-val-lic" id="disc-lic-v">0%</span></div>
+        <div class="ctl-row"><input type="range" id="disc-lic" min="0" max="99" step="1" value="0" style="background:var(--border-mid)"><span class="ctl-val disc-val-lic" id="disc-lic-v">0%</span></div>
       </div>
       <div class="ctl-group">
         <div class="ctl-lbl" style="color:#F48FB1">Professional Services Discount</div>
@@ -668,7 +668,7 @@ const RUBRIK_PRICES = {
   'R7402': 93300, 'R7404': 93900, 'R7408': 96100,
   'R7412': 100300, 'R7416': null, 'R7420': null, 'R7424': null,
 };
-const LICENSE_PER_TB   = 130;   // Foundation Edition per TB
+const LICENSE_PER_TB   = 130 * 12;   // Foundation Edition $130/TB/month × 12 months
 const PS_PER_APPLIANCE = 7500;  // Professional services per appliance
 const CABLES_PER_APPL  = 100;   // Network cables per appliance
 const XCVR_PER_APPL    = 400;   // Network transceivers per appliance
@@ -1300,9 +1300,9 @@ function buildPricingTable(p) {
       const licList = licTB * LICENSE_PER_TB;
       const licNet  = disc(licList, d.lic);
 
-      // PS
-      const psList = PS_PER_APPLIANCE;
-      const psNet  = disc(psList, d.ps);
+      // PS — charged once per SITE (IT row only, wi===0)
+      const psList = (wi === 0) ? PS_PER_APPLIANCE : null;
+      const psNet  = (wi === 0) ? disc(PS_PER_APPLIANCE, d.ps) : null;
 
       // Cables
       const cabList = CABLES_PER_APPL;
@@ -1312,14 +1312,14 @@ function buildPricingTable(p) {
       const xcvrList = XCVR_PER_APPL;
       const xcvrNet  = disc(xcvrList, d.hw);
 
-      // Line total (net) — only include appliance if price known
-      const lineNet = (appNet !== null ? appNet : 0) + licNet + psNet + cabNet + xcvrNet;
+      // Line total (net) — only include appliance if price known; PS only on wi===0
+      const lineNet = (appNet !== null ? appNet : 0) + licNet + (psNet || 0) + cabNet + xcvrNet;
 
       // Accumulate totals
       if (appList !== null) { totHWList += appList; totHWNet += appNet; }
       totHWList += cabList + xcvrList; totHWNet += cabNet + xcvrNet;
       totLicList += licList; totLicNet += licNet;
-      totPSList  += psList;  totPSNet  += psNet;
+      if (wi === 0) { totPSList += PS_PER_APPLIANCE; totPSNet += disc(PS_PER_APPLIANCE, d.ps); }
       totCabList += cabList; totCabNet += cabNet;
       totXcvrList += xcvrList; totXcvrNet += xcvrNet;
 
@@ -1331,7 +1331,7 @@ function buildPricingTable(p) {
         <td><span class="appl-badge ${vendorCls}" style="font-size:9px;padding:2px 7px">${appModel}</span><br><span style="font-size:9px;color:var(--text-muted)">${appCap} TB · ${licTB} TB lic</span></td>
         <td class="price-hi">${priceCell(appList, appNet, d.hw)}</td>
         <td class="price-hi">${priceCell(licList, licNet, d.lic)}</td>
-        <td class="price-hi">${priceCell(psList, psNet, d.ps)}</td>
+        <td class="price-hi">${wi===0 ? priceCell(psList, psNet, d.ps) : '<span class="price-net no-disc" style="color:var(--text-muted)">—</span>'}</td>
         <td>${priceCell(cabList, cabNet, d.hw)}</td>
         <td>${priceCell(xcvrList, xcvrNet, d.hw)}</td>
         <td class="total-td">${fmt$(lineNet)}</td>`;
