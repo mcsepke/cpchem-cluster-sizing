@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rubrik Sizing Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rb: #001B4E;
+    --rc: #00B4D8;
+    --bg-page: #0a0f1e;
+    --bg-surface: #111827;
+    --bg-card: #1a2235;
+    --bg-card-alt: #141d2e;
+    --border: rgba(255,255,255,0.08);
+    --border-mid: rgba(255,255,255,0.14);
+    --text-primary: #f0f4ff;
+    --text-secondary: #8a9bc0;
+    --text-muted: #546882;
+    --it-bg: #0d47a1;
+    --it-text: #90caf9;
+    --ot-bg: #1b5e20;
+    --ot-text: #a5d6a7;
+    --ics-bg: #bf360c;
+    --ics-text: #ffccbc;
+    --note-bg: rgba(230, 81, 0, 0.10);
+    --note-text: #ffb74d;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  .page-wrap {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: linear-gradient(135deg, #001B4E 0%, #0d2b6b 60%, #0a1f4a 100%);
+    border-radius: var(--radius);
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border: 1px solid rgba(0,180,216,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hdr-left h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .hdr-left p {
+    font-size: 12px;
+    color: #90CAF9;
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+  .hdr-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .badge {
+    background: var(--rc);
+    color: #001B4E;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .hdr-note { font-size: 10px; color: var(--text-muted); text-align: right; }
+
+  /* ── Retention model callout ── */
+  .model-callout {
+    background: rgba(0,180,216,0.07);
+    border: 1px solid rgba(0,180,216,0.25);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 11px;
+    color: #90CAF9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .model-callout strong { color: var(--rc); font-weight: 500; }
+  .model-callout .sep  { color: var(--text-muted); }
+
+  /* ── Controls panel ── */
+  .controls-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 2rem;
+    margin-bottom: 1.25rem;
+  }
+  .controls-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--rc);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem 2rem;
+  }
+  .ctl-group { display: flex; flex-direction: column; gap: 6px; }
+  .ctl-lbl {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+  }
+  .ctl-row { display: flex; align-items: center; gap: 10px; }
+  .ctl-row input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: var(--border-mid);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .ctl-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--rc);
+    cursor: pointer;
+    border: 2px solid var(--bg-surface);
+    box-shadow: 0 0 0 1px var(--rc);
+  }
+  .ctl-row input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--rc);
+    cursor: pointer;
+    border: 2px solid var(--bg-surface);
+  }
+  .ctl-val {
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 52px;
+    text-align: right;
+    color: var(--rc);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Metric cards ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .met-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .met-card:hover { border-color: rgba(0,180,216,0.3); }
+  .met-card-lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+  }
+  .met-card-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .met-card-val.accent { color: var(--rc); }
+  .met-card-sub { font-size: 10px; color: var(--text-secondary); margin-top: 5px; }
+
+  /* ── Table section ── */
+  .table-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .table-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .legend { display: flex; gap: 12px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  .tbl-outer { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+
+  thead tr.hdr-group th {
+    background: var(--rb);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 9px 8px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+  }
+  thead tr.hdr-group th.left { text-align: left; padding-left: 14px; }
+  thead tr.hdr-group th.span-grp { border-bottom: 1px solid rgba(0,180,216,0.3); }
+  thead tr.hdr-group th.span-req { border-bottom: 1px solid rgba(124,77,255,0.4); }
+
+  thead tr.hdr-sub th {
+    background: #0a1d45;
+    color: #90CAF9;
+    font-size: 9px;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+    padding: 6px 8px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    white-space: nowrap;
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  tbody tr.even td { background: var(--bg-card-alt); }
+  tbody tr.odd  td { background: var(--bg-card); }
+  tbody tr:hover td { background: rgba(0,180,216,0.05); }
+  tbody tr.note-row td {
+    background: var(--note-bg);
+    border-bottom: none;
+    color: var(--note-text);
+    font-style: italic;
+    font-size: 10px;
+    text-align: left;
+    padding: 5px 14px;
+    letter-spacing: 0.01em;
+  }
+
+  td {
+    padding: 8px 8px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    vertical-align: middle;
+  }
+  td.site-num  { text-align: center; color: var(--text-muted); font-size: 10px; }
+  td.site-name {
+    text-align: left; padding-left: 14px;
+    font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 11px; color: var(--text-primary); white-space: nowrap;
+  }
+  td.num     { color: var(--text-secondary); }
+  td.yr3     { color: var(--text-primary); font-weight: 500; }
+  td.req-yr3 { color: #fff; font-weight: 500; }
+
+  .wl-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-family: 'Syne', sans-serif; font-size: 9.5px;
+    font-weight: 700; letter-spacing: 0.04em;
+  }
+  .wl-it  { background: var(--it-bg);  color: var(--it-text); }
+  .wl-ot  { background: var(--ot-bg);  color: var(--ot-text); }
+  .wl-ics { background: var(--ics-bg); color: var(--ics-text); }
+
+  .appl-badge {
+    display: inline-block; padding: 3px 9px; border-radius: 4px;
+    background: rgba(0,180,216,0.12); color: var(--rc);
+    border: 1px solid rgba(0,180,216,0.35);
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 10px; letter-spacing: 0.04em;
+  }
+  td.lic { color: var(--rc); font-weight: 500; }
+
+  tfoot tr td {
+    background: var(--rb); color: #fff;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 12px; padding: 11px 8px; text-align: center;
+    border-top: 2px solid rgba(0,180,216,0.4);
+  }
+  tfoot td.foot-label { text-align: left; padding-left: 14px; color: #90CAF9; }
+  tfoot td.foot-total { color: var(--rc); font-size: 15px; }
+
+  .page-footer {
+    text-align: center; margin-top: 2.5rem;
+    font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em;
+  }
+  .page-footer span { color: var(--rc); }
+
+  @media (max-width: 768px) {
+    .page-wrap { padding: 1rem; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .hdr-right { align-items: flex-start; }
+    .hdr-left h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header class="page-header">
+    <div class="hdr-left">
+      <h1>Rubrik Sizing Dashboard</h1>
+      <p>16 sites &nbsp;·&nbsp; IT / OT / ICS workloads &nbsp;·&nbsp; 3-year capacity projection &nbsp;·&nbsp; Appliance auto-selection</p>
+    </div>
+    <div class="hdr-right">
+      <div class="badge">CLUSTER PLANNER</div>
+      <div class="hdr-note">Adjust sliders to recalculate all projections</div>
+    </div>
+  </header>
+
+  <div class="model-callout" id="callout">
+    <strong>Retention model:</strong>
+    <span>1 full backup (day 1)</span>
+    <span class="sep">+</span>
+    <span>29 daily incrementals (days 2–30)</span>
+    <span class="sep">·</span>
+    <span>Rolling 30-day window — storage is constant per year, source FETB compounds annually</span>
+  </div>
+
+  <div class="controls-panel">
+    <div class="controls-title">Sizing Parameters</div>
+    <div class="controls-grid">
+      <div class="ctl-group">
+        <div class="ctl-lbl">Data Reduction Ratio</div>
+        <div class="ctl-row">
+          <input type="range" id="drr" min="1" max="5" step="0.1" value="2.8">
+          <span class="ctl-val" id="drr-v">2.8:1</span>
+        </div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Daily Change Rate</div>
+        <div class="ctl-row">
+          <input type="range" id="dcr" min="0.5" max="10" step="0.5" value="2">
+          <span class="ctl-val" id="dcr-v">2.0%</span>
+        </div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Annual Growth Rate</div>
+        <div class="ctl-row">
+          <input type="range" id="agr" min="0" max="50" step="1" value="15">
+          <span class="ctl-val" id="agr-v">15%</span>
+        </div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Reserve Capacity</div>
+        <div class="ctl-row">
+          <input type="range" id="rsv" min="0" max="30" step="1" value="10">
+          <span class="ctl-val" id="rsv-v">10%</span>
+        </div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Small Site Threshold</div>
+        <div class="ctl-row">
+          <input type="range" id="thr" min="1" max="20" step="1" value="5">
+          <span class="ctl-val" id="thr-v">5 TB</span>
+        </div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Retention Window (days)</div>
+        <div class="ctl-row">
+          <input type="range" id="ret" min="7" max="90" step="1" value="30">
+          <span class="ctl-val" id="ret-v">30 days</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics-grid" id="metrics"></div>
+
+  <div class="table-section">
+    <div class="table-section-header">
+      <div class="table-section-title">Cluster Sizing Detail</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>IT Systems</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2E7D32"></div>OT Systems</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#bf360c"></div>ICS Systems</div>
+      </div>
+    </div>
+    <div class="tbl-outer">
+      <table>
+        <thead>
+          <tr class="hdr-group">
+            <th class="left" rowspan="2" style="width:30px">#</th>
+            <th class="left" rowspan="2" style="width:155px">Site</th>
+            <th rowspan="2" style="width:62px">Workload</th>
+            <th rowspan="2" style="width:66px">Eff. FETB (TB)</th>
+            <th rowspan="2" style="width:44px">DRR</th>
+            <th rowspan="2" style="width:62px">Full BU (TB)</th>
+            <th rowspan="2" style="width:58px">Daily Incr (TB)</th>
+            <th colspan="3" class="span-grp" style="background:#0a2060">Data Stored — Projected (TB)</th>
+            <th colspan="3" class="span-req" style="background:#1a0a40">Required Usable + Reserve (TB)</th>
+            <th rowspan="2" style="width:70px;background:#00324a">Appliance</th>
+            <th rowspan="2" style="width:52px;background:#00324a">Cap (TB)</th>
+            <th rowspan="2" style="width:58px;background:#003b55">Lic TB</th>
+          </tr>
+          <tr class="hdr-sub">
+            <th style="width:60px;background:#0a2060">Yr 1</th>
+            <th style="width:60px;background:#0a2060">Yr 2</th>
+            <th style="width:60px;background:#0a2060">Yr 3</th>
+            <th style="width:64px;background:#1a0a40">Yr 1</th>
+            <th style="width:64px;background:#1a0a40">Yr 2</th>
+            <th style="width:64px;background:#1a0a40">Yr 3</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+        <tfoot id="tbl-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    Rubrik Sizing Dashboard &nbsp;·&nbsp; Appliances: R7402 (15TB) · R7404 (30TB) · R7408 (60TB) · R7412 (90TB) · R7416 (120TB) · R7420 (150TB) · R7424 (180TB)
+    &nbsp;·&nbsp; Sized to <span>Year 3</span> requirements &nbsp;·&nbsp; Retention: <span id="footer-ret">1 full + 29 incrementals</span>
+  </div>
+
+</div>
+
+<script>
+const SITES = [
+  [1,  "Bartlesville, OK",         8.17,  2.11,  62.5  ],
+  [2,  "Cedar Bayou, TX",          89.59, 7.0,   15.0  ],
+  [3,  "Conroe, TX",               4.51,  null,  0.5   ],
+  [4,  "Kingwood, TX",             7.67,  1.14,  3.33  ],
+  [5,  "Orange, TX",               10.19, 5.0,   12.0  ],
+  [6,  "Port Arthur, TX",          35.36, 3.0,   7.0   ],
+  [7,  "Pasadena, TX (PPC)",       21.7,  6.2,   10.0  ],
+  [8,  "Borger, TX",               18.71, 5.67,  1.362 ],
+  [9,  "Sweeny, TX",               54.35, 10.0,  2.4   ],
+  [10, "Plano, TX",                9.96,  null,  null  ],
+  [11, "Diegem, Belgium",          7.81,  null,  null  ],
+  [12, "Tessenderlo, Belgium",     11.27, 1.58,  5.0   ],
+  [13, "Beringen, Belgium",        4.97,  1.14,  4.5   ],
+  [14, "Suntec Tower, Singapore",  2.74,  null,  null  ],
+  [15, "The Woodlands, TX",        9.67,  null,  null  ],
+  [16, "GTPC",                     34.0,  null,  22.5  ],
+];
+
+const APPLIANCES = [
+  ["R7402",15],["R7404",30],["R7408",60],["R7412",90],
+  ["R7416",120],["R7420",150],["R7424",180]
+];
+
+function selectAppliance(reqTB) {
+  for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c];
+  return ["R7424+", 180];
+}
+
+function f(v, d = 2) { return v.toFixed(d); }
+
+/*
+ * Retention model (rolling window, no accumulation across years):
+ *
+ *   At any point in time the cluster stores exactly:
+ *     - 1 full backup  = grownFETB / DRR
+ *     - (ret-1) daily incrementals = (ret-1) × (grownFETB × DCR / DRR)
+ *
+ *   grownFETB at year N = FETB × (1 + AGR)^(N-1)
+ *
+ *   Total stored at year N:
+ *     = grownFETB / DRR × (1 + (ret-1) × DCR)
+ */
+function calcStored(fetb, drr, dcr, agr, yr, ret) {
+  const grownFETB = fetb * Math.pow(1 + agr, yr - 1);
+  const fullBU    = grownFETB / drr;
+  const increms   = (ret - 1) * (grownFETB * dcr / drr);
+  return fullBU + increms;
+}
+
+function getParams() {
+  return {
+    drr: parseFloat(document.getElementById('drr').value),
+    dcr: parseFloat(document.getElementById('dcr').value) / 100,
+    agr: parseFloat(document.getElementById('agr').value) / 100,
+    rsv: parseFloat(document.getElementById('rsv').value) / 100,
+    thr: parseFloat(document.getElementById('thr').value),
+    ret: parseInt(document.getElementById('ret').value),
+  };
+}
+
+function render() {
+  const p = getParams();
+  const tbody     = document.getElementById('tbl-body');
+  const tfoot     = document.getElementById('tbl-foot');
+  const metricsEl = document.getElementById('metrics');
+  tbody.innerHTML = '';
+  tfoot.innerHTML = '';
+
+  // Update retention callout
+  document.getElementById('footer-ret').textContent = `1 full + ${p.ret - 1} incrementals`;
+  document.getElementById('callout').innerHTML = `
+    <strong>Retention model:</strong>
+    <span>1 full backup (day 1)</span>
+    <span class="sep">+</span>
+    <span>${p.ret - 1} daily incrementals (days 2–${p.ret})</span>
+    <span class="sep">·</span>
+    <span>Rolling ${p.ret}-day window — storage is constant per year, source FETB compounds annually</span>`;
+
+  let rowIdx = 0, totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
+
+  for (const [num, name, itRaw, otRaw, icsRaw] of SITES) {
+    const otAbs  = (otRaw  === null || otRaw  < p.thr);
+    const icsAbs = (icsRaw === null || icsRaw < p.thr);
+
+    const wls = [['IT','it']];
+    if (!otAbs)  wls.push(['OT','ot']);
+    if (!icsAbs) wls.push(['ICS','ics']);
+    totalClusters += wls.length;
+
+    for (let wi = 0; wi < wls.length; wi++) {
+      const [wl, wlc] = wls[wi];
+      const even = rowIdx % 2 === 0;
+      const tr = document.createElement('tr');
+      tr.className = even ? 'even' : 'odd';
+
+      let fetb;
+      if (wl === 'IT') {
+        fetb = itRaw
+          + (otAbs  && otRaw  !== null ? otRaw  : 0)
+          + (icsAbs && icsRaw !== null ? icsRaw : 0);
+        totalIT += fetb;
+      } else {
+        fetb = (wl === 'OT' ? otRaw : icsRaw);
+        totalOTICS += fetb;
+      }
+
+      // Base (Year 0 / current) values for display
+      const fb = fetb / p.drr;
+      const di = fetb * p.dcr / p.drr;
+
+      // Stored per year using rolling retention model
+      const y1 = calcStored(fetb, p.drr, p.dcr, p.agr, 1, p.ret);
+      const y2 = calcStored(fetb, p.drr, p.dcr, p.agr, 2, p.ret);
+      const y3 = calcStored(fetb, p.drr, p.dcr, p.agr, 3, p.ret);
+
+      // Add reserve buffer
+      const r1 = y1 * (1 + p.rsv);
+      const r2 = y2 * (1 + p.rsv);
+      const r3 = y3 * (1 + p.rsv);
+
+      const [appModel, appCap] = selectAppliance(r3);
+      totalLic += appCap;
+
+      tr.innerHTML = `
+        <td class="site-num">${num}</td>
+        <td class="site-name">${name}</td>
+        <td><span class="wl-badge wl-${wlc}">${wl}</span></td>
+        <td class="num">${f(fetb)}</td>
+        <td class="num">${f(p.drr,1)}:1</td>
+        <td class="num">${f(fb)}</td>
+        <td class="num">${f(di)}</td>
+        <td class="num">${f(y1)}</td>
+        <td class="num">${f(y2)}</td>
+        <td class="yr3">${f(y3)}</td>
+        <td class="num">${f(r1)}</td>
+        <td class="num">${f(r2)}</td>
+        <td class="req-yr3">${f(r3)}</td>
+        <td><span class="appl-badge">${appModel}</span></td>
+        <td class="num">${appCap} TB</td>
+        <td class="lic">${appCap} TB</td>`;
+      tbody.appendChild(tr);
+      rowIdx++;
+    }
+
+    const notes = [];
+    if (otAbs  && otRaw  !== null) notes.push(`Site ${num} OT: ${otRaw} TB FETB (< ${p.thr} TB threshold) — capacity absorbed into IT cluster`);
+    if (icsAbs && icsRaw !== null) notes.push(`Site ${num} ICS: ${icsRaw} TB FETB (< ${p.thr} TB threshold) — capacity absorbed into IT cluster`);
+    for (const note of notes) {
+      const nr = document.createElement('tr');
+      nr.className = 'note-row';
+      nr.innerHTML = `<td colspan="16">⚠ ${note}</td>`;
+      tbody.appendChild(nr);
+    }
+  }
+
+  const fr = document.createElement('tr');
+  fr.innerHTML = `
+    <td class="foot-label" colspan="3">Total license capacity required</td>
+    <td colspan="12"></td>
+    <td class="foot-total">${totalLic} TB</td>`;
+  tfoot.appendChild(fr);
+
+  metricsEl.innerHTML = `
+    <div class="met-card">
+      <div class="met-card-lbl">Total clusters</div>
+      <div class="met-card-val">${totalClusters}</div>
+      <div class="met-card-sub">across ${SITES.length} sites</div>
+    </div>
+    <div class="met-card">
+      <div class="met-card-lbl">Total license capacity</div>
+      <div class="met-card-val accent">${totalLic} TB</div>
+      <div class="met-card-sub">sum of selected appliance capacities</div>
+    </div>
+    <div class="met-card">
+      <div class="met-card-lbl">Effective IT FETB</div>
+      <div class="met-card-val">${f(totalIT, 0)} TB</div>
+      <div class="met-card-sub">incl. absorbed OT / ICS workloads</div>
+    </div>
+    <div class="met-card">
+      <div class="met-card-lbl">Standalone OT + ICS</div>
+      <div class="met-card-val">${f(totalOTICS, 0)} TB</div>
+      <div class="met-card-sub">own dedicated cluster FETB</div>
+    </div>`;
+}
+
+const sliderFmts = {
+  drr: v => `${parseFloat(v).toFixed(1)}:1`,
+  dcr: v => `${parseFloat(v).toFixed(1)}%`,
+  agr: v => `${v}%`,
+  rsv: v => `${v}%`,
+  thr: v => `${v} TB`,
+  ret: v => `${v} days`,
+};
+
+['drr','dcr','agr','rsv','thr','ret'].forEach(id => {
+  const el  = document.getElementById(id);
+  const out = document.getElementById(id + '-v');
+  el.addEventListener('input', () => { out.textContent = sliderFmts[id](el.value); render(); });
+  out.textContent = sliderFmts[id](el.value);
+});
+
+render();
+</script>
+</body>
+</html>
