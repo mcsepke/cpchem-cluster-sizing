@@ -329,6 +329,91 @@
     padding: 0 5px; font-size: 10px; font-weight: 700;
     font-family: 'DM Mono', monospace;
   }
+
+  /* ── Discount Controls Panel ── */
+  .discount-panel { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 2rem; margin-bottom: 1.25rem; }
+  .discount-title { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: #FFD600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .disc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem 2rem; }
+  input#disc-hw::-webkit-slider-thumb  { background: #FFB74D; box-shadow: 0 0 0 1px #FFB74D; }
+  input#disc-lic::-webkit-slider-thumb { background: #A5D6A7; box-shadow: 0 0 0 1px #A5D6A7; }
+  input#disc-ps::-webkit-slider-thumb  { background: #F48FB1; box-shadow: 0 0 0 1px #F48FB1; }
+  input#disc-hw::-moz-range-thumb  { background: #FFB74D; }
+  input#disc-lic::-moz-range-thumb { background: #A5D6A7; }
+  input#disc-ps::-moz-range-thumb  { background: #F48FB1; }
+  .disc-val-hw  { color: #FFB74D; }
+  .disc-val-lic { color: #A5D6A7; }
+  .disc-val-ps  { color: #F48FB1; }
+
+  /* ── Pricing Summary Table ── */
+  .pricing-section { margin-top: 1.5rem; }
+  .pricing-section-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 1rem 1.5rem; background: var(--bg-surface);
+    border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .pricing-section-title .ps-pill {
+    font-size: 10px; color: var(--text-muted); background: var(--bg-card);
+    border: 1px solid var(--border); padding: 2px 8px; border-radius: 8px;
+    font-weight: 400; font-family: 'DM Mono', monospace;
+  }
+  .pricing-tbl-outer { overflow-x: auto; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); }
+  .pricing-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .pricing-tbl thead th {
+    background: #0a1d45; color: #90CAF9; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 8px 10px; text-align: right;
+    border-right: 1px solid var(--border); white-space: nowrap;
+  }
+  .pricing-tbl thead th:first-child { text-align: left; padding-left: 14px; width: 160px; }
+  .pricing-tbl thead th.wl-col { width: 56px; text-align: center; }
+  .pricing-tbl thead th.app-col { width: 120px; }
+  .pricing-tbl thead th.num-col { width: 88px; }
+  .pricing-tbl thead th.total-col { width: 110px; background: #0d2040; }
+  .pricing-tbl tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+  .pricing-tbl tbody tr.pt-it  td { background: rgba(13,71,161,0.10); }
+  .pricing-tbl tbody tr.pt-ot  td { background: rgba(27,94,32,0.10); }
+  .pricing-tbl tbody tr.pt-ics td { background: rgba(191,54,12,0.08); }
+  .pricing-tbl tbody tr:hover td { background: rgba(0,180,216,0.06); }
+  .pricing-tbl tbody tr.pt-site-first td { border-top: 2px solid rgba(0,180,216,0.15); }
+  .pricing-tbl td {
+    padding: 7px 10px; border-right: 1px solid var(--border);
+    font-family: 'DM Mono', monospace; font-size: 11px; text-align: right;
+    color: var(--text-secondary); vertical-align: middle;
+  }
+  .pricing-tbl td:first-child { text-align: left; padding-left: 14px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 11px; color: var(--text-primary); white-space: nowrap; }
+  .pricing-tbl td.wl-td { text-align: center; }
+  .pricing-tbl td.price-hi { color: var(--text-primary); font-weight: 500; }
+  .pricing-tbl td.total-td { color: var(--rc); font-weight: 700; background: rgba(0,180,216,0.06) !important; }
+  .pricing-tbl td.absorbed-td { color: var(--text-muted); font-style: italic; font-size: 10px; text-align: center; }
+
+  /* Strikethrough list price + discounted */
+  .price-list { color: var(--text-muted); text-decoration: line-through; font-size: 10px; display: block; }
+  .price-net  { color: var(--text-primary); font-weight: 500; }
+  .price-net.no-disc { color: var(--text-secondary); font-weight: 400; }
+
+  /* Pricing totals footer */
+  .pricing-tbl tfoot td {
+    background: #001B4E; color: #fff; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 12px; padding: 10px 10px;
+    border-top: 2px solid rgba(0,180,216,0.4); text-align: right;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .pricing-tbl tfoot td:first-child { text-align: left; padding-left: 14px; color: #90CAF9; }
+  .pricing-tbl tfoot td.grand-total { color: var(--rc); font-size: 14px; }
+
+  /* Grand total summary cards */
+  .grand-total-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 10px; margin-top: 1rem; }
+  .gt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+  .gt-card-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .gt-card-list { font-size: 11px; color: var(--text-muted); text-decoration: line-through; }
+  .gt-card-net  { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.1; margin-top: 2px; }
+  .gt-card-net.hw-color  { color: #FFB74D; }
+  .gt-card-net.lic-color { color: #A5D6A7; }
+  .gt-card-net.ps-color  { color: #F48FB1; }
+  .gt-card-net.total-color { color: var(--rc); }
+  .gt-card-save { font-size: 10px; color: #a5d6a7; margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -419,6 +504,28 @@
     </div>
   </div>
 
+  <!-- Discount Controls -->
+  <div class="discount-panel">
+    <div class="discount-title">
+      <span style="font-size:14px">%</span> Discount Levels
+      <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'DM Mono',monospace">Applied to list prices — 0% = list price</span>
+    </div>
+    <div class="disc-grid">
+      <div class="ctl-group">
+        <div class="ctl-lbl" style="color:#FFB74D">Hardware Discount (Appliances + Cables + Transceivers)</div>
+        <div class="ctl-row"><input type="range" id="disc-hw" min="0" max="60" step="1" value="0" style="background:var(--border-mid)"><span class="ctl-val disc-val-hw" id="disc-hw-v">0%</span></div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl" style="color:#A5D6A7">Software License Discount</div>
+        <div class="ctl-row"><input type="range" id="disc-lic" min="0" max="60" step="1" value="0" style="background:var(--border-mid)"><span class="ctl-val disc-val-lic" id="disc-lic-v">0%</span></div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl" style="color:#F48FB1">Professional Services Discount</div>
+        <div class="ctl-row"><input type="range" id="disc-ps" min="0" max="60" step="1" value="0" style="background:var(--border-mid)"><span class="ctl-val disc-val-ps" id="disc-ps-v">0%</span></div>
+      </div>
+    </div>
+  </div>
+
   <div class="metrics-grid" id="metrics"></div>
 
   <div class="table-section">
@@ -475,6 +582,34 @@
     <div class="region-blocks" id="region-blocks"></div>
   </div>
 
+  <!-- Pricing Summary -->
+  <div class="pricing-section">
+    <div class="pricing-section-title">
+      Pricing Summary
+      <span class="ps-pill" id="pricing-pill">List Price · No Discounts Applied</span>
+    </div>
+    <div class="pricing-tbl-outer">
+      <table class="pricing-tbl">
+        <thead>
+          <tr>
+            <th>Site</th>
+            <th class="wl-col">WL</th>
+            <th class="app-col">Appliance / Node</th>
+            <th class="num-col">Appliance<br>List / Net</th>
+            <th class="num-col">License<br>List / Net</th>
+            <th class="num-col">Prof. Services<br>List / Net</th>
+            <th class="num-col">Cables<br>List / Net</th>
+            <th class="num-col">Transceivers<br>List / Net</th>
+            <th class="num-col total-col">Line Total (Net)</th>
+          </tr>
+        </thead>
+        <tbody id="pricing-body"></tbody>
+        <tfoot id="pricing-foot"></tfoot>
+      </table>
+    </div>
+    <div class="grand-total-grid" id="grand-total-grid"></div>
+  </div>
+
   <div class="page-footer">
     Rubrik Sizing Dashboard &nbsp;·&nbsp; Platform: <span id="footer-hw">Rubrik Appliances</span>
     &nbsp;·&nbsp; Appliance selected for <span id="footer-yr">Year 3</span> &nbsp;·&nbsp; Retention: <span id="footer-ret">1 full + 29 incrementals</span>
@@ -483,7 +618,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v6';
+const STORAGE_KEY = 'rubrik_dashboard_v7';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -510,7 +645,7 @@ const REGIONS = [
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1, 'disc-hw': 0, 'disc-lic': 0, 'disc-ps': 0 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // Dell hardware catalog
@@ -527,6 +662,29 @@ const DELL_APPLIANCES = [
 
 // HWP mode values: 1=Rubrik, 2=Dell, 3=Combination
 const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'Dell Hardware', 3: 'Combination' };
+
+// ── Pricing catalog (list prices) ─────────────────────────────────────────
+const RUBRIK_PRICES = {
+  'R7402': 93300, 'R7404': 93900, 'R7408': 96100,
+  'R7412': 100300, 'R7416': null, 'R7420': null, 'R7424': null,
+};
+const LICENSE_PER_TB   = 130;   // Foundation Edition per TB
+const PS_PER_APPLIANCE = 7500;  // Professional services per appliance
+const CABLES_PER_APPL  = 100;   // Network cables per appliance
+const XCVR_PER_APPL    = 400;   // Network transceivers per appliance
+
+function getListPrice(model) {
+  if (RUBRIK_PRICES[model] !== undefined && RUBRIK_PRICES[model] !== null)
+    return RUBRIK_PRICES[model];
+  return null; // Dell or unlisted
+}
+
+function disc(listAmt, pct) { return listAmt * (1 - pct / 100); }
+
+function fmt$(v) {
+  if (v === null || v === undefined) return '—';
+  return '$' + Math.round(v).toLocaleString('en-US');
+}
 
 function selectRubrik(reqTB) {
   for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c, 'rubrik'];
@@ -671,6 +829,14 @@ function utilColor(pct) {
   if (pct >= 90) return ['util-high','pct-high'];
   if (pct >= 70) return ['util-mid', 'pct-mid'];
   return              ['util-low',  'pct-low'];
+}
+
+function getDiscounts() {
+  return {
+    hw:  parseFloat(document.getElementById('disc-hw').value),
+    lic: parseFloat(document.getElementById('disc-lic').value),
+    ps:  parseFloat(document.getElementById('disc-ps').value),
+  };
 }
 
 function getParams() {
@@ -873,6 +1039,7 @@ function recalcAll() {
     <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
 
   buildRegionSummary(p);
+  buildPricingTable(p);
 }
 
 
@@ -1061,6 +1228,165 @@ function buildRegionSummary(p) {
   });
 }
 
+
+// ── Pricing Table ─────────────────────────────────────────────────────────
+function buildPricingTable(p) {
+  const d = getDiscounts();
+  const tbody = document.getElementById('pricing-body');
+  const tfoot = document.getElementById('pricing-foot');
+  const gtGrid = document.getElementById('grand-total-grid');
+  tbody.innerHTML = ''; tfoot.innerHTML = ''; gtGrid.innerHTML = '';
+
+  const hasDisc = d.hw > 0 || d.lic > 0 || d.ps > 0;
+  document.getElementById('pricing-pill').textContent = hasDisc
+    ? `HW ${d.hw}% · License ${d.lic}% · PS ${d.ps}% discount`
+    : 'List Price · No Discounts Applied';
+
+  let totHWList=0, totHWNet=0, totLicList=0, totLicNet=0;
+  let totPSList=0, totPSNet=0, totCabList=0, totCabNet=0;
+  let totXcvrList=0, totXcvrNet=0;
+
+  function priceCell(list, netVal, discPct) {
+    if (list === null) return '<span class="price-net no-disc">TBD</span>';
+    const net = netVal !== null ? netVal : list;
+    if (discPct > 0) {
+      return `<span class="price-list">${fmt$(list)}</span><span class="price-net">${fmt$(net)}</span>`;
+    }
+    return `<span class="price-net no-disc">${fmt$(list)}</span>`;
+  }
+
+  let rowIdx = 0;
+  SITE_DEFAULTS.forEach(([num, name,,,, region], si) => {
+    const itVal  = fetbState[`${si}-IT`]  || 0;
+    const otVal  = fetbState[`${si}-OT`];
+    const icsVal = fetbState[`${si}-ICS`];
+    const otNull  = otVal  === null;
+    const icsNull = icsVal === null;
+    const otAbs   = otNull  || otVal  < p.thr;
+    const icsAbs  = icsNull || icsVal < p.thr;
+
+    const workloads = [
+      { wl: 'IT', wlc: 'it', fetb: itVal + (otAbs&&!otNull?otVal||0:0) + (icsAbs&&!icsNull?icsVal||0:0), standalone: true },
+      { wl: 'OT',  wlc: 'ot',  fetb: otVal,  standalone: !otAbs  && !otNull  },
+      { wl: 'ICS', wlc: 'ics', fetb: icsVal, standalone: !icsAbs && !icsNull },
+    ];
+
+    workloads.forEach(({ wl, wlc, fetb, standalone }, wi) => {
+      const tr = document.createElement('tr');
+      tr.className = `pt-${wlc}${wi===0?' pt-site-first':''}`;
+
+      if (!standalone) {
+        // Absorbed or null row
+        const isNull = (wl==='OT'&&otNull)||(wl==='ICS'&&icsNull);
+        tr.innerHTML = `
+          <td>${wi===0?`<span style="font-size:10px;color:var(--text-muted)">${num}</span> ${name}`:''}</td>
+          <td class="wl-td"><span class="wl-badge wl-${wlc}" style="font-size:8.5px;padding:1px 5px">${wl}</span></td>
+          <td class="absorbed-td" colspan="7">${isNull ? 'No data' : '↳ Absorbed into IT cluster'}</td>`;
+        tbody.appendChild(tr);
+        rowIdx++;
+        return;
+      }
+
+      const stored = calcStored(fetb, p.drr, p.dcr, p.agr, p.syr, p.ret);
+      const req    = stored * (1 + p.rsv);
+      const [appModel, appCap, appVendor] = selectHardware(req, p.hwp);
+      const licTB  = appCap;
+
+      // Appliance price (Rubrik only; Dell = TBD)
+      const appList = getListPrice(appModel);
+      const appNet  = appList !== null ? disc(appList, d.hw) : null;
+
+      // License
+      const licList = licTB * LICENSE_PER_TB;
+      const licNet  = disc(licList, d.lic);
+
+      // PS
+      const psList = PS_PER_APPLIANCE;
+      const psNet  = disc(psList, d.ps);
+
+      // Cables
+      const cabList = CABLES_PER_APPL;
+      const cabNet  = disc(cabList, d.hw);
+
+      // Transceivers
+      const xcvrList = XCVR_PER_APPL;
+      const xcvrNet  = disc(xcvrList, d.hw);
+
+      // Line total (net) — only include appliance if price known
+      const lineNet = (appNet !== null ? appNet : 0) + licNet + psNet + cabNet + xcvrNet;
+
+      // Accumulate totals
+      if (appList !== null) { totHWList += appList; totHWNet += appNet; }
+      totHWList += cabList + xcvrList; totHWNet += cabNet + xcvrNet;
+      totLicList += licList; totLicNet += licNet;
+      totPSList  += psList;  totPSNet  += psNet;
+      totCabList += cabList; totCabNet += cabNet;
+      totXcvrList += xcvrList; totXcvrNet += xcvrNet;
+
+      const vendorCls = appVendor === 'dell' ? 'dell-badge' : 'rubrik-badge';
+
+      tr.innerHTML = `
+        <td>${wi===0?`<span style="font-size:10px;color:var(--text-muted)">${num}</span> ${name}`:''}</td>
+        <td class="wl-td"><span class="wl-badge wl-${wlc}" style="font-size:8.5px;padding:1px 5px">${wl}</span></td>
+        <td><span class="appl-badge ${vendorCls}" style="font-size:9px;padding:2px 7px">${appModel}</span><br><span style="font-size:9px;color:var(--text-muted)">${appCap} TB · ${licTB} TB lic</span></td>
+        <td class="price-hi">${priceCell(appList, appNet, d.hw)}</td>
+        <td class="price-hi">${priceCell(licList, licNet, d.lic)}</td>
+        <td class="price-hi">${priceCell(psList, psNet, d.ps)}</td>
+        <td>${priceCell(cabList, cabNet, d.hw)}</td>
+        <td>${priceCell(xcvrList, xcvrNet, d.hw)}</td>
+        <td class="total-td">${fmt$(lineNet)}</td>`;
+      tbody.appendChild(tr);
+      rowIdx++;
+    });
+  });
+
+  // Grand totals footer
+  const grandList = totHWList + totLicList + totPSList;
+  const grandNet  = totHWNet  + totLicNet  + totPSNet;
+  const fr = document.createElement('tr');
+  fr.innerHTML = `
+    <td colspan="3">Grand Total</td>
+    <td>${fmt$(totHWNet)}</td>
+    <td>${fmt$(totLicNet)}</td>
+    <td>${fmt$(totPSNet)}</td>
+    <td>${fmt$(totCabNet)}</td>
+    <td>${fmt$(totXcvrNet)}</td>
+    <td class="grand-total">${fmt$(grandNet)}</td>`;
+  tfoot.appendChild(fr);
+
+  // Grand total cards
+  const hwSave  = totHWList  - totHWNet;
+  const licSave = totLicList - totLicNet;
+  const psSave  = totPSList  - totPSNet;
+  const totalSave = grandList - grandNet;
+
+  gtGrid.innerHTML = `
+    <div class="gt-card">
+      <div class="gt-card-lbl">Hardware</div>
+      ${d.hw>0?`<div class="gt-card-list">${fmt$(totHWList)}</div>`:''}
+      <div class="gt-card-net hw-color">${fmt$(totHWNet)}</div>
+      ${d.hw>0?`<div class="gt-card-save">Save ${fmt$(hwSave)} (${d.hw}%)</div>`:''}
+    </div>
+    <div class="gt-card">
+      <div class="gt-card-lbl">Software License</div>
+      ${d.lic>0?`<div class="gt-card-list">${fmt$(totLicList)}</div>`:''}
+      <div class="gt-card-net lic-color">${fmt$(totLicNet)}</div>
+      ${d.lic>0?`<div class="gt-card-save">Save ${fmt$(licSave)} (${d.lic}%)</div>`:''}
+    </div>
+    <div class="gt-card">
+      <div class="gt-card-lbl">Professional Services</div>
+      ${d.ps>0?`<div class="gt-card-list">${fmt$(totPSList)}</div>`:''}
+      <div class="gt-card-net ps-color">${fmt$(totPSNet)}</div>
+      ${d.ps>0?`<div class="gt-card-save">Save ${fmt$(psSave)} (${d.ps}%)</div>`:''}
+    </div>
+    <div class="gt-card" style="border-color:rgba(0,180,216,0.35)">
+      <div class="gt-card-lbl">Grand Total (Net)</div>
+      ${totalSave>0?`<div class="gt-card-list">${fmt$(grandList)}</div>`:''}
+      <div class="gt-card-net total-color">${fmt$(grandNet)}</div>
+      ${totalSave>0?`<div class="gt-card-save">Total savings: ${fmt$(totalSave)}</div>`:''}
+    </div>`;
+}
+
 // ── Sliders ────────────────────────────────────────────────────────────────
 const sliderFmts = {
   syr: v => `Year ${v}`,
@@ -1071,8 +1397,11 @@ const sliderFmts = {
   thr: v => `${parseFloat(v).toFixed(1)} TB`,
   ret: v => `${v} days`,
   hwp: v => HW_LABELS[parseInt(v)] || 'Rubrik',
+  'disc-hw':  v => `${v}%`,
+  'disc-lic': v => `${v}%`,
+  'disc-ps':  v => `${v}%`,
 };
-['syr','drr','dcr','agr','rsv','thr','ret','hwp'].forEach(id => {
+['syr','drr','dcr','agr','rsv','thr','ret','hwp','disc-hw','disc-lic','disc-ps'].forEach(id => {
   const el  = document.getElementById(id);
   const out = document.getElementById(id + '-v');
   el.addEventListener('input', () => {
