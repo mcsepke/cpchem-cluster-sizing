@@ -286,6 +286,26 @@
   .rs-cap { font-size: 9.5px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
   .rs-pct { font-size: 9.5px; font-weight: 500; font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .rs-absorbed { font-size: 9px; color: var(--text-muted); font-style: italic; margin-left: 34px; }
+  /* Region totals footer row */
+  .region-footer {
+    background: #0a1d45;
+    border-top: 2px solid rgba(0,180,216,0.25);
+    padding: .85rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .region-footer-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    color: #90CAF9; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .region-footer-stats { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .rfs-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .rfs-val  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; line-height: 1; }
+  .rfs-val.rubrik { color: var(--rc); }
+  .rfs-val.dell   { color: #B388FF; }
+  .rfs-val.lic    { color: #FFD600; }
+  .rfs-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+  .rfs-sep { width: 1px; height: 28px; background: var(--border); }
 </style>
 </head>
 <body>
@@ -440,7 +460,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v4';
+const STORAGE_KEY = 'rubrik_dashboard_v5';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -828,6 +848,8 @@ function recalcAll() {
     <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">${hwLabel} · sized for ${yrLabel}</div></div>
     <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub">incl. absorbed OT / ICS workloads</div></div>
     <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
+
+  buildRegionSummary(p);
 }
 
 
@@ -847,7 +869,7 @@ function buildRegionSummary(p) {
 
     if (!sites.length) return;
 
-    let regionClusters = 0, regionLic = 0;
+    let regionClusters = 0, regionLic = 0, regionRubrik = 0, regionDell = 0;
 
     // Pre-compute per-site cluster data for totals
     const siteData = sites.map(({ s, si }) => {
@@ -871,6 +893,7 @@ function buildRegionSummary(p) {
       const itPct    = (itStored / itCap * 100).toFixed(1);
       clusters.push({ wl:'IT', model:itModel, cap:itCap, vendor:itVendor, pct:itPct });
       regionClusters++; regionLic += itCap;
+      if (itVendor === 'dell') regionDell++; else regionRubrik++;
 
       // Absorbed notes for IT
       const absorbed = [];
@@ -884,6 +907,7 @@ function buildRegionSummary(p) {
         const [m, c, v] = selectHardware(req, p.hwp);
         clusters.push({ wl:'OT', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
+        if (v === 'dell') regionDell++; else regionRubrik++;
       }
 
       // ICS standalone
@@ -893,6 +917,7 @@ function buildRegionSummary(p) {
         const [m, c, v] = selectHardware(req, p.hwp);
         clusters.push({ wl:'ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
+        if (v === 'dell') regionDell++; else regionRubrik++;
       }
 
       return { s, si, clusters, absorbed };
@@ -953,6 +978,39 @@ function buildRegionSummary(p) {
     });
 
     container.appendChild(grid);
+
+    // Region totals footer row
+    const foot = document.createElement('div');
+    foot.className = 'region-footer';
+
+    // Build vendor stat items — only show vendors that exist
+    let statsHtml = '';
+    if (regionRubrik > 0) {
+      statsHtml += `
+        <div class="rfs-item">
+          <div class="rfs-val rubrik">${regionRubrik}</div>
+          <div class="rfs-lbl">Rubrik Appliance${regionRubrik>1?'s':''}</div>
+        </div>`;
+    }
+    if (regionDell > 0) {
+      if (statsHtml) statsHtml += '<div class="rfs-sep"></div>';
+      statsHtml += `
+        <div class="rfs-item">
+          <div class="rfs-val dell">${regionDell}</div>
+          <div class="rfs-lbl">Dell Node${regionDell>1?'s':''} / Cluster${regionDell>1?'s':''}</div>
+        </div>`;
+    }
+    if (statsHtml) statsHtml += '<div class="rfs-sep"></div>';
+    statsHtml += `
+      <div class="rfs-item">
+        <div class="rfs-val lic">${regionLic} TB</div>
+        <div class="rfs-lbl">Licensed Capacity</div>
+      </div>`;
+
+    foot.innerHTML = `
+      <div class="region-footer-title">${flag} ${label} Region Total</div>
+      <div class="region-footer-stats">${statsHtml}</div>`;
+    container.appendChild(foot);
   });
 }
 
