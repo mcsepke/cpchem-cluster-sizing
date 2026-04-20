@@ -178,6 +178,22 @@
   /* Required columns — dim non-active years */
   td.req-dim { color: var(--text-muted); font-size: 10px; }
 
+  /* Hardware platform slider */
+  .hw-slider-wrap { display: flex; flex-direction: column; gap: 6px; }
+  input#hwp {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 4px; background: var(--border-mid); border-radius: 2px; outline: none; cursor: pointer;
+  }
+  input#hwp::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #B388FF; cursor: pointer; border: 2px solid var(--bg-surface); box-shadow: 0 0 0 1px #B388FF; }
+  input#hwp::-moz-range-thumb     { width: 16px; height: 16px; border-radius: 50%; background: #B388FF; cursor: pointer; border: 2px solid var(--bg-surface); }
+  .hw-val { font-size: 12px; font-weight: 700; min-width: 90px; text-align: right; color: #B388FF; font-family: 'Syne', sans-serif; white-space: nowrap; }
+  .hw-ticks { display: flex; justify-content: space-between; padding: 0 2px; }
+  .hw-ticks span { font-size: 9px; color: var(--text-muted); letter-spacing: 0.03em; text-align: center; flex: 1; }
+  .hw-ticks span.active-hw { color: #B388FF; font-weight: 700; }
+  .appl-badge.rubrik-badge { background: rgba(0,180,216,0.12); color: var(--rc); border-color: rgba(0,180,216,0.35); }
+  .appl-badge.dell-badge   { background: rgba(179,136,255,0.12); color: #B388FF; border-color: rgba(179,136,255,0.35); }
+  .hw-pill { display: inline-block; background: rgba(179,136,255,0.15); color: #B388FF; border: 1px solid rgba(179,136,255,0.35); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; padding: 2px 10px; border-radius: 10px; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
+
   tfoot tr td { background: var(--rb); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 11px 8px; text-align: center; border-top: 2px solid rgba(0,180,216,0.4); }
   tfoot td.foot-label { text-align: left; padding-left: 14px; color: #90CAF9; }
   tfoot td.foot-total { color: var(--rc); font-size: 15px; }
@@ -264,6 +280,20 @@
         <div class="ctl-row"><input type="range" id="ret" min="7" max="90" step="1" value="30"><span class="ctl-val" id="ret-v">30 days</span></div>
       </div>
 
+      <!-- Hardware Platform -->
+      <div class="ctl-group hw-slider-wrap">
+        <div class="ctl-lbl">Hardware Platform</div>
+        <div class="ctl-row">
+          <input type="range" id="hwp" min="1" max="3" step="1" value="1">
+          <span class="hw-val" id="hwp-v">Rubrik</span>
+        </div>
+        <div class="hw-ticks">
+          <span id="hw-tick-1" class="active-hw">Rubrik</span>
+          <span id="hw-tick-2">Dell</span>
+          <span id="hw-tick-3">Combination</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -274,6 +304,7 @@
       <div class="table-section-title">
         Cluster Sizing Detail
         <span class="year-pill" id="tbl-year-pill">Sized to Year 3</span>
+        <span class="hw-pill" id="tbl-hw-pill">Rubrik Appliances</span>
       </div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#1565C0"></div>IT Systems</div>
@@ -314,14 +345,14 @@
   </div>
 
   <div class="page-footer">
-    Rubrik Sizing Dashboard &nbsp;·&nbsp; R7402 (15TB) · R7404 (30TB) · R7408 (60TB) · R7412 (90TB) · R7416 (120TB) · R7420 (150TB) · R7424 (180TB)
+    Rubrik Sizing Dashboard &nbsp;·&nbsp; Platform: <span id="footer-hw">Rubrik Appliances</span>
     &nbsp;·&nbsp; Appliance selected for <span id="footer-yr">Year 3</span> &nbsp;·&nbsp; Retention: <span id="footer-ret">1 full + 29 incrementals</span>
   </div>
 
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v2';
+const STORAGE_KEY = 'rubrik_dashboard_v3';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5  ],
@@ -342,8 +373,53 @@ const SITE_DEFAULTS = [
   [16, "GTPC",                     34.0,  null,  22.5  ],
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 15, rsv: 10, thr: 5, ret: 30 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 15, rsv: 10, thr: 5, ret: 30, hwp: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
+
+// Dell hardware catalog
+// R760 is a fixed 120TB cluster; R660 is a single-node with 6 capacity tiers
+const DELL_APPLIANCES = [
+  ["Dell R660 Node 3.5TB",  3.5],
+  ["Dell R660 Node 7TB",    7.0],
+  ["Dell R660 Node 10.5TB", 10.5],
+  ["Dell R660 Node 14TB",   14.0],
+  ["Dell R660 Node 17.5TB", 17.5],
+  ["Dell R660 Node 21TB",   21.0],
+  ["Dell R760 Cluster",     120.0],
+];
+
+// HWP mode values: 1=Rubrik, 2=Dell, 3=Combination
+const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'Dell Hardware', 3: 'Combination' };
+
+function selectRubrik(reqTB) {
+  for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c, 'rubrik'];
+  return ["R7424+", 180, 'rubrik'];
+}
+
+function selectDell(reqTB) {
+  for (const [m, c] of DELL_APPLIANCES) if (c >= reqTB) return [m, c, 'dell'];
+  // If requirement exceeds largest Dell option, return largest
+  const last = DELL_APPLIANCES[DELL_APPLIANCES.length - 1];
+  return [last[0], last[1], 'dell'];
+}
+
+function selectBest(reqTB) {
+  // For combination: pick whichever of the two options has smallest overage (closest fit without going under)
+  const [rm, rc, rt] = selectRubrik(reqTB);
+  const [dm, dc, dt] = selectDell(reqTB);
+  // Both must meet reqTB; pick the one with less waste
+  const rOverage = rc - reqTB;
+  const dOverage = dc - reqTB;
+  // If one doesn't meet requirement (overage < 0 shouldn't happen since we pick >=), fall back
+  if (rOverage <= dOverage) return [rm, rc, 'rubrik'];
+  return [dm, dc, 'dell'];
+}
+
+function selectHardware(reqTB, hwp) {
+  if (hwp === 1) return selectRubrik(reqTB);
+  if (hwp === 2) return selectDell(reqTB);
+  return selectBest(reqTB);
+}
 
 // ── State ──────────────────────────────────────────────────────────────────
 const fetbState = {};
@@ -449,10 +525,7 @@ function autoSave() {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function selectAppliance(reqTB) {
-  for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c];
-  return ["R7424+", 180];
-}
+// selectAppliance replaced by selectHardware() above
 function f(v, d = 2) { return v.toFixed(d); }
 function calcStored(fetb, drr, dcr, agr, yr, ret) {
   return (fetb * Math.pow(1 + agr, yr - 1) / drr) * (1 + (ret - 1) * dcr);
@@ -472,6 +545,7 @@ function getParams() {
     rsv: parseFloat(document.getElementById('rsv').value) / 100,
     thr: parseFloat(document.getElementById('thr').value),
     ret: parseInt(document.getElementById('ret').value),
+    hwp: parseInt(document.getElementById('hwp').value),
   };
 }
 
@@ -539,6 +613,16 @@ function recalcAll() {
     const th = document.getElementById(`col-yr${y}-hdr`);
     th.style.color  = y === p.syr ? '#FFD600' : '#90CAF9';
     th.style.fontWeight = y === p.syr ? '700' : '500';
+  }
+
+  // Update hardware platform UI elements
+  const hwLabel = HW_LABELS[p.hwp] || 'Rubrik Appliances';
+  document.getElementById('hwp-v').textContent      = hwLabel;
+  document.getElementById('tbl-hw-pill').textContent = hwLabel;
+  document.getElementById('footer-hw').textContent  = hwLabel;
+  for (let h = 1; h <= 3; h++) {
+    const t = document.getElementById(`hw-tick-${h}`);
+    t.classList.toggle('active-hw', h === p.hwp);
   }
 
   document.getElementById('footer-ret').textContent = `1 full + ${p.ret - 1} incrementals`;
@@ -617,7 +701,7 @@ function recalcAll() {
       });
 
       // Appliance chosen for the ACTIVE sizing year
-      const [appModel, appCap] = selectAppliance(r[p.syr - 1]);
+      const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp);
       totalLic += appCap;
 
       // Utilization = actual stored for active year / appliance capacity
@@ -625,7 +709,8 @@ function recalcAll() {
       const pctCapped = Math.min(pctUsed, 100);
       const [barCls, txtCls] = utilColor(pctUsed);
 
-      tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge">${appModel}</span>`;
+      const vendorClass = appVendor === 'dell' ? 'dell-badge' : 'rubrik-badge';
+      tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge ${vendorClass}">${appModel}</span>`;
       tr.querySelector('.cap-cell').textContent = `${appCap} TB`;
       tr.querySelector('.lic-cell').textContent = `${appCap} TB`;
       tr.querySelector('.util-cell').innerHTML  = `
@@ -646,7 +731,7 @@ function recalcAll() {
   // Metrics
   document.getElementById('metrics').innerHTML = `
     <div class="met-card"><div class="met-card-lbl">Total clusters</div><div class="met-card-val">${totalClusters}</div><div class="met-card-sub">across ${SITE_DEFAULTS.length} sites</div></div>
-    <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">appliances sized for ${yrLabel}</div></div>
+    <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">${hwLabel} · sized for ${yrLabel}</div></div>
     <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub">incl. absorbed OT / ICS workloads</div></div>
     <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
 }
@@ -660,8 +745,9 @@ const sliderFmts = {
   rsv: v => `${v}%`,
   thr: v => `${parseFloat(v).toFixed(1)} TB`,
   ret: v => `${v} days`,
+  hwp: v => HW_LABELS[parseInt(v)] || 'Rubrik',
 };
-['syr','drr','dcr','agr','rsv','thr','ret'].forEach(id => {
+['syr','drr','dcr','agr','rsv','thr','ret','hwp'].forEach(id => {
   const el  = document.getElementById(id);
   const out = document.getElementById(id + '-v');
   el.addEventListener('input', () => {
