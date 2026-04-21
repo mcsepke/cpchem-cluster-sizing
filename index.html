@@ -10,16 +10,16 @@
 
   :root {
     --rb: #001B4E;
-    --rc: #00B4D8;
-    --bg-page: #0a0f1e;
-    --bg-surface: #111827;
-    --bg-card: #1a2235;
-    --bg-card-alt: #141d2e;
-    --border: rgba(255,255,255,0.08);
-    --border-mid: rgba(255,255,255,0.14);
-    --text-primary: #f0f4ff;
-    --text-secondary: #8a9bc0;
-    --text-muted: #546882;
+    --rc: #0077A8;
+    --bg-page: #f0f2f5;
+    --bg-surface: #ffffff;
+    --bg-card: #f7f8fa;
+    --bg-card-alt: #eef0f4;
+    --border: rgba(0,0,0,0.10);
+    --border-mid: rgba(0,0,0,0.18);
+    --text-primary: #0d1b2e;
+    --text-secondary: #3d5166;
+    --text-muted: #7a8fa6;
     --it-bg: #0d47a1;
     --it-text: #90caf9;
     --ot-bg: #1b5e20;
@@ -38,7 +38,7 @@
 
   /* ── Header ── */
   .page-header {
-    background: linear-gradient(135deg, #001B4E 0%, #0d2b6b 60%, #0a1f4a 100%);
+    background: linear-gradient(135deg, #001B4E 0%, #003070 60%, #001B4E 100%);
     border-radius: var(--radius); padding: 1.75rem 2.5rem; margin-bottom: 1.5rem;
     display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
     border: 1px solid rgba(0,180,216,0.2); position: relative; overflow: hidden;
@@ -83,15 +83,15 @@
   .btn-save:hover { background: rgba(0,180,216,0.25); }
   .btn-download { background: rgba(46,125,50,0.15); border-color: rgba(46,125,50,0.45); color: #a5d6a7; }
   .btn-download:hover { background: rgba(46,125,50,0.25); }
-  .btn-reset    { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: var(--text-muted); }
-  .btn-reset:hover { background: rgba(255,255,255,0.1); color: var(--text-secondary); }
+  .btn-reset    { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.18); color: var(--text-muted); }
+  .btn-reset:hover { background: rgba(0,0,0,0.08); color: var(--text-secondary); }
 
   .save-status { font-size: 10px; color: var(--text-muted); text-align: right; min-height: 14px; letter-spacing: 0.03em; transition: color 0.3s; }
   .save-status.saved { color: #a5d6a7; }
 
   /* ── Callout ── */
-  .model-callout { background: rgba(0,180,216,0.07); border: 1px solid rgba(0,180,216,0.25); border-radius: var(--radius-sm); padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; font-size: 11px; color: #90CAF9; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .model-callout strong { color: var(--rc); font-weight: 500; }
+  .model-callout { background: rgba(0,119,168,0.06); border: 1px solid rgba(0,119,168,0.25); border-radius: var(--radius-sm); padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; font-size: 11px; color: #90CAF9; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .model-callout strong { color: var(--rc); font-weight: 600; }
   .model-callout .sep  { color: var(--text-muted); }
 
   /* ── Controls ── */
@@ -103,7 +103,7 @@
   .ctl-row   { display: flex; align-items: center; gap: 10px; }
 
   /* Standard range */
-  .ctl-row input[type=range] { flex: 1; -webkit-appearance: none; appearance: none; height: 3px; background: var(--border-mid); border-radius: 2px; outline: none; cursor: pointer; }
+  .ctl-row input[type=range] { flex: 1; -webkit-appearance: none; appearance: none; height: 3px; background: #c8d4e0; border-radius: 2px; outline: none; cursor: pointer; }
   .ctl-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--rc); cursor: pointer; border: 2px solid var(--bg-surface); box-shadow: 0 0 0 1px var(--rc); }
   .ctl-row input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--rc); cursor: pointer; border: 2px solid var(--bg-surface); }
   .ctl-val { font-size: 13px; font-weight: 500; min-width: 52px; text-align: right; color: var(--rc); font-family: 'DM Mono', monospace; }
@@ -134,7 +134,7 @@
   .met-card-sub { font-size: 10px; color: var(--text-secondary); margin-top: 5px; }
 
   /* ── Table ── */
-  .table-section { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-section { background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
   .table-section-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
   .table-section-title  { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.07em; }
 
@@ -151,16 +151,16 @@
   thead tr.hdr-group th { background: var(--rb); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.07em; padding: 9px 8px; text-align: center; border-right: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); white-space: nowrap; }
   thead tr.hdr-group th.left { text-align: left; padding-left: 14px; }
   thead tr.hdr-group th.span-req { border-bottom: 1px solid rgba(124,77,255,0.4); }
-  thead tr.hdr-sub th { background: #0a1d45; color: #90CAF9; font-size: 9px; font-weight: 500; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; padding: 6px 8px; text-align: center; border-right: 1px solid rgba(255,255,255,0.07); white-space: nowrap; }
+  thead tr.hdr-sub th { background: #001B4E; color: #90CAF9; font-size: 9px; font-weight: 500; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; padding: 6px 8px; text-align: center; border-right: 1px solid rgba(255,255,255,0.07); white-space: nowrap; }
 
   tbody tr.site-first td { border-top: 2px solid rgba(0,180,216,0.18); }
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
-  tbody tr.r-it  td { background: rgba(13,71,161,0.12); }
-  tbody tr.r-ot  td { background: rgba(27,94,32,0.12); }
-  tbody tr.r-ics td { background: rgba(191,54,12,0.10); }
-  tbody tr.r-it:hover  td { background: rgba(13,71,161,0.22); }
-  tbody tr.r-ot:hover  td { background: rgba(27,94,32,0.22); }
-  tbody tr.r-ics:hover td { background: rgba(191,54,12,0.18); }
+  tbody tr.r-it  td { background: rgba(13,71,161,0.06); }
+  tbody tr.r-ot  td { background: rgba(27,94,32,0.06); }
+  tbody tr.r-ics td { background: rgba(191,54,12,0.05); }
+  tbody tr.r-it:hover  td { background: rgba(13,71,161,0.12); }
+  tbody tr.r-ot:hover  td { background: rgba(27,94,32,0.12); }
+  tbody tr.r-ics:hover td { background: rgba(191,54,12,0.10); }
   tbody tr.absorbed td { opacity: 0.5; }
 
   td { padding: 7px 8px; text-align: center; border-right: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-primary); vertical-align: middle; }
@@ -212,6 +212,18 @@
   .hw-ticks { display: flex; justify-content: space-between; padding: 0 2px; }
   .hw-ticks span { font-size: 9px; color: var(--text-muted); letter-spacing: 0.03em; text-align: center; flex: 1; }
   .hw-ticks span.active-hw { color: #B388FF; font-weight: 700; }
+  .ofs-ticks span.active-ofs { color: #CE93D8; font-weight: 700; }
+  .ctl-select {
+    width: 100%; padding: 6px 10px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border-mid); background: var(--bg-surface);
+    color: var(--text-primary); font-family: 'DM Mono', monospace;
+    font-size: 11px; cursor: pointer; outline: none;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a8fa6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center;
+    padding-right: 26px;
+  }
+  .ctl-select:focus { border-color: var(--rc); }
   .appl-badge.rubrik-badge { background: rgba(0,180,216,0.12); color: var(--rc); border-color: rgba(0,180,216,0.35); }
   .appl-badge.dell-badge   { background: rgba(179,136,255,0.12); color: #B388FF; border-color: rgba(179,136,255,0.35); }
   .hw-pill { display: inline-block; background: rgba(179,136,255,0.15); color: #B388FF; border: 1px solid rgba(179,136,255,0.35); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; padding: 2px 10px; border-radius: 10px; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
@@ -220,7 +232,7 @@
   tfoot td.foot-label { text-align: left; padding-left: 14px; color: #90CAF9; }
   tfoot td.foot-total { color: var(--rc); font-size: 15px; }
 
-  .page-footer { text-align: center; margin-top: 2.5rem; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+  .page-footer { text-align: center; margin-top: 2.5rem; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; border-top: 1px solid var(--border); padding-top: 1rem; }
   .page-footer span { color: var(--rc); }
 
   @media (max-width: 768px) {
@@ -394,7 +406,7 @@
   .offsite-section-title {
     font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
     color: var(--text-primary); text-transform: uppercase; letter-spacing: .07em;
-    padding: 1rem 1.5rem; background: var(--bg-surface);
+    padding: 1rem 1.5rem; background: #ffffff;
     border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -407,7 +419,7 @@
   .offsite-blocks { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
 
   .offsite-region-hdr {
-    background: linear-gradient(90deg, #12003a 0%, #111827 100%);
+    background: linear-gradient(90deg, #001B4E 0%, #003070 100%);
     padding: .75rem 1.5rem; display: flex; align-items: center;
     justify-content: space-between; flex-wrap: wrap; gap: 8px;
     border-bottom: 1px solid var(--border);
@@ -425,9 +437,9 @@
   .offsite-sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); }
   .offsite-site-card {
     padding: .9rem 1.25rem; border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border); background: var(--bg-card); transition: background .12s;
+    border-bottom: 1px solid var(--border); background: #ffffff; transition: background .12s;
   }
-  .offsite-site-card:hover { background: var(--bg-card-alt); }
+  .offsite-site-card:hover { background: #f0f4f8; }
   .offsite-site-name {
     font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
     color: var(--text-primary); margin-bottom: 7px;
@@ -446,7 +458,7 @@
   .offsite-node-detail { font-size: 9px; color: var(--text-muted); margin-left: 30px; font-style: italic; }
 
   .offsite-footer {
-    background: #0d0020; border-top: 2px solid rgba(124,77,255,0.25);
+    background: #001B4E; border-top: 2px solid rgba(124,77,255,0.25);
     padding: .85rem 1.5rem; display: flex; align-items: center;
     justify-content: space-between; flex-wrap: wrap; gap: 12px;
   }
@@ -459,7 +471,7 @@
 
   /* ── View toggle tabs ── */
   .view-tabs {
-    display: flex; gap: 4px; background: rgba(0,0,0,0.3);
+    display: flex; gap: 4px; background: rgba(0,0,0,0.08);
     padding: 4px; border-radius: 8px; margin-bottom: 1.25rem;
   }
   .view-tab {
@@ -471,13 +483,13 @@
     justify-content: center; gap: 8px;
   }
   .view-tab.active {
-    background: var(--rb); color: var(--rc);
-    box-shadow: 0 0 0 1px rgba(0,180,216,0.4), inset 0 0 20px rgba(0,180,216,0.08);
+    background: #001B4E; color: #00B4D8;
+    box-shadow: 0 0 0 1px rgba(0,180,216,0.4);
   }
   .view-tab.inactive {
     background: transparent; color: var(--text-muted);
   }
-  .view-tab.inactive:hover { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+  .view-tab.inactive:hover { background: rgba(0,0,0,0.06); color: var(--text-secondary); }
   .view-tab-icon { font-size: 14px; }
 </style>
 </head>
@@ -599,17 +611,23 @@
       </div>
 
       <!-- Hardware Platform -->
-      <div class="ctl-group hw-slider-wrap">
+      <div class="ctl-group">
         <div class="ctl-lbl">Hardware Platform</div>
-        <div class="ctl-row">
-          <input type="range" id="hwp" min="1" max="3" step="1" value="1">
-          <span class="hw-val" id="hwp-v">Rubrik</span>
-        </div>
-        <div class="hw-ticks">
-          <span id="hw-tick-1" class="active-hw">Rubrik</span>
-          <span id="hw-tick-2">Dell</span>
-          <span id="hw-tick-3">Combination</span>
-        </div>
+        <select id="hwp" class="ctl-select">
+          <option value="1">Rubrik Appliances</option>
+          <option value="2">Dell Hardware</option>
+          <option value="3">Combination</option>
+        </select>
+      </div>
+
+      <!-- Off-Site Copy Mode -->
+      <div class="ctl-group">
+        <div class="ctl-lbl">Off-Site Copy Mode</div>
+        <select id="ofs" class="ctl-select" style="border-color:rgba(124,77,255,0.4);color:#7c3aed">
+          <option value="1">Instant Archive → RCV</option>
+          <option value="2">Rep to Cloud Cluster</option>
+          <option value="3">Manual (per-row)</option>
+        </select>
       </div>
 
     </div>
@@ -659,30 +677,10 @@
           <span style="font-size:10px;color:var(--text-muted);font-style:italic">Dimmed = absorbed into IT cluster</span>
         </div>
       </div>
-      <!-- Off-Site Copy controls — inline above Off-Site column -->
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:4px 0">
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <span style="font-size:9px;color:#CE93D8;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Off-Site Copy</span>
-          <div class="toggle-wrap">
-            <span style="font-size:10px" class="toggle-option inactive" id="os-all-off-lbl">Off</span>
-            <label class="toggle">
-              <input type="checkbox" id="os-select-all" checked>
-              <span class="toggle-slider" style="background:rgba(124,77,255,0.5)"></span>
-            </label>
-            <span style="font-size:10px" class="toggle-option active" id="os-all-on-lbl">Select All On</span>
-          </div>
-        </div>
-        <div id="os-type-wrap" style="display:block;border-left:1px solid var(--border);padding-left:14px">
-          <span style="font-size:9px;color:#CE93D8;text-transform:uppercase;letter-spacing:.08em;font-weight:600;display:block;margin-bottom:4px">Copy Type</span>
-          <div class="toggle-wrap">
-            <span class="toggle-option active" id="os-type-rcv-lbl" style="color:#CE93D8;font-size:10px">Arch → RCV</span>
-            <label class="toggle">
-              <input type="checkbox" id="os-type-cc">
-              <span class="toggle-slider" style="background:rgba(124,77,255,0.4)"></span>
-            </label>
-            <span class="toggle-option inactive" id="os-type-cc-lbl" style="font-size:10px">Rep → Cloud Cluster</span>
-          </div>
-        </div>
+      <!-- Off-Site mode shown as pill (driven by sizing parameter slider) -->
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+        <span style="font-size:9px;color:#CE93D8;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Off-Site:</span>
+        <span id="os-mode-pill" style="font-size:10px;font-weight:700;color:#CE93D8;background:rgba(124,77,255,0.12);border:1px solid rgba(124,77,255,0.3);padding:2px 8px;border-radius:4px">Instant Archive → RCV</span>
       </div>
     </div>
     <div class="tbl-outer">
@@ -695,12 +693,12 @@
             <th rowspan="2" style="width:80px">FETB (TB)</th>
             <th rowspan="2" style="width:62px">Full BU (TB)</th>
             <th rowspan="2" style="width:60px">Daily Incr (TB)</th>
-            <th colspan="3" class="span-req" style="background:#1a0a40">Required Usable + Reserve (TB)</th>
-            <th rowspan="2" style="width:72px;background:#00324a">Appliance</th>
+            <th colspan="3" class="span-req" style="background:#1a3a6a">Required Usable + Reserve (TB)</th>
+            <th rowspan="2" style="width:72px;background:#004a6e">Appliance</th>
             <th rowspan="2" style="width:54px;background:#00324a">Cap (TB)</th>
-            <th rowspan="2" style="width:58px;background:#003b55">Lic TB</th>
-            <th rowspan="2" style="width:130px;background:#0d1f0d">Capacity Utilized</th>
-            <th rowspan="2" style="width:90px;background:#12003a" id="offsite-col-hdr">Off-Site</th>
+            <th rowspan="2" style="width:58px;background:#005577">Lic TB</th>
+            <th rowspan="2" style="width:130px;background:#1a3a1a">Capacity Utilized</th>
+            <th rowspan="2" style="width:90px;background:#1a0a4e" id="offsite-col-hdr">Off-Site</th>
           </tr>
           <tr class="hdr-sub">
             <th id="col-yr1-hdr" style="width:66px;background:#1a0a40">Yr 1</th>
@@ -724,7 +722,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v15';
+const STORAGE_KEY = 'rubrik_dashboard_v17';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -751,7 +749,7 @@ const REGIONS = [
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1, prodpct: 75, npret: 14 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1, prodpct: 75, npret: 14, ofs: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // Dell hardware catalog
@@ -865,8 +863,10 @@ function resetToDefaults() {
   if (!confirm('Reset all FETB values and sliders to defaults?')) return;
   Object.entries(SLIDER_DEFAULTS).forEach(([id, val]) => {
     const el = document.getElementById(id);
+    if (!el) return;
     el.value = val;
-    document.getElementById(id + '-v').textContent = sliderFmts[id](String(val));
+    const outEl = document.getElementById(id + '-v');
+    if (outEl && sliderFmts[id]) outEl.textContent = sliderFmts[id](String(val));
   });
   SITE_DEFAULTS.forEach(([,, it, ot, ics], si) => {
     fetbState[`${si}-IT`] = it; fetbState[`${si}-OT`] = ot; fetbState[`${si}-ICS`] = ics;
@@ -938,8 +938,10 @@ function getParams() {
     prodpct: parseInt(document.getElementById('prodpct').value) / 100,
     npret:   parseInt(document.getElementById('npret').value),
     itOnly:  document.getElementById('wl-it-only').checked,
-    osAll:   document.getElementById('os-select-all').checked,
-    osCC:    document.getElementById('os-type-cc').checked,
+    ofs:     parseInt(document.getElementById('ofs').value),
+    // ofs: 1=RCV (select-all RCV), 2=Cloud Cluster (select-all CC), 3=Manual (per-row)
+    get osAll() { return this.ofs !== 3; },
+    get osCC()  { return this.ofs === 2; },
   };
 }
 
@@ -1020,13 +1022,10 @@ function recalcAll() {
 
   // Update hardware platform UI elements
   const hwLabel = HW_LABELS[p.hwp] || 'Rubrik Appliances';
-  document.getElementById('hwp-v').textContent      = hwLabel;
+  const hwpVEl = document.getElementById('hwp-v'); if (hwpVEl) hwpVEl.textContent = hwLabel;
   document.getElementById('tbl-hw-pill').textContent = hwLabel;
   document.getElementById('footer-hw').textContent  = hwLabel;
-  for (let h = 1; h <= 3; h++) {
-    const t = document.getElementById(`hw-tick-${h}`);
-    t.classList.toggle('active-hw', h === p.hwp);
-  }
+  // hwp is now a <select> — no tick UI needed
 
   document.getElementById('footer-ret').textContent = `1 full + ${p.ret - 1} incrementals`;
   document.getElementById('callout').innerHTML = `
@@ -1044,14 +1043,14 @@ function recalcAll() {
   document.getElementById('wl-lbl-all').className = 'toggle-option ' + (isITOnly ? 'inactive' : 'active');
   document.getElementById('wl-lbl-it').className  = 'toggle-option ' + (isITOnly ? 'active' : 'inactive');
 
-  // Update off-site UI
-  const osAllOn = p.osAll;
-  document.getElementById('os-all-off-lbl').className = 'toggle-option ' + (!osAllOn ? 'active' : 'inactive');
-  document.getElementById('os-all-on-lbl').className  = 'toggle-option ' + (osAllOn  ? 'active' : 'inactive');
-  document.getElementById('os-type-wrap').style.display = osAllOn ? 'block' : 'none';
+  // Update off-site UI from ofs slider
+  const OFS_LABELS = { 1: 'Instant Archive → RCV', 2: 'Rep to Cloud Cluster', 3: 'Manual (per-row)' };
+  const ofsLabel = OFS_LABELS[p.ofs] || 'Instant Archive → RCV';
+  // ofs is now a <select> — no tick/val UI needed
+  const modePill = document.getElementById('os-mode-pill');
+  if (modePill) modePill.textContent = ofsLabel;
   document.getElementById('offsite-section').style.display = 'block';
-
-  const osTypeLbl = p.osAll ? (p.osCC ? 'Rep to Cloud Cluster' : 'Instant Archive to RCV') : 'Per-row selection';
+  const osTypeLbl = p.ofs === 2 ? 'Rep to Cloud Cluster' : p.ofs === 3 ? 'Per-row selection' : 'Instant Archive to RCV';
   document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Yr 1 · CC: Azure PAYG + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
 
   let totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
@@ -1094,11 +1093,12 @@ function recalcAll() {
       } else if (wl === 'OT'  && !otAbs)  { clusterFETB = otVal;  totalOTICS += clusterFETB; totalClusters++; }
       else       if (wl === 'ICS' && !icsAbs) { clusterFETB = icsVal; totalOTICS += clusterFETB; totalClusters++; }
 
-      // Off-site cell — show toggle only for standalone clusters when osAll is OFF
+      // Off-site cell — per-row toggle only in Manual mode (ofs===3)
       const osCell = tr.querySelector('.offsite-cell');
       if (osCell) {
-        if (clusterFETB !== null && !osAllOn) {
-          const rowCC  = getOsRowCC(si, wl);
+        if (clusterFETB !== null && !p.osAll) {
+          // Manual mode — per-row RCV/CC mini toggle
+          const rowCC = getOsRowCC(si, wl);
           osCell.innerHTML = `
             <div class="os-toggle-wrap">
               <span class="os-lbl ${!rowCC?'active':''}">RCV</span>
@@ -1113,8 +1113,11 @@ function recalcAll() {
             osRowState[si+'-'+wl] = e.target.checked;
             buildOffsiteSummary(getParams());
           });
-        } else if (clusterFETB !== null && osAllOn) {
-          const typeStr = p.osCC ? '<span style="color:var(--rc);font-size:9px;font-weight:700">CC</span>' : '<span style="color:#CE93D8;font-size:9px;font-weight:700">RCV</span>';
+        } else if (clusterFETB !== null) {
+          // RCV or Cloud Cluster mode — show label
+          const typeStr = p.osCC
+            ? '<span style="color:var(--rc);font-size:9px;font-weight:700">CC</span>'
+            : '<span style="color:#CE93D8;font-size:9px;font-weight:700">RCV</span>';
           osCell.innerHTML = typeStr;
         } else {
           osCell.innerHTML = '<span style="color:var(--text-muted);font-size:9px">—</span>';
@@ -1706,8 +1709,9 @@ const sliderFmts = {
   hwp:     v => HW_LABELS[parseInt(v)] || 'Rubrik',
   prodpct: v => `${v}%`,
   npret:   v => `${v} days`,
+  ofs:     v => ({ 1:'Instant Archive → RCV', 2:'Rep to Cloud Cluster', 3:'Manual (per-row)' }[parseInt(v)] || 'RCV'),
 };
-['syr','drr','dcr','agr','rsv','thr','ret','hwp','prodpct','npret'].forEach(id => {
+['syr','drr','dcr','agr','rsv','thr','ret','prodpct','npret'].forEach(id => {
   const el  = document.getElementById(id);
   const out = document.getElementById(id + '-v');
   el.addEventListener('input', () => {
@@ -1728,8 +1732,14 @@ function switchView(view) {
   if (!isSummary) recalcAll();
 }
 
+// ── Select dropdown wiring (hwp, ofs) ────────────────────────────────────
+['hwp', 'ofs'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
+});
+
 // ── Toggle and checkbox wiring ────────────────────────────────────────────
-['wl-it-only','os-select-all','os-type-cc'].forEach(id => {
+['wl-it-only'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
 });
