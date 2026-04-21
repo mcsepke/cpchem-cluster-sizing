@@ -724,7 +724,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v13';
+const STORAGE_KEY = 'rubrik_dashboard_v14';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -1214,9 +1214,13 @@ function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC) {
 function selectCCNodes(totalStoredTB) {
   if (totalStoredTB < 32) {
     // Single node, 32TB Dense
+    const vmMo   = CC_DENSE_MONTHLY_RESERVED;
+    const diskMo = CC_DISK_MONTHLY_PER_NODE;
     return {
       nodes: 1, nodeSize: 32, totalCap: 32,
-      vmType: CC_DENSE_VM, nodeMonthly: CC_DENSE_MONTHLY_RESERVED,
+      vmType: CC_DENSE_VM,
+      nodeVMMonthly: vmMo, nodeDiskMonthly: diskMo,
+      nodeMonthly: vmMo + diskMo,
       note: '1 Dense node (below 32TB min)'
     };
   }
@@ -1224,24 +1228,43 @@ function selectCCNodes(totalStoredTB) {
   const nodeSize = isDense ? 32 : 64;
   const nodes    = Math.max(3, Math.ceil(totalStoredTB / nodeSize));
   const vmType   = isDense ? CC_DENSE_VM : CC_EXTRA_DENSE_VM;
-  const nodeMo   = isDense ? CC_DENSE_MONTHLY_RESERVED : CC_EXTRA_DENSE_MONTHLY_RESERVED;
+  const vmMo     = isDense ? CC_DENSE_MONTHLY_RESERVED : CC_EXTRA_DENSE_MONTHLY_RESERVED;
+  const diskMo   = CC_DISK_MONTHLY_PER_NODE;
   return {
     nodes, nodeSize, totalCap: nodes * nodeSize,
-    vmType, nodeMonthly: nodeMo,
+    vmType,
+    nodeVMMonthly: vmMo, nodeDiskMonthly: diskMo,
+    nodeMonthly: vmMo + diskMo,
     note: `${nodes} × ${nodeSize}TB ${isDense ? 'Dense' : 'Extra Dense'} nodes`
   };
 }
 
 // ── Azure Cloud Cluster Pricing ───────────────────────────────────────────
 // Dense Node:       Standard_D16s_v5  (32TB/node usable) — for < 192TB total
-// Extra Dense Node: Standard_D32s_v5  (64TB/node usable) — for >= 192TB total
+// Extra Dense Node: Standard_E16as_v5 (64TB/node usable) — for >= 192TB total
 // 1-year reserved Linux pricing (East US, April 2026):
-//   D16s_v5 PAYG $0.768/hr → 1yr reserved ~38% discount → $0.476/hr → $347/mo
-//   D32s_v5 PAYG $1.536/hr → 1yr reserved ~38% discount → $0.953/hr → $695/mo
+//   D16s_v5  PAYG $0.768/hr → 1yr reserved ~38% discount → $347/mo
+//   E16as_v5 PAYG $0.904/hr → 1yr reserved ~38% discount → $418/mo
+// Node VM types
+// Dense (<192TB):      Standard_D16s_v5  — 16 vCPU, 64GB RAM  — $347/mo (1-yr reserved Linux, East US)
+// Extra Dense (≥192TB): Standard_E16as_v5 — 16 vCPU, 128GB RAM — $418/mo (1-yr reserved Linux, East US)
 const CC_DENSE_VM       = 'Standard_D16s_v5';
-const CC_EXTRA_DENSE_VM = 'Standard_D32s_v5';
-const CC_DENSE_MONTHLY_RESERVED      = 347;   // USD/node/month, 1-yr reserved
-const CC_EXTRA_DENSE_MONTHLY_RESERVED = 695;  // USD/node/month, 1-yr reserved
+const CC_EXTRA_DENSE_VM = 'Standard_E16as_v5';
+const CC_DENSE_MONTHLY_RESERVED       = 347;  // USD/node/month, 1-yr reserved Linux East US
+const CC_EXTRA_DENSE_MONTHLY_RESERVED = 418;  // USD/node/month, 1-yr reserved Linux East US
+
+// Managed disk config — same 4 disks per node for both Dense and Extra Dense:
+//   Disk 1: 128GB Premium SSD (P10, LRS)            → $19.71/mo
+//   Disk 2: 132GB Premium SSD v2 @ 125 MiBps        → 132 × $0.081 = $10.69/mo (throughput included in baseline)
+//   Disk 3: 206GB Premium SSD v2 @ 125 MiBps        → 206 × $0.081 = $16.69/mo
+//   Disk 4: 500GB Premium SSD v2 @ 400 MiBps        → 500 × $0.081 + (400-125) × $0.041 = $51.78/mo
+//   Total managed disk cost per node: $98.87/mo
+const CC_DISK_P10_128GB     = 19.71;   // Premium SSD P10 128GB LRS
+const CC_DISK_V2_132GB      = 132 * 0.081;                       // $10.69
+const CC_DISK_V2_206GB      = 206 * 0.081;                       // $16.69
+const CC_DISK_V2_500GB      = (500 * 0.081) + ((400 - 125) * 0.041); // $51.78
+const CC_DISK_MONTHLY_PER_NODE = CC_DISK_P10_128GB + CC_DISK_V2_132GB + CC_DISK_V2_206GB + CC_DISK_V2_500GB;
+// ≈ $98.87/node/month
 
 // Azure Hot Blob Storage: $0.018/GB/month = $18.43/TB/month (first 50TB tier, LRS)
 const AZURE_HOT_BLOB_PER_TB_MONTH = 18.43;
@@ -1310,7 +1333,9 @@ function buildOffsiteSummary(p) {
     const regionTotalCap = (ccConfig ? ccConfig.totalCap : 0) + regionRCVCap;
 
     // Cost calculations
-    const ccVMCostMonthly    = ccConfig ? ccConfig.nodes * ccConfig.nodeMonthly : 0;
+    const ccVMOnlyMonthly    = ccConfig ? ccConfig.nodes * ccConfig.nodeVMMonthly   : 0;
+    const ccDiskMonthly      = ccConfig ? ccConfig.nodes * ccConfig.nodeDiskMonthly : 0;
+    const ccVMCostMonthly    = ccVMOnlyMonthly + ccDiskMonthly;  // VMs + managed disks
     const ccBlobCostMonthly  = ccConfig ? regionCCStoredTB * AZURE_HOT_BLOB_PER_TB_MONTH : 0;
     const ccTotalMonthly     = ccVMCostMonthly + ccBlobCostMonthly;
     const ccTotalAnnual      = ccTotalMonthly * 12;
@@ -1351,12 +1376,14 @@ function buildOffsiteSummary(p) {
             <span>Total usable: <strong style="color:var(--rc)">${ccConfig.totalCap} TB</strong></span>
             <span>Utilized: <strong style="color:${ccPctCls}">${ccPctUsed.toFixed(1)}%</strong></span>
           </div>
-          <div style="font-size:10px;display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;padding:6px 8px;background:rgba(0,0,0,0.2);border-radius:4px;border-left:2px solid rgba(0,180,216,0.4)">
-            <span style="color:var(--text-muted)">Est. monthly cost:</span>
-            <span>VM (1-yr reserved): <strong style="color:var(--rc)">${fmtUSD(ccVMCostMonthly)}</strong></span>
-            <span>Hot Blob storage: <strong style="color:var(--rc)">${fmtUSD(ccBlobCostMonthly)}</strong></span>
-            <span style="font-weight:700">Total/mo: <strong style="color:#FFD600">${fmtUSD(ccTotalMonthly)}</strong></span>
-            <span style="color:var(--text-muted)">Annual: <strong style="color:#FFD600">${fmtUSD(ccTotalAnnual)}</strong></span>
+          <div style="font-size:10px;display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:4px;border-left:2px solid rgba(0,180,216,0.4)">
+            <span style="color:var(--text-muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em;width:100%">Est. monthly cost breakdown (per ${ccConfig.nodes}-node cluster)</span>
+            <span style="font-size:9px">VMs (${ccConfig.vmType}, 1-yr reserved): <strong style="color:var(--rc)">${fmtUSD(ccVMOnlyMonthly)}</strong></span>
+            <span style="font-size:9px">Managed disks (4×/node): <strong style="color:var(--rc)">${fmtUSD(ccDiskMonthly)}</strong>
+              <span style="color:var(--text-muted);font-size:8px"> P10+3×v2 @ ${fmtUSD(Math.round(CC_DISK_MONTHLY_PER_NODE))}/node</span>
+            </span>
+            <span style="font-size:9px">Hot Blob storage: <strong style="color:var(--rc)">${fmtUSD(ccBlobCostMonthly)}</strong></span>
+            <span style="font-size:9px;font-weight:700">Total/mo: <strong style="color:#FFD600">${fmtUSD(ccTotalMonthly)}</strong> &nbsp;·&nbsp; Annual: <strong style="color:#FFD600">${fmtUSD(ccTotalAnnual)}</strong></span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <div style="flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
@@ -1413,7 +1440,7 @@ function buildOffsiteSummary(p) {
             <div class="ofs-val" style="color:var(--rc)">${ccConfig.totalCap} TB</div>
             <div class="ofs-lbl">Cloud Cluster (${ccConfig.nodes}× ${ccConfig.nodeSize}TB ${ccConfig.nodeSize===32?'Dense':'Extra Dense'})</div>
             <div style="font-size:9px;color:#FFB74D;margin-top:2px">${fmtUSD(ccTotalMonthly)}/mo · ${fmtUSD(ccTotalAnnual)}/yr</div>
-            <div style="font-size:8px;color:var(--text-muted);margin-top:1px">VMs: ${fmtUSD(ccVMCostMonthly)}/mo · Blob: ${fmtUSD(ccBlobCostMonthly)}/mo</div>
+            <div style="font-size:8px;color:var(--text-muted);margin-top:1px">VMs: ${fmtUSD(ccVMOnlyMonthly)} · Disks: ${fmtUSD(ccDiskMonthly)} · Blob: ${fmtUSD(ccBlobCostMonthly)}</div>
           </div>
           <div class="ofs-sep"></div>`:''}
         ${regionRCVCount>0?`
@@ -1459,7 +1486,7 @@ function buildOffsiteSummary(p) {
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--rc);line-height:1">${fmtUSD(grandCCMonthly)}<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/mo</span></div>
         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Cloud Cluster Total (${grandCCCap} TB)</div>
-        <div style="font-size:9px;color:var(--text-muted)">VMs: ${fmtUSD(grandCCVMMonthly)}/mo · Blob: ${fmtUSD(grandCCBlobMonthly)}/mo</div>
+        <div style="font-size:9px;color:var(--text-muted)">VMs+Disks: ${fmtUSD(grandCCVMMonthly)}/mo · Blob: ${fmtUSD(grandCCBlobMonthly)}/mo</div>
         <div style="font-size:9px;color:#FFB74D">Annual: ${fmtUSD(grandCCMonthly*12)}</div>
       </div>
       <div style="width:1px;height:40px;background:var(--border);align-self:center"></div>`:''}
