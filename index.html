@@ -1296,10 +1296,11 @@ function buildOffsiteSummary(p) {
         rows.push({ wl, isCC, stored: result.stored, rcvCap: result.rcvCap });
       };
 
-      const itFETB = itVal + (otAbs&&!otNull?otVal||0:0) + (icsAbs&&!icsNull?icsVal||0:0);
-      addRow('IT', itFETB);
-      if (!otAbs)  addRow('OT',  otVal);
-      if (!icsAbs) addRow('ICS', icsVal);
+      // Off-site uses raw workload FETB for each workload individually
+      addRow('IT', itVal);
+      // Absorbed OT/ICS still get their own off-site row based on raw FETB
+      if (!otNull)  addRow('OT',  otVal);
+      if (!icsNull) addRow('ICS', icsVal);
 
       return { s, si, rows };
     });
