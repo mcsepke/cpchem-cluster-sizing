@@ -724,7 +724,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v14';
+const STORAGE_KEY = 'rubrik_dashboard_v15';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -1052,7 +1052,7 @@ function recalcAll() {
   document.getElementById('offsite-section').style.display = 'block';
 
   const osTypeLbl = p.osAll ? (p.osCC ? 'Rep to Cloud Cluster' : 'Instant Archive to RCV') : 'Per-row selection';
-  document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Yr 1 · CC: Azure 1-yr reserved + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
+  document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Yr 1 · CC: Azure PAYG + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
 
   let totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
 
@@ -1190,8 +1190,8 @@ function recalcAll() {
 
 // ── Off-Site Copy Summary ──────────────────────────────────────────────────
 // Cloud Cluster sizing: 3-node minimum
-//   < 192TB needed → 32TB/node   (3 nodes = 96TB min)
-//   >= 192TB needed → 64TB/node  (3 nodes = 192TB min)
+//   < 96TB needed  → 32TB/node Dense (3 nodes = 96TB min)
+//   >= 96TB needed  → 64TB/node Extra Dense (3 nodes = 192TB min)
 // Required capacity = Required Usable WITHOUT reserve (prod FETB only)
 // RCV = 2.0 × prod FETB
 
@@ -1224,7 +1224,7 @@ function selectCCNodes(totalStoredTB) {
       note: '1 Dense node (below 32TB min)'
     };
   }
-  const isDense  = totalStoredTB < 192;
+  const isDense  = totalStoredTB < 96;
   const nodeSize = isDense ? 32 : 64;
   const nodes    = Math.max(3, Math.ceil(totalStoredTB / nodeSize));
   const vmType   = isDense ? CC_DENSE_VM : CC_EXTRA_DENSE_VM;
@@ -1240,18 +1240,18 @@ function selectCCNodes(totalStoredTB) {
 }
 
 // ── Azure Cloud Cluster Pricing ───────────────────────────────────────────
-// Dense Node:       Standard_D16s_v5  (32TB/node usable) — for < 192TB total
-// Extra Dense Node: Standard_E16as_v5 (64TB/node usable) — for >= 192TB total
-// 1-year reserved Linux pricing (East US, April 2026):
-//   D16s_v5  PAYG $0.768/hr → 1yr reserved ~38% discount → $347/mo
-//   E16as_v5 PAYG $0.904/hr → 1yr reserved ~38% discount → $418/mo
+// Dense Node:       Standard_D16s_v5  (32TB/node usable) — for < 96TB total
+// Extra Dense Node: Standard_E16as_v5 (64TB/node usable) — for >= 96TB total
+// Pay-as-you-go Linux pricing (East US, April 2026):
+//   D16s_v5  $0.768/hr × 730 hrs = $561/mo
+//   E16as_v5 $0.904/hr × 730 hrs = $660/mo
 // Node VM types
-// Dense (<192TB):      Standard_D16s_v5  — 16 vCPU, 64GB RAM  — $347/mo (1-yr reserved Linux, East US)
-// Extra Dense (≥192TB): Standard_E16as_v5 — 16 vCPU, 128GB RAM — $418/mo (1-yr reserved Linux, East US)
+// Dense (<96TB):       Standard_D16s_v5  — 16 vCPU, 64GB RAM  — $561/mo (PAYG Linux, East US)
+// Extra Dense (≥96TB):  Standard_E16as_v5 — 16 vCPU, 128GB RAM — $660/mo (PAYG Linux, East US)
 const CC_DENSE_VM       = 'Standard_D16s_v5';
 const CC_EXTRA_DENSE_VM = 'Standard_E16as_v5';
-const CC_DENSE_MONTHLY_RESERVED       = 347;  // USD/node/month, 1-yr reserved Linux East US
-const CC_EXTRA_DENSE_MONTHLY_RESERVED = 418;  // USD/node/month, 1-yr reserved Linux East US
+const CC_DENSE_MONTHLY_RESERVED       = 561;  // USD/node/month, pay-as-you-go Linux East US ($0.768/hr × 730hrs)
+const CC_EXTRA_DENSE_MONTHLY_RESERVED = 660;  // USD/node/month, pay-as-you-go Linux East US ($0.904/hr × 730hrs)
 
 // Managed disk config — same 4 disks per node for both Dense and Extra Dense:
 //   Disk 1: 128GB Premium SSD (P10, LRS)            → $19.71/mo
@@ -1270,7 +1270,7 @@ const CC_DISK_MONTHLY_PER_NODE = CC_DISK_P10_128GB + CC_DISK_V2_132GB + CC_DISK_
 const AZURE_HOT_BLOB_PER_TB_MONTH = 18.43;
 
 // RCV: $20/TB/month
-const RCV_PER_TB_MONTH = 20;
+const RCV_PER_TB_MONTH = 8.50;
 
 function fmtUSD(v) {
   if (v === null || v === undefined) return '—';
@@ -1378,7 +1378,7 @@ function buildOffsiteSummary(p) {
           </div>
           <div style="font-size:10px;display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:4px;border-left:2px solid rgba(0,180,216,0.4)">
             <span style="color:var(--text-muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em;width:100%">Est. monthly cost breakdown (per ${ccConfig.nodes}-node cluster)</span>
-            <span style="font-size:9px">VMs (${ccConfig.vmType}, 1-yr reserved): <strong style="color:var(--rc)">${fmtUSD(ccVMOnlyMonthly)}</strong></span>
+            <span style="font-size:9px">VMs (${ccConfig.vmType}, pay-as-you-go): <strong style="color:var(--rc)">${fmtUSD(ccVMOnlyMonthly)}</strong></span>
             <span style="font-size:9px">Managed disks (4×/node): <strong style="color:var(--rc)">${fmtUSD(ccDiskMonthly)}</strong>
               <span style="color:var(--text-muted);font-size:8px"> P10+3×v2 @ ${fmtUSD(Math.round(CC_DISK_MONTHLY_PER_NODE))}/node</span>
             </span>
@@ -1479,7 +1479,7 @@ function buildOffsiteSummary(p) {
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#FFD600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">
         &#9733; All Regions — Combined Off-Site Cost Summary
       </div>
-      <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Cloud Cluster: Azure 1-yr reserved VMs + Hot Blob ($${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo) &nbsp;·&nbsp; RCV: $${RCV_PER_TB_MONTH}/TB/mo</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Cloud Cluster: Azure pay-as-you-go VMs + Hot Blob ($${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo) &nbsp;·&nbsp; RCV: $${RCV_PER_TB_MONTH}/TB/mo</div>
     </div>
     <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
       ${grandCCMonthly>0?`
