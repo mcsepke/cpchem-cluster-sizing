@@ -34,7 +34,7 @@
 
   html { scroll-behavior: smooth; }
   body { font-family: 'DM Mono', monospace; background: var(--bg-page); color: var(--text-primary); min-height: 100vh; line-height: 1.5; }
-  .page-wrap { max-width: 1300px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .page-wrap { max-width: 90vw; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
   /* ── Header ── */
   .page-header {
@@ -579,30 +579,6 @@
         </div>
       </div>
 
-      <!-- Off-Site Copy controls -->
-      <div class="ctl-group">
-        <div class="ctl-lbl">Off-Site Copy — Select All</div>
-        <div class="toggle-wrap" style="margin-top:4px">
-          <span class="toggle-option inactive" id="os-all-off-lbl">Off</span>
-          <label class="toggle">
-            <input type="checkbox" id="os-select-all" checked>
-            <span class="toggle-slider" style="background:rgba(124,77,255,0.4)"></span>
-          </label>
-          <span class="toggle-option active" id="os-all-on-lbl">On</span>
-        </div>
-        <div id="os-type-wrap" style="margin-top:8px;display:block">
-          <div class="ctl-lbl" style="margin-bottom:4px">Off-Site Copy Type</div>
-          <div class="toggle-wrap">
-            <span class="toggle-option active" id="os-type-rcv-lbl" style="color:#CE93D8;font-size:10px">Instant Archive to RCV</span>
-            <label class="toggle">
-              <input type="checkbox" id="os-type-cc">
-              <span class="toggle-slider" style="background:rgba(124,77,255,0.4)"></span>
-            </label>
-            <span class="toggle-option inactive" id="os-type-cc-lbl" style="font-size:10px">Rep to Cloud Cluster</span>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -624,6 +600,31 @@
           <span style="font-size:10px;color:var(--text-muted);font-style:italic">Dimmed = absorbed into IT cluster</span>
         </div>
       </div>
+      <!-- Off-Site Copy controls — inline above Off-Site column -->
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:4px 0">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:9px;color:#CE93D8;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Off-Site Copy</span>
+          <div class="toggle-wrap">
+            <span style="font-size:10px" class="toggle-option inactive" id="os-all-off-lbl">Off</span>
+            <label class="toggle">
+              <input type="checkbox" id="os-select-all" checked>
+              <span class="toggle-slider" style="background:rgba(124,77,255,0.5)"></span>
+            </label>
+            <span style="font-size:10px" class="toggle-option active" id="os-all-on-lbl">Select All On</span>
+          </div>
+        </div>
+        <div id="os-type-wrap" style="display:block;border-left:1px solid var(--border);padding-left:14px">
+          <span style="font-size:9px;color:#CE93D8;text-transform:uppercase;letter-spacing:.08em;font-weight:600;display:block;margin-bottom:4px">Copy Type</span>
+          <div class="toggle-wrap">
+            <span class="toggle-option active" id="os-type-rcv-lbl" style="color:#CE93D8;font-size:10px">Arch → RCV</span>
+            <label class="toggle">
+              <input type="checkbox" id="os-type-cc">
+              <span class="toggle-slider" style="background:rgba(124,77,255,0.4)"></span>
+            </label>
+            <span class="toggle-option inactive" id="os-type-cc-lbl" style="font-size:10px">Rep → Cloud Cluster</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="tbl-outer">
       <table>
@@ -633,7 +634,6 @@
             <th class="left" rowspan="2" style="width:155px">Site</th>
             <th rowspan="2" style="width:62px">Workload</th>
             <th rowspan="2" style="width:80px">FETB (TB)</th>
-            <th rowspan="2" style="width:44px">DRR</th>
             <th rowspan="2" style="width:62px">Full BU (TB)</th>
             <th rowspan="2" style="width:60px">Daily Incr (TB)</th>
             <th colspan="3" class="span-req" style="background:#1a0a40">Required Usable + Reserve (TB)</th>
@@ -682,7 +682,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v12';
+const STORAGE_KEY = 'rubrik_dashboard_v13';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -933,7 +933,6 @@ function buildTable() {
             class="${isNull ? 'na-val' : ''}"
             ${isNull ? 'disabled' : ''}>
         </td>
-        <td class="drr-cell num"></td>
         <td class="fb-cell  num"></td>
         <td class="di-cell  num"></td>
         <td class="r1-cell"></td>
@@ -1041,7 +1040,7 @@ function recalcAll() {
       const isAbsorbed = (wl === 'OT' && otAbs) || (wl === 'ICS' && icsAbs);
       isAbsorbed ? tr.classList.add('absorbed') : tr.classList.remove('absorbed');
 
-      tr.querySelector('.drr-cell').textContent = `${f(p.drr,1)}:1`;
+
 
       // Determine cluster FETB
       let clusterFETB = null;
@@ -1152,7 +1151,7 @@ function recalcAll() {
 //   < 192TB needed → 32TB/node   (3 nodes = 96TB min)
 //   >= 192TB needed → 64TB/node  (3 nodes = 192TB min)
 // Required capacity = Required Usable WITHOUT reserve (prod FETB only)
-// RCV = 1.9 × prod FETB
+// RCV = 2.0 × prod FETB
 
 function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC) {
   // Always Year 1 growth for off-site comparison consistency
@@ -1163,8 +1162,8 @@ function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC) {
     const stored = (grownYr1 / drr) * (1 + (30 - 1) * dcr);
     return { stored, rcvCap: null };
   } else {
-    // RCV = 1.9 × prod FETB at Year 1 growth
-    const rcvCap = grownYr1 * 1.9;
+    // RCV = 2.0 × prod FETB at Year 1 growth
+    const rcvCap = grownYr1 * 2.0;
     return { stored: rcvCap, rcvCap };
   }
 }
@@ -1216,6 +1215,10 @@ function fmtUSD(v) {
 function buildOffsiteSummary(p) {
   const container = document.getElementById('offsite-blocks');
   container.innerHTML = '';
+
+  // Grand totals across all regions
+  let grandCCMonthly = 0, grandCCVMMonthly = 0, grandCCBlobMonthly = 0;
+  let grandRCVMonthly = 0, grandRCVCap = 0, grandCCCap = 0;
 
   REGIONS.forEach(({ key, label, flag }) => {
     const sites = SITE_DEFAULTS.map((s,si) => ({s,si})).filter(({s}) => s[5] === key);
@@ -1386,7 +1389,52 @@ function buildOffsiteSummary(p) {
         </div>
       </div>`;
     container.appendChild(foot);
+
+    // Accumulate into grand totals
+    grandCCMonthly   += ccTotalMonthly;
+    grandCCVMMonthly += ccVMCostMonthly;
+    grandCCBlobMonthly += ccBlobCostMonthly;
+    grandRCVMonthly  += rcvTotalMonthly;
+    grandRCVCap      += regionRCVCap;
+    grandCCCap       += (ccConfig ? ccConfig.totalCap : 0);
   });
+
+  // ── Grand total summary across all regions ────────────────────────────────
+  const grandTotal = grandCCMonthly + grandRCVMonthly;
+  const grandAnnual = grandTotal * 12;
+  const grandDiv = document.createElement('div');
+  grandDiv.style.cssText = 'background:linear-gradient(90deg,#0a0020 0%,#001020 100%);border-top:3px solid rgba(255,214,0,0.5);padding:1.25rem 1.5rem;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px';
+  grandDiv.innerHTML = `
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#FFD600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">
+        &#9733; All Regions — Combined Off-Site Cost Summary
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:4px">Cloud Cluster: Azure 1-yr reserved VMs + Hot Blob ($${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo) &nbsp;·&nbsp; RCV: $${RCV_PER_TB_MONTH}/TB/mo</div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      ${grandCCMonthly>0?`
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--rc);line-height:1">${fmtUSD(grandCCMonthly)}<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/mo</span></div>
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Cloud Cluster Total (${grandCCCap} TB)</div>
+        <div style="font-size:9px;color:var(--text-muted)">VMs: ${fmtUSD(grandCCVMMonthly)}/mo · Blob: ${fmtUSD(grandCCBlobMonthly)}/mo</div>
+        <div style="font-size:9px;color:#FFB74D">Annual: ${fmtUSD(grandCCMonthly*12)}</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);align-self:center"></div>`:''}
+      ${grandRCVMonthly>0?`
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:#CE93D8;line-height:1">${fmtUSD(grandRCVMonthly)}<span style="font-size:10px;font-weight:400;color:var(--text-muted)">/mo</span></div>
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">RCV Total (${f(grandRCVCap)} TB)</div>
+        <div style="font-size:9px;color:var(--text-muted)">$${RCV_PER_TB_MONTH}/TB/mo across all regions</div>
+        <div style="font-size:9px;color:#FFB74D">Annual: ${fmtUSD(grandRCVMonthly*12)}</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);align-self:center"></div>`:''}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:#FFD600;line-height:1">${fmtUSD(grandTotal)}<span style="font-size:11px;font-weight:400;color:var(--text-muted)">/mo</span></div>
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">Grand Total — All Regions</div>
+        <div style="font-size:10px;color:#FFD600;font-weight:700;margin-top:2px">Annual est.: ${fmtUSD(grandAnnual)}</div>
+      </div>
+    </div>`;
+  container.appendChild(grandDiv);
 }
 
 // ── Region Summary ─────────────────────────────────────────────────────────
