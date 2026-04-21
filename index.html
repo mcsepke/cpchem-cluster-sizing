@@ -354,6 +354,108 @@
 
 
 
+
+  /* ── Toggle Switch ── */
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+  .toggle-lbl { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .07em; font-weight: 500; }
+  .toggle { position: relative; display: inline-block; width: 42px; height: 22px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border-mid); border-radius: 22px; transition: .2s; }
+  .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  .toggle input:checked + .toggle-slider { background: var(--rc); }
+  .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+  .toggle-option { font-size: 11px; font-weight: 500; font-family: 'Syne', sans-serif; }
+  .toggle-option.active { color: var(--rc); }
+  .toggle-option.inactive { color: var(--text-muted); }
+
+  /* Workload mode banner */
+  .wl-mode-banner {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 14px; border-radius: 6px; font-size: 11px;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    border: 1px solid rgba(0,180,216,0.3);
+    background: rgba(0,180,216,0.08); color: var(--rc);
+  }
+
+  /* Off-site copy row switch */
+  .offsite-cell { padding: 3px 6px !important; }
+  .os-toggle-wrap { display: flex; align-items: center; gap: 4px; }
+  .os-lbl { font-size: 9px; color: var(--text-muted); white-space: nowrap; }
+  .os-lbl.active { color: var(--rc); font-weight: 600; }
+  .os-mini-toggle { position: relative; display: inline-block; width: 32px; height: 17px; flex-shrink: 0; }
+  .os-mini-toggle input { opacity: 0; width: 0; height: 0; }
+  .os-mini-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border-mid); border-radius: 17px; transition: .2s; }
+  .os-mini-slider:before { position: absolute; content: ""; height: 11px; width: 11px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  .os-mini-toggle input:checked + .os-mini-slider { background: #7C4DFF; }
+  .os-mini-toggle input:checked + .os-mini-slider:before { transform: translateX(15px); }
+
+  /* Off-site copy / cloud section */
+  .offsite-section { margin-top: 1.5rem; }
+  .offsite-section-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text-primary); text-transform: uppercase; letter-spacing: .07em;
+    padding: 1rem 1.5rem; background: var(--bg-surface);
+    border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .offsite-pill {
+    font-size: 10px; color: #CE93D8; background: rgba(124,77,255,0.1);
+    border: 1px solid rgba(124,77,255,0.3); padding: 2px 8px; border-radius: 8px;
+    font-weight: 600; font-family: 'DM Mono', monospace;
+  }
+  .offsite-blocks { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+
+  .offsite-region-hdr {
+    background: linear-gradient(90deg, #12003a 0%, #111827 100%);
+    padding: .75rem 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .offsite-region-hdr:not(:first-child) { border-top: 2px solid rgba(124,77,255,0.2); }
+  .offsite-region-name {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
+    color: #fff; display: flex; align-items: center; gap: 8px;
+  }
+  .offsite-region-totals { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .offsite-stat { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+  .offsite-stat-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: #CE93D8; line-height: 1; }
+  .offsite-stat-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+
+  .offsite-sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); }
+  .offsite-site-card {
+    padding: .9rem 1.25rem; border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); background: var(--bg-card); transition: background .12s;
+  }
+  .offsite-site-card:hover { background: var(--bg-card-alt); }
+  .offsite-site-name {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    color: var(--text-primary); margin-bottom: 7px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .offsite-site-num { font-size: 9px; color: var(--text-muted); background: var(--bg-surface); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-family: 'DM Mono', monospace; }
+  .offsite-clusters { display: flex; flex-direction: column; gap: 4px; }
+  .offsite-cluster-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-secondary); }
+  .offsite-type-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 9px;
+    font-family: 'Syne', sans-serif; font-weight: 700; flex-shrink: 0;
+  }
+  .offsite-type-cc  { background: rgba(0,180,216,0.15); color: var(--rc); border: 1px solid rgba(0,180,216,0.3); }
+  .offsite-type-rcv { background: rgba(124,77,255,0.15); color: #CE93D8; border: 1px solid rgba(124,77,255,0.3); }
+  .offsite-cap { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-secondary); margin-left: auto; }
+  .offsite-node-detail { font-size: 9px; color: var(--text-muted); margin-left: 30px; font-style: italic; }
+
+  .offsite-footer {
+    background: #0d0020; border-top: 2px solid rgba(124,77,255,0.25);
+    padding: .85rem 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .offsite-footer-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px; color: #CE93D8; text-transform: uppercase; letter-spacing: .06em; }
+  .offsite-footer-stats { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .ofs-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .ofs-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: #CE93D8; line-height: 1; }
+  .ofs-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+  .ofs-sep { width: 1px; height: 28px; background: var(--border); }
 </style>
 </head>
 <body>
@@ -402,7 +504,7 @@
     <div class="controls-title">Sizing Parameters</div>
     <div class="controls-grid">
 
-      <!-- Sizing Year — special slider -->
+      <!-- Sizing Year -->
       <div class="ctl-group year-slider-wrap">
         <div class="ctl-lbl">Sizing Year</div>
         <div class="year-slider-row ctl-row">
@@ -414,6 +516,20 @@
           <span id="tick-2">Year 2</span>
           <span id="tick-3" class="active-tick">Year 3</span>
         </div>
+      </div>
+
+      <!-- Workload Mode toggle -->
+      <div class="ctl-group">
+        <div class="ctl-lbl">Workload Scope</div>
+        <div class="toggle-wrap" style="margin-top:4px">
+          <span class="toggle-option active" id="wl-lbl-all">IT / OT / ICS</span>
+          <label class="toggle">
+            <input type="checkbox" id="wl-it-only">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-option inactive" id="wl-lbl-it">IT Only</span>
+        </div>
+        <div style="margin-top:6px"><span class="wl-mode-banner" id="wl-mode-banner">IT / OT / ICS Mode</span></div>
       </div>
 
       <div class="ctl-group">
@@ -437,8 +553,16 @@
         <div class="ctl-row"><input type="range" id="thr" min="1" max="20" step="0.1" value="3.5"><span class="ctl-val" id="thr-v">3.5 TB</span></div>
       </div>
       <div class="ctl-group">
-        <div class="ctl-lbl">Retention Window (days)</div>
+        <div class="ctl-lbl">Production Retention (days)</div>
         <div class="ctl-row"><input type="range" id="ret" min="7" max="90" step="1" value="30"><span class="ctl-val" id="ret-v">30 days</span></div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">% Production Workloads</div>
+        <div class="ctl-row"><input type="range" id="prodpct" min="20" max="100" step="1" value="75"><span class="ctl-val" id="prodpct-v">75%</span></div>
+      </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Non-Prod Retention (days)</div>
+        <div class="ctl-row"><input type="range" id="npret" min="1" max="30" step="1" value="14"><span class="ctl-val" id="npret-v">14 days</span></div>
       </div>
 
       <!-- Hardware Platform -->
@@ -452,6 +576,30 @@
           <span id="hw-tick-1" class="active-hw">Rubrik</span>
           <span id="hw-tick-2">Dell</span>
           <span id="hw-tick-3">Combination</span>
+        </div>
+      </div>
+
+      <!-- Off-Site Copy controls -->
+      <div class="ctl-group">
+        <div class="ctl-lbl">Off-Site Copy — Select All</div>
+        <div class="toggle-wrap" style="margin-top:4px">
+          <span class="toggle-option inactive" id="os-all-off-lbl">Off</span>
+          <label class="toggle">
+            <input type="checkbox" id="os-select-all" checked>
+            <span class="toggle-slider" style="background:rgba(124,77,255,0.4)"></span>
+          </label>
+          <span class="toggle-option active" id="os-all-on-lbl">On</span>
+        </div>
+        <div id="os-type-wrap" style="margin-top:8px;display:block">
+          <div class="ctl-lbl" style="margin-bottom:4px">Off-Site Copy Type</div>
+          <div class="toggle-wrap">
+            <span class="toggle-option active" id="os-type-rcv-lbl" style="color:#CE93D8;font-size:10px">Instant Archive to RCV</span>
+            <label class="toggle">
+              <input type="checkbox" id="os-type-cc">
+              <span class="toggle-slider" style="background:rgba(124,77,255,0.4)"></span>
+            </label>
+            <span class="toggle-option inactive" id="os-type-cc-lbl" style="font-size:10px">Rep to Cloud Cluster</span>
+          </div>
         </div>
       </div>
 
@@ -493,6 +641,7 @@
             <th rowspan="2" style="width:54px;background:#00324a">Cap (TB)</th>
             <th rowspan="2" style="width:58px;background:#003b55">Lic TB</th>
             <th rowspan="2" style="width:130px;background:#0d1f0d">Capacity Utilized</th>
+            <th rowspan="2" style="width:90px;background:#12003a" id="offsite-col-hdr">Off-Site</th>
           </tr>
           <tr class="hdr-sub">
             <th id="col-yr1-hdr" style="width:66px;background:#1a0a40">Yr 1</th>
@@ -516,6 +665,15 @@
   </div>
 
 
+  <!-- Off-Site Copy Summary -->
+  <div class="offsite-section" id="offsite-section" style="display:none">
+    <div class="offsite-section-title">
+      Off-Site Copy Summary
+      <span class="offsite-pill" id="offsite-pill">RCV · Production data only · 30-day retention</span>
+    </div>
+    <div class="offsite-blocks" id="offsite-blocks"></div>
+  </div>
+
   <div class="page-footer">
     Rubrik Sizing Dashboard &nbsp;·&nbsp; Platform: <span id="footer-hw">Rubrik Appliances</span>
     &nbsp;·&nbsp; Appliance selected for <span id="footer-yr">Year 3</span> &nbsp;·&nbsp; Retention: <span id="footer-ret">1 full + 29 incrementals</span>
@@ -524,7 +682,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v8';
+const STORAGE_KEY = 'rubrik_dashboard_v12';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -551,7 +709,7 @@ const REGIONS = [
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1, prodpct: 75, npret: 14 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // Dell hardware catalog
@@ -709,6 +867,16 @@ function f(v, d = 2) { return v.toFixed(d); }
 function calcStored(fetb, drr, dcr, agr, yr, ret) {
   return (fetb * Math.pow(1 + agr, yr - 1) / drr) * (1 + (ret - 1) * dcr);
 }
+
+// Split prod/non-prod, each with its own retention
+function calcStoredSplit(fetb, drr, dcr, agr, yr, ret, prodpct, npret) {
+  const prodFETB = fetb * prodpct;
+  const npFETB   = fetb * (1 - prodpct);
+  const grown    = Math.pow(1 + agr, yr - 1);
+  const prod = (prodFETB * grown / drr) * (1 + (ret   - 1) * dcr);
+  const np   = (npFETB   * grown / drr) * (1 + (npret - 1) * dcr);
+  return prod + np;
+}
 function utilColor(pct) {
   if (pct >= 90) return ['util-high','pct-high'];
   if (pct >= 70) return ['util-mid', 'pct-mid'];
@@ -717,15 +885,29 @@ function utilColor(pct) {
 
 function getParams() {
   return {
-    syr: parseInt(document.getElementById('syr').value),
-    drr: parseFloat(document.getElementById('drr').value),
-    dcr: parseFloat(document.getElementById('dcr').value) / 100,
-    agr: parseFloat(document.getElementById('agr').value) / 100,
-    rsv: parseFloat(document.getElementById('rsv').value) / 100,
-    thr: parseFloat(document.getElementById('thr').value),
-    ret: parseInt(document.getElementById('ret').value),
-    hwp: parseInt(document.getElementById('hwp').value),
+    syr:     parseInt(document.getElementById('syr').value),
+    drr:     parseFloat(document.getElementById('drr').value),
+    dcr:     parseFloat(document.getElementById('dcr').value) / 100,
+    agr:     parseFloat(document.getElementById('agr').value) / 100,
+    rsv:     parseFloat(document.getElementById('rsv').value) / 100,
+    thr:     parseFloat(document.getElementById('thr').value),
+    ret:     parseInt(document.getElementById('ret').value),
+    hwp:     parseInt(document.getElementById('hwp').value),
+    prodpct: parseInt(document.getElementById('prodpct').value) / 100,
+    npret:   parseInt(document.getElementById('npret').value),
+    itOnly:  document.getElementById('wl-it-only').checked,
+    osAll:   document.getElementById('os-select-all').checked,
+    osCC:    document.getElementById('os-type-cc').checked,
   };
+}
+
+// Per-row offsite state: key = "si-wl", value = true (CC) / false (RCV)
+const osRowState = {};
+
+function getOsRowCC(si, wl) {
+  const key = si + '-' + wl;
+  if (key in osRowState) return osRowState[key];
+  return false; // default = RCV
 }
 
 // ── Build table DOM once ───────────────────────────────────────────────────
@@ -760,7 +942,8 @@ function buildTable() {
         <td class="app-cell"></td>
         <td class="cap-cell num"></td>
         <td class="lic-cell lic"></td>
-        <td class="util-cell"></td>`;
+        <td class="util-cell"></td>
+        <td class="offsite-cell" id="os-cell-${si}-${wl}"></td>`;
       tbody.appendChild(tr);
       if (!isNull) {
         document.getElementById(inputId).addEventListener('input', e => {
@@ -813,6 +996,23 @@ function recalcAll() {
     <span class="sep">·</span>
     <span>Rolling ${p.ret}-day window — storage constant per year, source FETB compounds annually</span>`;
 
+  // Update workload mode UI
+  const isITOnly = p.itOnly;
+  document.getElementById('wl-mode-banner').textContent = isITOnly ? 'IT Only Mode' : 'IT / OT / ICS Mode';
+  document.getElementById('wl-mode-banner').style.color = isITOnly ? '#FFD600' : 'var(--rc)';
+  document.getElementById('wl-lbl-all').className = 'toggle-option ' + (isITOnly ? 'inactive' : 'active');
+  document.getElementById('wl-lbl-it').className  = 'toggle-option ' + (isITOnly ? 'active' : 'inactive');
+
+  // Update off-site UI
+  const osAllOn = p.osAll;
+  document.getElementById('os-all-off-lbl').className = 'toggle-option ' + (!osAllOn ? 'active' : 'inactive');
+  document.getElementById('os-all-on-lbl').className  = 'toggle-option ' + (osAllOn  ? 'active' : 'inactive');
+  document.getElementById('os-type-wrap').style.display = osAllOn ? 'block' : 'none';
+  document.getElementById('offsite-section').style.display = 'block';
+
+  const osTypeLbl = p.osAll ? (p.osCC ? 'Rep to Cloud Cluster' : 'Instant Archive to RCV') : 'Per-row selection';
+  document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Yr 1 · CC: Azure 1-yr reserved + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
+
   let totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
 
   SITE_DEFAULTS.forEach(([,], si) => {
@@ -821,12 +1021,21 @@ function recalcAll() {
     const icsVal = fetbState[`${si}-ICS`];
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    const otAbs   = otNull  || otVal  < p.thr;
-    const icsAbs  = icsNull || icsVal < p.thr;
+    // In IT-only mode, OT and ICS are always absorbed
+    const otAbs   = isITOnly || otNull  || otVal  < p.thr;
+    const icsAbs  = isITOnly || icsNull || icsVal < p.thr;
 
     ['IT','OT','ICS'].forEach(wl => {
       const tr = document.querySelector(`tr[data-si="${si}"][data-wl="${wl}"]`);
       if (!tr) return;
+
+      // Hide OT/ICS rows entirely in IT-only mode
+      if (isITOnly && wl !== 'IT') {
+        tr.style.display = 'none';
+        return;
+      } else {
+        tr.style.display = '';
+      }
 
       const isNull     = fetbState[`${si}-${wl}`] === null;
       const isAbsorbed = (wl === 'OT' && otAbs) || (wl === 'ICS' && icsAbs);
@@ -844,6 +1053,33 @@ function recalcAll() {
       } else if (wl === 'OT'  && !otAbs)  { clusterFETB = otVal;  totalOTICS += clusterFETB; totalClusters++; }
       else       if (wl === 'ICS' && !icsAbs) { clusterFETB = icsVal; totalOTICS += clusterFETB; totalClusters++; }
 
+      // Off-site cell — show toggle only for standalone clusters when osAll is OFF
+      const osCell = tr.querySelector('.offsite-cell');
+      if (osCell) {
+        if (clusterFETB !== null && !osAllOn) {
+          const rowCC  = getOsRowCC(si, wl);
+          osCell.innerHTML = `
+            <div class="os-toggle-wrap">
+              <span class="os-lbl ${!rowCC?'active':''}">RCV</span>
+              <label class="os-mini-toggle">
+                <input type="checkbox" data-si="${si}" data-wl="${wl}" class="os-row-cb" ${rowCC?'checked':''}>
+                <span class="os-mini-slider"></span>
+              </label>
+              <span class="os-lbl ${rowCC?'active':''}">CC</span>
+            </div>`;
+          const cb = osCell.querySelector('.os-row-cb');
+          cb.addEventListener('change', e => {
+            osRowState[si+'-'+wl] = e.target.checked;
+            buildOffsiteSummary(getParams());
+          });
+        } else if (clusterFETB !== null && osAllOn) {
+          const typeStr = p.osCC ? '<span style="color:var(--rc);font-size:9px;font-weight:700">CC</span>' : '<span style="color:#CE93D8;font-size:9px;font-weight:700">RCV</span>';
+          osCell.innerHTML = typeStr;
+        } else {
+          osCell.innerHTML = '<span style="color:var(--text-muted);font-size:9px">—</span>';
+        }
+      }
+
       if (clusterFETB === null) {
         const rawD = wl === 'OT' ? otVal : icsVal;
         const showD = !isNull && rawD !== null;
@@ -859,8 +1095,8 @@ function recalcAll() {
         return;
       }
 
-      // Calculate all 3 years
-      const y = [1,2,3].map(yr => calcStored(clusterFETB, p.drr, p.dcr, p.agr, yr, p.ret));
+      // Calculate all 3 years with prod/non-prod split
+      const y = [1,2,3].map(yr => calcStoredSplit(clusterFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret));
       const r = y.map(v => v * (1 + p.rsv));
       const fb = clusterFETB / p.drr;
       const di = clusterFETB * p.dcr / p.drr;
@@ -868,26 +1104,17 @@ function recalcAll() {
       tr.querySelector('.fb-cell').textContent = f(fb);
       tr.querySelector('.di-cell').textContent = f(di);
 
-      // Fill all 3 required cells, highlight active year
       [1,2,3].forEach(yr => {
         const cell = tr.querySelector(`.r${yr}-cell`);
         cell.textContent = f(r[yr-1]);
-        if (yr === p.syr) {
-          cell.className = `r${yr}-cell req-active`;
-        } else {
-          cell.className = `r${yr}-cell req-dim`;
-        }
+        cell.className = `r${yr}-cell ${yr === p.syr ? 'req-active' : 'req-dim'}`;
       });
 
-      // Appliance chosen for the ACTIVE sizing year
       const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp);
       totalLic += appCap;
-
-      // Utilization = actual stored for active year / appliance capacity
       const pctUsed   = (y[p.syr - 1] / appCap) * 100;
       const pctCapped = Math.min(pctUsed, 100);
       const [barCls, txtCls] = utilColor(pctUsed);
-
       const vendorClass = appVendor === 'dell' ? 'dell-badge' : 'rubrik-badge';
       tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge ${vendorClass}">${appModel}</span>`;
       tr.querySelector('.cap-cell').textContent = `${appCap} TB`;
@@ -915,8 +1142,252 @@ function recalcAll() {
     <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
 
   buildRegionSummary(p);
+  buildOffsiteSummary(p);
 }
 
+
+
+// ── Off-Site Copy Summary ──────────────────────────────────────────────────
+// Cloud Cluster sizing: 3-node minimum
+//   < 192TB needed → 32TB/node   (3 nodes = 96TB min)
+//   >= 192TB needed → 64TB/node  (3 nodes = 192TB min)
+// Required capacity = Required Usable WITHOUT reserve (prod FETB only)
+// RCV = 1.9 × prod FETB
+
+function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC) {
+  // Always Year 1 growth for off-site comparison consistency
+  const prodFETB = clusterFETB * prodpct;
+  const grownYr1 = prodFETB * (1 + agr); // Year 1: FETB × (1+AGR)^1 = one year of growth
+  if (isCC) {
+    // Required usable without reserve — 30-day retention, prod only, Year 1 growth
+    const stored = (grownYr1 / drr) * (1 + (30 - 1) * dcr);
+    return { stored, rcvCap: null };
+  } else {
+    // RCV = 1.9 × prod FETB at Year 1 growth
+    const rcvCap = grownYr1 * 1.9;
+    return { stored: rcvCap, rcvCap };
+  }
+}
+
+// Given total TB needed for a region Cloud Cluster, return the node configuration
+function selectCCNodes(totalStoredTB) {
+  if (totalStoredTB < 32) {
+    // Single node, 32TB Dense
+    return {
+      nodes: 1, nodeSize: 32, totalCap: 32,
+      vmType: CC_DENSE_VM, nodeMonthly: CC_DENSE_MONTHLY_RESERVED,
+      note: '1 Dense node (below 32TB min)'
+    };
+  }
+  const isDense  = totalStoredTB < 192;
+  const nodeSize = isDense ? 32 : 64;
+  const nodes    = Math.max(3, Math.ceil(totalStoredTB / nodeSize));
+  const vmType   = isDense ? CC_DENSE_VM : CC_EXTRA_DENSE_VM;
+  const nodeMo   = isDense ? CC_DENSE_MONTHLY_RESERVED : CC_EXTRA_DENSE_MONTHLY_RESERVED;
+  return {
+    nodes, nodeSize, totalCap: nodes * nodeSize,
+    vmType, nodeMonthly: nodeMo,
+    note: `${nodes} × ${nodeSize}TB ${isDense ? 'Dense' : 'Extra Dense'} nodes`
+  };
+}
+
+// ── Azure Cloud Cluster Pricing ───────────────────────────────────────────
+// Dense Node:       Standard_D16s_v5  (32TB/node usable) — for < 192TB total
+// Extra Dense Node: Standard_D32s_v5  (64TB/node usable) — for >= 192TB total
+// 1-year reserved Linux pricing (East US, April 2026):
+//   D16s_v5 PAYG $0.768/hr → 1yr reserved ~38% discount → $0.476/hr → $347/mo
+//   D32s_v5 PAYG $1.536/hr → 1yr reserved ~38% discount → $0.953/hr → $695/mo
+const CC_DENSE_VM       = 'Standard_D16s_v5';
+const CC_EXTRA_DENSE_VM = 'Standard_D32s_v5';
+const CC_DENSE_MONTHLY_RESERVED      = 347;   // USD/node/month, 1-yr reserved
+const CC_EXTRA_DENSE_MONTHLY_RESERVED = 695;  // USD/node/month, 1-yr reserved
+
+// Azure Hot Blob Storage: $0.018/GB/month = $18.43/TB/month (first 50TB tier, LRS)
+const AZURE_HOT_BLOB_PER_TB_MONTH = 18.43;
+
+// RCV: $20/TB/month
+const RCV_PER_TB_MONTH = 20;
+
+function fmtUSD(v) {
+  if (v === null || v === undefined) return '—';
+  return '$' + Math.round(v).toLocaleString('en-US');
+}
+
+function buildOffsiteSummary(p) {
+  const container = document.getElementById('offsite-blocks');
+  container.innerHTML = '';
+
+  REGIONS.forEach(({ key, label, flag }) => {
+    const sites = SITE_DEFAULTS.map((s,si) => ({s,si})).filter(({s}) => s[5] === key);
+    if (!sites.length) return;
+
+    // First pass: accumulate CC stored TB across entire region and collect per-site RCV rows
+    let regionCCStoredTB = 0;   // total CC data to store for this region's single cloud cluster
+    let regionRCVCap = 0;       // total RCV capacity across all RCV streams
+    let regionRCVCount = 0;
+    let anyCCInRegion = false;
+
+    const siteCards = sites.map(({ s, si }) => {
+      const itVal  = fetbState[`${si}-IT`]  || 0;
+      const otVal  = fetbState[`${si}-OT`];
+      const icsVal = fetbState[`${si}-ICS`];
+      const otNull  = otVal  === null;
+      const icsNull = icsVal === null;
+      const otAbs   = p.itOnly || otNull  || otVal  < p.thr;
+      const icsAbs  = p.itOnly || icsNull || icsVal < p.thr;
+
+      const rows = [];
+
+      const addRow = (wl, fetb) => {
+        const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
+        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC);
+        if (isCC) {
+          regionCCStoredTB += result.stored;
+          anyCCInRegion = true;
+        } else {
+          regionRCVCap += result.rcvCap;
+          regionRCVCount++;
+        }
+        rows.push({ wl, isCC, stored: result.stored, rcvCap: result.rcvCap });
+      };
+
+      const itFETB = itVal + (otAbs&&!otNull?otVal||0:0) + (icsAbs&&!icsNull?icsVal||0:0);
+      addRow('IT', itFETB);
+      if (!otAbs)  addRow('OT',  otVal);
+      if (!icsAbs) addRow('ICS', icsVal);
+
+      return { s, si, rows };
+    });
+
+    // Size ONE cloud cluster for the entire region
+    const ccConfig = anyCCInRegion ? selectCCNodes(regionCCStoredTB) : null;
+    const regionTotalCap = (ccConfig ? ccConfig.totalCap : 0) + regionRCVCap;
+
+    // Cost calculations
+    const ccVMCostMonthly    = ccConfig ? ccConfig.nodes * ccConfig.nodeMonthly : 0;
+    const ccBlobCostMonthly  = ccConfig ? regionCCStoredTB * AZURE_HOT_BLOB_PER_TB_MONTH : 0;
+    const ccTotalMonthly     = ccVMCostMonthly + ccBlobCostMonthly;
+    const ccTotalAnnual      = ccTotalMonthly * 12;
+    const rcvTotalMonthly    = regionRCVCap * RCV_PER_TB_MONTH;
+    const rcvTotalAnnual     = rcvTotalMonthly * 12;
+
+    // Region header
+    const hdr = document.createElement('div');
+    hdr.className = 'offsite-region-hdr';
+    hdr.innerHTML = `
+      <div class="offsite-region-name">
+        <span style="font-size:16px">${flag}</span>${label}
+        <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'DM Mono',monospace">
+          ${sites.length} site${sites.length>1?'s':''}</span>
+      </div>
+      <div class="offsite-region-totals">
+        ${anyCCInRegion?`<div class="offsite-stat"><div class="offsite-stat-val" style="color:var(--rc)">1</div><div class="offsite-stat-lbl">Cloud Cluster</div></div>`:''}
+        ${regionRCVCount>0?`<div class="offsite-stat"><div class="offsite-stat-val">${regionRCVCount}</div><div class="offsite-stat-lbl">RCV Stream${regionRCVCount>1?'s':''}</div></div>`:''}
+      </div>`;
+    container.appendChild(hdr);
+
+    // Cloud cluster summary card (one per region)
+    if (ccConfig) {
+      const ccCard = document.createElement('div');
+      ccCard.style.cssText = 'background:#0a1f3a;border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap';
+      const ccPctUsed = (regionCCStoredTB / ccConfig.totalCap * 100);
+      const ccPctCls  = ccPctUsed >= 90 ? '#ef9a9a' : ccPctUsed >= 70 ? '#ffe082' : '#a5d6a7';
+      const ccBarW    = Math.min(ccPctUsed, 100).toFixed(1);
+      ccCard.innerHTML = `
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--rc);margin-bottom:6px">
+            ☁ ${flag} ${label} Cloud Cluster — 1 cluster for all ${sites.length} site${sites.length>1?'s':''} &nbsp;<span style="font-size:9px;color:var(--text-muted);font-weight:400">(Year 1 sizing)</span>
+          </div>
+          <div style="font-size:10px;color:var(--text-secondary);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+            <span>Data to store (Yr 1): <strong style="color:var(--text-primary)">${f(regionCCStoredTB)} TB</strong></span>
+            <span>VM type: <strong style="color:var(--text-primary)">${ccConfig.vmType}</strong></span>
+            <span>Nodes: <strong style="color:var(--text-primary)">${ccConfig.nodes} × ${ccConfig.nodeSize}TB</strong></span>
+            <span>Total usable: <strong style="color:var(--rc)">${ccConfig.totalCap} TB</strong></span>
+            <span>Utilized: <strong style="color:${ccPctCls}">${ccPctUsed.toFixed(1)}%</strong></span>
+          </div>
+          <div style="font-size:10px;display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;padding:6px 8px;background:rgba(0,0,0,0.2);border-radius:4px;border-left:2px solid rgba(0,180,216,0.4)">
+            <span style="color:var(--text-muted)">Est. monthly cost:</span>
+            <span>VM (1-yr reserved): <strong style="color:var(--rc)">${fmtUSD(ccVMCostMonthly)}</strong></span>
+            <span>Hot Blob storage: <strong style="color:var(--rc)">${fmtUSD(ccBlobCostMonthly)}</strong></span>
+            <span style="font-weight:700">Total/mo: <strong style="color:#FFD600">${fmtUSD(ccTotalMonthly)}</strong></span>
+            <span style="color:var(--text-muted)">Annual: <strong style="color:#FFD600">${fmtUSD(ccTotalAnnual)}</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${ccBarW}%;background:${ccPctCls};border-radius:3px;transition:width .3s"></div>
+            </div>
+            <span style="font-size:10px;font-weight:500;min-width:42px;text-align:right;color:${ccPctCls}">${ccPctUsed.toFixed(1)}%</span>
+          </div>
+          <div style="font-size:9px;color:var(--text-muted);margin-top:4px;font-style:italic">${ccConfig.note} · ${ccConfig.nodes===1?' Single-node (below 32TB minimum)':ccConfig.nodeSize===32?'3-node cluster · 32TB/node':`${ccConfig.nodes}-node cluster · ${ccConfig.nodeSize}TB/node`}</div>
+        </div>`;
+      container.appendChild(ccCard);
+    }
+
+    // Per-site grid (shows individual site contribution)
+    const grid = document.createElement('div');
+    grid.className = 'offsite-sites';
+
+    siteCards.forEach(({ s, rows }) => {
+      const [num, name] = s;
+      const card = document.createElement('div');
+      card.className = 'offsite-site-card';
+      let inner = `<div class="offsite-site-name"><span class="offsite-site-num">${num}</span>${name}</div><div class="offsite-clusters">`;
+      rows.forEach(({ wl, isCC, stored, rcvCap }) => {
+        const wlc = wl.toLowerCase();
+        const typeBadge = isCC
+          ? `<span class="offsite-type-badge offsite-type-cc">→ Cloud Cluster</span>`
+          : `<span class="offsite-type-badge offsite-type-rcv">→ RCV</span>`;
+        const capStr = isCC
+          ? `${f(stored)} TB contribution`
+          : `${f(rcvCap)} TB`;
+        inner += `
+          <div class="offsite-cluster-row">
+            <span class="rs-wl rs-wl-${wlc}" style="width:28px;text-align:center;font-size:8.5px;padding:1px 4px">${wl}</span>
+            ${typeBadge}
+            <span class="offsite-cap">${capStr}</span>
+          </div>`;
+      });
+      inner += '</div>';
+      card.innerHTML = inner;
+      grid.appendChild(card);
+    });
+    container.appendChild(grid);
+
+    // Footer
+    const foot = document.createElement('div');
+    foot.className = 'offsite-footer';
+    const totalOffsiteMonthly = ccTotalMonthly + rcvTotalMonthly;
+    const totalOffsiteAnnual  = totalOffsiteMonthly * 12;
+
+    foot.innerHTML = `
+      <div class="offsite-footer-title">${flag} ${label} Off-Site Total</div>
+      <div class="offsite-footer-stats">
+        ${ccConfig?`
+          <div class="ofs-item">
+            <div class="ofs-val" style="color:var(--rc)">${ccConfig.totalCap} TB</div>
+            <div class="ofs-lbl">Cloud Cluster (${ccConfig.nodes}× ${ccConfig.nodeSize}TB ${ccConfig.nodeSize===32?'Dense':'Extra Dense'})</div>
+            <div style="font-size:9px;color:#FFB74D;margin-top:2px">${fmtUSD(ccTotalMonthly)}/mo · ${fmtUSD(ccTotalAnnual)}/yr</div>
+            <div style="font-size:8px;color:var(--text-muted);margin-top:1px">VMs: ${fmtUSD(ccVMCostMonthly)}/mo · Blob: ${fmtUSD(ccBlobCostMonthly)}/mo</div>
+          </div>
+          <div class="ofs-sep"></div>`:''}
+        ${regionRCVCount>0?`
+          <div class="ofs-item">
+            <div class="ofs-val">${f(regionRCVCap)} TB</div>
+            <div class="ofs-lbl">RCV Capacity (${regionRCVCount} stream${regionRCVCount>1?'s':''})</div>
+            <div style="font-size:9px;color:#FFB74D;margin-top:2px">${fmtUSD(rcvTotalMonthly)}/mo · ${fmtUSD(rcvTotalAnnual)}/yr</div>
+            <div style="font-size:8px;color:var(--text-muted);margin-top:1px">@ $${RCV_PER_TB_MONTH}/TB/mo</div>
+          </div>
+          <div class="ofs-sep"></div>`:''}
+        <div class="ofs-item">
+          <div class="ofs-val" style="color:#FFD600">${fmtUSD(totalOffsiteMonthly)}/mo</div>
+          <div class="ofs-lbl">Est. Total Off-Site Cost</div>
+          <div style="font-size:9px;color:#FFD600;margin-top:2px">${fmtUSD(totalOffsiteAnnual)}/yr</div>
+          <div style="font-size:8px;color:var(--text-muted);margin-top:1px">${f(regionTotalCap)} TB total capacity</div>
+        </div>
+      </div>`;
+    container.appendChild(foot);
+  });
+}
 
 // ── Region Summary ─────────────────────────────────────────────────────────
 function buildRegionSummary(p) {
@@ -944,8 +1415,8 @@ function buildRegionSummary(p) {
       const icsVal = fetbState[`${si}-ICS`];
       const otNull  = otVal  === null;
       const icsNull = icsVal === null;
-      const otAbs   = otNull  || otVal  < p.thr;
-      const icsAbs  = icsNull || icsVal < p.thr;
+      const otAbs   = p.itOnly || otNull  || otVal  < p.thr;
+      const icsAbs  = p.itOnly || icsNull || icsVal < p.thr;
 
       const clusters = [];
 
@@ -953,7 +1424,7 @@ function buildRegionSummary(p) {
       const itFETB = itVal
         + (otAbs && !otNull  ? (otVal  || 0) : 0)
         + (icsAbs && !icsNull ? (icsVal || 0) : 0);
-      const itStored = calcStored(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret);
+      const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
       const itReq    = itStored * (1 + p.rsv);
       const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp);
       const itPct    = (itStored / itCap * 100).toFixed(1);
@@ -970,7 +1441,7 @@ function buildRegionSummary(p) {
 
       // OT standalone
       if (!otAbs) {
-        const stored = calcStored(otVal, p.drr, p.dcr, p.agr, p.syr, p.ret);
+        const stored = calcStoredSplit(otVal, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
         const req    = stored * (1 + p.rsv);
         const [m, c, v] = selectHardware(req, p.hwp);
         clusters.push({ wl:'OT', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
@@ -982,7 +1453,7 @@ function buildRegionSummary(p) {
 
       // ICS standalone
       if (!icsAbs) {
-        const stored = calcStored(icsVal, p.drr, p.dcr, p.agr, p.syr, p.ret);
+        const stored = calcStoredSplit(icsVal, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
         const req    = stored * (1 + p.rsv);
         const [m, c, v] = selectHardware(req, p.hwp);
         clusters.push({ wl:'ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
@@ -1107,16 +1578,18 @@ function buildRegionSummary(p) {
 
 // ── Sliders ────────────────────────────────────────────────────────────────
 const sliderFmts = {
-  syr: v => `Year ${v}`,
-  drr: v => `${parseFloat(v).toFixed(1)}:1`,
-  dcr: v => `${parseFloat(v).toFixed(1)}%`,
-  agr: v => `${v}%`,
-  rsv: v => `${v}%`,
-  thr: v => `${parseFloat(v).toFixed(1)} TB`,
-  ret: v => `${v} days`,
-  hwp: v => HW_LABELS[parseInt(v)] || 'Rubrik',
+  syr:     v => `Year ${v}`,
+  drr:     v => `${parseFloat(v).toFixed(1)}:1`,
+  dcr:     v => `${parseFloat(v).toFixed(1)}%`,
+  agr:     v => `${v}%`,
+  rsv:     v => `${v}%`,
+  thr:     v => `${parseFloat(v).toFixed(1)} TB`,
+  ret:     v => `${v} days`,
+  hwp:     v => HW_LABELS[parseInt(v)] || 'Rubrik',
+  prodpct: v => `${v}%`,
+  npret:   v => `${v} days`,
 };
-['syr','drr','dcr','agr','rsv','thr','ret','hwp'].forEach(id => {
+['syr','drr','dcr','agr','rsv','thr','ret','hwp','prodpct','npret'].forEach(id => {
   const el  = document.getElementById(id);
   const out = document.getElementById(id + '-v');
   el.addEventListener('input', () => {
@@ -1124,6 +1597,12 @@ const sliderFmts = {
     recalcAll(); autoSave();
   });
   out.textContent = sliderFmts[id](el.value);
+});
+
+// ── Toggle and checkbox wiring ────────────────────────────────────────────
+['wl-it-only','os-select-all','os-type-cc'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
 });
 
 // ── Init ───────────────────────────────────────────────────────────────────
