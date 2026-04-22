@@ -225,7 +225,7 @@
   }
   .ctl-select:focus { border-color: var(--rc); }
   .appl-badge.rubrik-badge { background: rgba(0,180,216,0.12); color: var(--rc); border-color: rgba(0,180,216,0.35); }
-  .appl-badge.dell-badge   { background: rgba(179,136,255,0.12); color: #B388FF; border-color: rgba(179,136,255,0.35); }
+  .appl-badge.hpe-badge   { background: rgba(179,136,255,0.12); color: #B388FF; border-color: rgba(179,136,255,0.35); }
   .hw-pill { display: inline-block; background: rgba(179,136,255,0.15); color: #B388FF; border: 1px solid rgba(179,136,255,0.35); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; padding: 2px 10px; border-radius: 10px; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
 
   tfoot tr td { background: var(--rb); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 11px 8px; text-align: center; border-top: 2px solid rgba(0,180,216,0.4); }
@@ -316,7 +316,7 @@
     padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
   }
   .rs-appl.rubrik { background: rgba(0,180,216,0.12); color: var(--rc); border: 1px solid rgba(0,180,216,0.25); }
-  .rs-appl.dell   { background: rgba(179,136,255,0.12); color: #B388FF; border: 1px solid rgba(179,136,255,0.25); }
+  .rs-appl.hpe   { background: rgba(179,136,255,0.12); color: #B388FF; border: 1px solid rgba(179,136,255,0.25); }
   .rs-cap { font-size: 9.5px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
   .rs-pct { font-size: 9.5px; font-weight: 500; font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .rs-absorbed { font-size: 9px; color: var(--text-muted); font-style: italic; margin-left: 34px; }
@@ -336,7 +336,7 @@
   .rfs-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
   .rfs-val  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; line-height: 1; }
   .rfs-val.rubrik { color: var(--rc); }
-  .rfs-val.dell   { color: #B388FF; }
+  .rfs-val.hpe   { color: #B388FF; }
   .rfs-val.lic    { color: #FFD600; }
   .rfs-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
   .rfs-sep { width: 1px; height: 28px; background: var(--border); }
@@ -357,7 +357,7 @@
     border: 1px solid transparent;
   }
   .rfs-model-chip.rubrik { background: rgba(0,180,216,0.1); color: var(--rc); border-color: rgba(0,180,216,0.3); }
-  .rfs-model-chip.dell   { background: rgba(179,136,255,0.1); color: #B388FF; border-color: rgba(179,136,255,0.3); }
+  .rfs-model-chip.hpe   { background: rgba(179,136,255,0.1); color: #B388FF; border-color: rgba(179,136,255,0.3); }
   .rfs-model-count {
     background: rgba(255,255,255,0.12); border-radius: 3px;
     padding: 0 5px; font-size: 10px; font-weight: 700;
@@ -616,7 +616,7 @@
         <div class="ctl-lbl">Hardware Platform</div>
         <select id="hwp" class="ctl-select">
           <option value="1">Rubrik Appliances</option>
-          <option value="2">Dell Hardware</option>
+          <option value="2">HPE Hardware</option>
           <option value="3">Combination</option>
         </select>
       </div>
@@ -723,7 +723,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v17';
+const STORAGE_KEY = 'rubrik_dashboard_v18';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -753,20 +753,21 @@ const REGIONS = [
 const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1, prodpct: 75, npret: 14, ofs: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
-// Dell hardware catalog
-// R760 is a fixed 120TB cluster; R660 is a single-node with 6 capacity tiers
-const DELL_APPLIANCES = [
-  ["Dell R660 Node 3.5TB",  3.5],
-  ["Dell R660 Node 7TB",    7.0],
-  ["Dell R660 Node 10.5TB", 10.5],
-  ["Dell R660 Node 14TB",   14.0],
-  ["Dell R660 Node 17.5TB", 17.5],
-  ["Dell R660 Node 21TB",   21.0],
-  ["Dell R760 Cluster",     120.0],
+// HPE hardware catalog
+// Fixed single-node (non-expandable) configs:
+const HPE_FIXED = [
+  ["HPE DL360 1-Node 3.5TB",  3.5],
+  ["HPE DL360 1-Node 7TB",    7.0],
+  ["HPE DL360 1-Node 10.5TB", 10.5],
+  ["HPE DL360 1-Node 14TB",   14.0],
+  ["HPE DL360 1-Node 17.5TB", 17.5],
+  ["HPE DL360 1-Node 21TB",   21.0],
 ];
+// Scalable multi-node configs (min 4 nodes, same size throughout):
+const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
 
-// HWP mode values: 1=Rubrik, 2=Dell, 3=Combination
-const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'Dell Hardware', 3: 'Combination' };
+// HWP mode values: 1=Rubrik, 2=HPE, 3=Combination
+const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'HPE Hardware', 3: 'Combination' };
 
 
 function selectRubrik(reqTB) {
@@ -774,29 +775,55 @@ function selectRubrik(reqTB) {
   return ["R7424+", 180, 'rubrik'];
 }
 
-function selectDell(reqTB) {
-  for (const [m, c] of DELL_APPLIANCES) if (c >= reqTB) return [m, c, 'dell'];
-  // If requirement exceeds largest Dell option, return largest
-  const last = DELL_APPLIANCES[DELL_APPLIANCES.length - 1];
-  return [last[0], last[1], 'dell'];
+function selectHPE(reqTB) {
+  // Try fixed single-node first (only for small requirements)
+  for (const [m, c] of HPE_FIXED) {
+    if (c >= reqTB) return [m, c, 'hpe'];
+  }
+  // Scalable: try each node size with 4-node minimum.
+  // Pick the config using the largest node size whose 4-node total meets reqTB.
+  // This gives fewest total nodes.
+  // Strategy: find smallest nodeSize where (4 × nodeSize) >= reqTB,
+  // but prefer larger node sizes to minimise node count.
+  let bestModel = null, bestCap = Infinity, bestNodes = Infinity;
+  for (const nodeSize of HPE_SCALABLE_SIZES) {
+    const minNodes = 4;
+    const minCap   = minNodes * nodeSize;
+    if (minCap >= reqTB) {
+      // 4 nodes of this size suffices — check if it beats current best (fewer nodes = better)
+      if (minNodes < bestNodes || (minNodes === bestNodes && minCap < bestCap)) {
+        bestNodes = minNodes;
+        bestCap   = minCap;
+        bestModel = `HPE DL360 4-Node ${nodeSize}TB`;
+      }
+    } else {
+      // Need more than 4 nodes of this size
+      const nodesNeeded = Math.ceil(reqTB / nodeSize);
+      const totalCap    = nodesNeeded * nodeSize;
+      if (nodesNeeded < bestNodes || (nodesNeeded === bestNodes && totalCap < bestCap)) {
+        bestNodes = nodesNeeded;
+        bestCap   = totalCap;
+        bestModel = `HPE DL360 ${nodesNeeded}-Node ${nodeSize}TB`;
+      }
+    }
+  }
+  if (bestModel) return [bestModel, bestCap, 'hpe'];
+  // Fallback: largest scalable option with enough nodes
+  const nodeSize = 60;
+  const nodes = Math.ceil(reqTB / nodeSize);
+  return [`HPE DL360 ${nodes}-Node 60TB`, nodes * nodeSize, 'hpe'];
 }
 
-function selectBest(reqTB) {
-  // For combination: pick whichever of the two options has smallest overage (closest fit without going under)
-  const [rm, rc, rt] = selectRubrik(reqTB);
-  const [dm, dc, dt] = selectDell(reqTB);
-  // Both must meet reqTB; pick the one with less waste
-  const rOverage = rc - reqTB;
-  const dOverage = dc - reqTB;
-  // If one doesn't meet requirement (overage < 0 shouldn't happen since we pick >=), fall back
-  if (rOverage <= dOverage) return [rm, rc, 'rubrik'];
-  return [dm, dc, 'dell'];
+function selectCombination(reqTB) {
+  // Combination: HPE for < 20TB required, Rubrik for >= 20TB
+  if (reqTB < 20) return selectHPE(reqTB);
+  return selectRubrik(reqTB);
 }
 
 function selectHardware(reqTB, hwp) {
   if (hwp === 1) return selectRubrik(reqTB);
-  if (hwp === 2) return selectDell(reqTB);
-  return selectBest(reqTB);
+  if (hwp === 2) return selectHPE(reqTB);
+  return selectCombination(reqTB);
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -1160,7 +1187,7 @@ function recalcAll() {
       const pctUsed   = (y[p.syr - 1] / appCap) * 100;
       const pctCapped = Math.min(pctUsed, 100);
       const [barCls, txtCls] = utilColor(pctUsed);
-      const vendorClass = appVendor === 'dell' ? 'dell-badge' : 'rubrik-badge';
+      const vendorClass = appVendor === 'hpe' ? 'hpe-badge' : 'rubrik-badge';
       tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge ${vendorClass}">${appModel}</span>`;
       tr.querySelector('.cap-cell').textContent = `${appCap} TB`;
       tr.querySelector('.lic-cell').textContent = `${appCap} TB`;
@@ -1527,7 +1554,7 @@ function buildRegionSummary(p) {
 
     if (!sites.length) return;
 
-    let regionClusters = 0, regionLic = 0, regionRubrik = 0, regionDell = 0;
+    let regionClusters = 0, regionLic = 0, regionRubrik = 0, regionHPE = 0;
     const modelTally = {};  // model name -> { count, vendor }
 
     // Pre-compute per-site cluster data for totals
@@ -1552,7 +1579,7 @@ function buildRegionSummary(p) {
       const itPct    = (itStored / itCap * 100).toFixed(1);
       clusters.push({ wl:'IT', model:itModel, cap:itCap, vendor:itVendor, pct:itPct });
       regionClusters++; regionLic += itCap;
-      if (itVendor === 'dell') regionDell++; else regionRubrik++;
+      if (itVendor === 'hpe') regionHPE++; else regionRubrik++;
       modelTally[itModel] = modelTally[itModel] || { count:0, vendor:itVendor };
       modelTally[itModel].count++;
 
@@ -1568,7 +1595,7 @@ function buildRegionSummary(p) {
         const [m, c, v] = selectHardware(req, p.hwp);
         clusters.push({ wl:'OT', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
-        if (v === 'dell') regionDell++; else regionRubrik++;
+        if (v === 'hpe') regionHPE++; else regionRubrik++;
         modelTally[m] = modelTally[m] || { count:0, vendor:v };
         modelTally[m].count++;
       }
@@ -1580,7 +1607,7 @@ function buildRegionSummary(p) {
         const [m, c, v] = selectHardware(req, p.hwp);
         clusters.push({ wl:'ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
-        if (v === 'dell') regionDell++; else regionRubrik++;
+        if (v === 'hpe') regionHPE++; else regionRubrik++;
         modelTally[m] = modelTally[m] || { count:0, vendor:v };
         modelTally[m].count++;
       }
@@ -1657,12 +1684,12 @@ function buildRegionSummary(p) {
           <div class="rfs-lbl">Rubrik Appliance${regionRubrik>1?'s':''}</div>
         </div>`;
     }
-    if (regionDell > 0) {
+    if (regionHPE > 0) {
       if (statsHtml) statsHtml += '<div class="rfs-sep"></div>';
       statsHtml += `
         <div class="rfs-item">
-          <div class="rfs-val dell">${regionDell}</div>
-          <div class="rfs-lbl">Dell Node${regionDell>1?'s':''} / Cluster${regionDell>1?'s':''}</div>
+          <div class="rfs-val dell">${regionHPE}</div>
+          <div class="rfs-lbl">HPE Node${regionHPE>1?'s':''} / Cluster${regionHPE>1?'s':''}</div>
         </div>`;
     }
     if (statsHtml) statsHtml += '<div class="rfs-sep"></div>';
@@ -1673,7 +1700,7 @@ function buildRegionSummary(p) {
       </div>`;
 
     // Build model breakdown chips
-    const modelOrder = [...APPLIANCES.map(([m])=>m), ...DELL_APPLIANCES.map(([m])=>m)];
+    const modelOrder = [...APPLIANCES.map(([m])=>m), ...HPE_FIXED.map(([m])=>m)];
     const sortedModels = Object.keys(modelTally).sort((a,b) => {
       const ai = modelOrder.indexOf(a), bi = modelOrder.indexOf(b);
       return (ai===-1?999:ai) - (bi===-1?999:bi);
