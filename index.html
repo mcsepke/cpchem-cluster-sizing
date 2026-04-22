@@ -492,6 +492,67 @@
   }
   .view-tab.inactive:hover { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
   .view-tab-icon { font-size: 14px; }
+
+  /* ── Hardware Catalog Table ── */
+  .catalog-section { margin-top: 1.5rem; }
+  .catalog-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text-primary); text-transform: uppercase; letter-spacing: .07em;
+    padding: 1rem 1.5rem; background: var(--bg-surface);
+    border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .catalog-pill {
+    font-size: 10px; color: var(--text-muted); background: var(--bg-card);
+    border: 1px solid var(--border); padding: 2px 8px; border-radius: 8px;
+    font-weight: 400; font-family: 'DM Mono', monospace;
+  }
+  .catalog-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
+  }
+  @media (max-width: 768px) { .catalog-grid { grid-template-columns: 1fr; } }
+  .catalog-col { border-right: 1px solid var(--border); }
+  .catalog-col:last-child { border-right: none; }
+  .catalog-col-hdr {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em;
+    padding: .6rem 1.25rem; background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .catalog-col-hdr.rubrik { color: var(--rc); }
+  .catalog-col-hdr.hpe    { color: #B388FF; }
+  .catalog-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .catalog-tbl th {
+    text-align: left; padding: 5px 1.25rem; font-size: 9px;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em;
+    background: var(--bg-card); border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace; font-weight: 500;
+  }
+  .catalog-tbl td {
+    padding: 6px 1.25rem; border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace; color: var(--text-secondary);
+    vertical-align: middle;
+  }
+  .catalog-tbl tr:last-child td { border-bottom: none; }
+  .catalog-tbl tr:hover td { background: rgba(255,255,255,0.03); }
+  .catalog-tbl td:first-child { font-weight: 500; }
+  .catalog-model { display: inline-block; }
+  .catalog-model.rubrik { color: var(--rc); font-weight: 700; }
+  .catalog-model.hpe    { color: #B388FF; font-weight: 700; }
+  .catalog-cap  { color: var(--text-primary); font-weight: 600; }
+  .catalog-note { font-size: 9.5px; color: var(--text-muted); }
+  .catalog-type-lbl {
+    font-size: 8.5px; padding: 1px 5px; border-radius: 3px;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    background: rgba(179,136,255,0.1); color: #B388FF; border: 1px solid rgba(179,136,255,0.25);
+  }
+  .catalog-type-lbl.scalable {
+    background: rgba(0,180,216,0.08); color: var(--rc); border-color: rgba(0,180,216,0.25);
+  }
 </style>
 </head>
 <body>
@@ -713,6 +774,62 @@
     </div>
   </div><!-- /table-section -->
 
+
+  <!-- Hardware Catalog Reference -->
+  <div class="catalog-section">
+    <div class="catalog-title">
+      Hardware Catalog Reference
+      <span class="catalog-pill">All available appliance &amp; node options</span>
+    </div>
+    <div class="catalog-grid">
+
+      <!-- Rubrik column -->
+      <div class="catalog-col">
+        <div class="catalog-col-hdr rubrik">
+          <svg width="12" height="12" viewBox="0 0 12 12"><rect x="1" y="3" width="10" height="10" rx="1.5" transform="rotate(-45 6 8)" fill="#00B4D8"/></svg>
+          Rubrik R7400 Series
+        </div>
+        <table class="catalog-tbl">
+          <thead><tr><th>Model</th><th>Usable Capacity</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td><span class="catalog-model rubrik">R7402</span></td><td><span class="catalog-cap">15 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7404</span></td><td><span class="catalog-cap">30 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7408</span></td><td><span class="catalog-cap">60 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7412</span></td><td><span class="catalog-cap">90 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7416</span></td><td><span class="catalog-cap">120 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7420</span></td><td><span class="catalog-cap">150 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7424</span></td><td><span class="catalog-cap">180 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- HPE column -->
+      <div class="catalog-col">
+        <div class="catalog-col-hdr hpe">
+          &#9670; HPE DL360 Series
+        </div>
+        <table class="catalog-tbl">
+          <thead><tr><th>Configuration</th><th>Usable Capacity</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td><span class="catalog-model hpe">1-Node 3.5TB</span></td><td><span class="catalog-cap">3.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 7TB</span></td><td><span class="catalog-cap">7 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 10.5TB</span></td><td><span class="catalog-cap">10.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 14TB</span></td><td><span class="catalog-cap">14 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 17.5TB</span></td><td><span class="catalog-cap">17.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 21TB</span></td><td><span class="catalog-cap">21 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 5TB</span></td><td><span class="catalog-cap">20+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 10TB</span></td><td><span class="catalog-cap">40+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 20TB</span></td><td><span class="catalog-cap">80+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 30TB</span></td><td><span class="catalog-cap">120+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 40TB</span></td><td><span class="catalog-cap">160+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 50TB</span></td><td><span class="catalog-cap">200+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 60TB</span></td><td><span class="catalog-cap">240+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
   </div><!-- /view-detail -->
 
   <div class="page-footer">
@@ -756,12 +873,12 @@ const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416"
 // HPE hardware catalog
 // Fixed single-node (non-expandable) configs:
 const HPE_FIXED = [
-  ["HPE DL360 1-Node 3.5TB",  3.5],
-  ["HPE DL360 1-Node 7TB",    7.0],
-  ["HPE DL360 1-Node 10.5TB", 10.5],
-  ["HPE DL360 1-Node 14TB",   14.0],
-  ["HPE DL360 1-Node 17.5TB", 17.5],
-  ["HPE DL360 1-Node 21TB",   21.0],
+  ["DL360 1-Node 3.5TB",  3.5],
+  ["DL360 1-Node 7TB",    7.0],
+  ["DL360 1-Node 10.5TB", 10.5],
+  ["DL360 1-Node 14TB",   14.0],
+  ["DL360 1-Node 17.5TB", 17.5],
+  ["DL360 1-Node 21TB",   21.0],
 ];
 // Scalable multi-node configs (min 4 nodes, same size throughout):
 const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
@@ -794,7 +911,7 @@ function selectHPE(reqTB) {
       if (minNodes < bestNodes || (minNodes === bestNodes && minCap < bestCap)) {
         bestNodes = minNodes;
         bestCap   = minCap;
-        bestModel = `HPE DL360 4-Node ${nodeSize}TB`;
+        bestModel = `DL360 4-Node ${nodeSize}TB`;
       }
     } else {
       // Need more than 4 nodes of this size
@@ -803,7 +920,7 @@ function selectHPE(reqTB) {
       if (nodesNeeded < bestNodes || (nodesNeeded === bestNodes && totalCap < bestCap)) {
         bestNodes = nodesNeeded;
         bestCap   = totalCap;
-        bestModel = `HPE DL360 ${nodesNeeded}-Node ${nodeSize}TB`;
+        bestModel = `DL360 ${nodesNeeded}-Node ${nodeSize}TB`;
       }
     }
   }
@@ -811,7 +928,7 @@ function selectHPE(reqTB) {
   // Fallback: largest scalable option with enough nodes
   const nodeSize = 60;
   const nodes = Math.ceil(reqTB / nodeSize);
-  return [`HPE DL360 ${nodes}-Node 60TB`, nodes * nodeSize, 'hpe'];
+  return [`DL360 ${nodes}-Node 60TB`, nodes * nodeSize, 'hpe'];
 }
 
 function selectCombination(reqTB) {
