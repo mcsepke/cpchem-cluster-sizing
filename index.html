@@ -736,7 +736,7 @@
         <div class="legend-item"><div class="legend-dot" style="background:#2E7D32"></div>OT Systems</div>
         <div class="legend-item"><div class="legend-dot" style="background:#bf360c"></div>ICS Systems</div>
         <div class="legend-item" style="margin-left:8px;padding-left:8px;border-left:1px solid var(--border)">
-          <span style="font-size:10px;color:var(--text-muted);font-style:italic">Dimmed = absorbed into IT cluster</span>
+          <span style="font-size:10px;color:var(--text-muted);font-style:italic" id="absorbed-legend">Dimmed = absorbed into IT cluster</span>
         </div>
       </div>
       <!-- Off-Site mode shown as pill (driven by sizing parameter slider) -->
@@ -779,7 +779,7 @@
   <div class="catalog-section">
     <div class="catalog-title">
       Hardware Catalog Reference
-      <span class="catalog-pill">All available appliance &amp; node options</span>
+      <span class="catalog-pill">All available appliance &amp; node options · HPE fixed nodes sized with 20% free capacity buffer</span>
     </div>
     <div class="catalog-grid">
 
@@ -844,7 +844,7 @@ const STORAGE_KEY = 'rubrik_dashboard_v18';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
-  [2,  "Cedar Bayou, TX",          89.59, 7.0,   15.0,  "US"        ],
+  [2,  "Cedar Bayou, TX",          104.0, 7.0,   15.0,  "US"        ],
   [3,  "Conroe, TX",               4.51,  null,  0.5,   "US"        ],
   [4,  "Kingwood, TX",             7.67,  1.14,  3.33,  "US"        ],
   [5,  "Orange, TX",               10.19, 5.0,   12.0,  "US"        ],
@@ -892,29 +892,31 @@ function selectRubrik(reqTB) {
   return ["R7424+", 180, 'rubrik'];
 }
 
+const HPE_FIXED_BUFFER = 0.20; // 20% free capacity buffer for fixed single-node HPE configs
+
 function selectHPE(reqTB) {
-  // Try fixed single-node first (only for small requirements)
+  // Fixed single-node: non-expandable, so size for 3-5 yr longevity.
+  // Require that Year-3 data fills no more than 80% of the node
+  // → effective requirement = reqTB / (1 - HPE_FIXED_BUFFER)
+  const fixedReqTB = reqTB / (1 - HPE_FIXED_BUFFER);
   for (const [m, c] of HPE_FIXED) {
-    if (c >= reqTB) return [m, c, 'hpe'];
+    if (c >= fixedReqTB) return [m, c, 'hpe'];
   }
-  // Scalable: try each node size with 4-node minimum.
-  // Pick the config using the largest node size whose 4-node total meets reqTB.
-  // This gives fewest total nodes.
-  // Strategy: find smallest nodeSize where (4 × nodeSize) >= reqTB,
-  // but prefer larger node sizes to minimise node count.
+  // Scalable: 4-node minimum, same node size throughout.
+  // Scalable configs can add nodes later so no extra buffer needed beyond existing reserve.
+  // Pick the config that minimises total nodes while meeting reqTB.
+  // Prefer larger node sizes (fewer nodes for same capacity).
   let bestModel = null, bestCap = Infinity, bestNodes = Infinity;
   for (const nodeSize of HPE_SCALABLE_SIZES) {
     const minNodes = 4;
     const minCap   = minNodes * nodeSize;
     if (minCap >= reqTB) {
-      // 4 nodes of this size suffices — check if it beats current best (fewer nodes = better)
       if (minNodes < bestNodes || (minNodes === bestNodes && minCap < bestCap)) {
         bestNodes = minNodes;
         bestCap   = minCap;
         bestModel = `DL360 4-Node ${nodeSize}TB`;
       }
     } else {
-      // Need more than 4 nodes of this size
       const nodesNeeded = Math.ceil(reqTB / nodeSize);
       const totalCap    = nodesNeeded * nodeSize;
       if (nodesNeeded < bestNodes || (nodesNeeded === bestNodes && totalCap < bestCap)) {
@@ -1183,15 +1185,21 @@ function recalcAll() {
 
   // Update workload mode UI
   const isITOnly = p.itOnly;
-  document.getElementById('wl-mode-banner').textContent = isITOnly ? 'IT Only Mode' : 'IT / OT / ICS Mode';
+  document.getElementById('wl-mode-banner').textContent = isITOnly ? 'IT Only Mode — Phase 1' : 'IT / OT / ICS Mode';
   document.getElementById('wl-mode-banner').style.color = isITOnly ? '#FFD600' : 'var(--rc)';
   document.getElementById('wl-lbl-all').className = 'toggle-option ' + (isITOnly ? 'inactive' : 'active');
   document.getElementById('wl-lbl-it').className  = 'toggle-option ' + (isITOnly ? 'active' : 'inactive');
+  const itSubEl = document.getElementById('it-fetb-sub');
+  if (itSubEl) itSubEl.textContent = isITOnly ? 'IT workloads only — Phase 1' : 'incl. absorbed OT / ICS workloads';
 
   // Update off-site UI from ofs slider
   const OFS_LABELS = { 1: 'Instant Archive → RCV', 2: 'Rep to Cloud Cluster', 3: 'Manual (per-row)' };
   const ofsLabel = OFS_LABELS[p.ofs] || 'Instant Archive → RCV';
   // ofs is now a <select> — no tick/val UI needed
+  const legendEl = document.getElementById('absorbed-legend');
+  if (legendEl) legendEl.textContent = isITOnly
+    ? 'IT Only mode — OT & ICS excluded (Phase 1)'
+    : 'Dimmed = absorbed into IT cluster';
   const modePill = document.getElementById('os-mode-pill');
   if (modePill) modePill.textContent = ofsLabel;
   document.getElementById('offsite-section').style.display = 'block';
@@ -1231,9 +1239,13 @@ function recalcAll() {
       // Determine cluster FETB
       let clusterFETB = null;
       if (wl === 'IT') {
-        clusterFETB = itVal
-          + (otAbs  && !otNull  ? (otVal  || 0) : 0)
-          + (icsAbs && !icsNull ? (icsVal || 0) : 0);
+        // IT-only mode: size IT cluster on IT FETB alone (no absorption of OT/ICS)
+        // IT/OT/ICS mode: absorb sub-threshold OT/ICS into IT cluster
+        clusterFETB = isITOnly
+          ? itVal
+          : itVal
+            + (otAbs  && !otNull  ? (otVal  || 0) : 0)
+            + (icsAbs && !icsNull ? (icsVal || 0) : 0);
         totalIT += clusterFETB; totalClusters++;
       } else if (wl === 'OT'  && !otAbs)  { clusterFETB = otVal;  totalOTICS += clusterFETB; totalClusters++; }
       else       if (wl === 'ICS' && !icsAbs) { clusterFETB = icsVal; totalOTICS += clusterFETB; totalClusters++; }
@@ -1327,7 +1339,7 @@ function recalcAll() {
   document.getElementById('metrics').innerHTML = `
     <div class="met-card"><div class="met-card-lbl">Total clusters</div><div class="met-card-val">${totalClusters}</div><div class="met-card-sub">across ${SITE_DEFAULTS.length} sites</div></div>
     <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">${hwLabel} · sized for ${yrLabel}</div></div>
-    <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub">incl. absorbed OT / ICS workloads</div></div>
+    <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub" id="it-fetb-sub">incl. absorbed OT / ICS workloads</div></div>
     <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
 
   buildRegionSummary(p);
@@ -1469,9 +1481,11 @@ function buildOffsiteSummary(p) {
 
       // Off-site uses raw workload FETB for each workload individually
       addRow('IT', itVal);
-      // Absorbed OT/ICS still get their own off-site row based on raw FETB
-      if (!otNull)  addRow('OT',  otVal);
-      if (!icsNull) addRow('ICS', icsVal);
+      // In IT-only mode, OT and ICS are excluded entirely from off-site
+      if (!p.itOnly) {
+        if (!otNull)  addRow('OT',  otVal);
+        if (!icsNull) addRow('ICS', icsVal);
+      }
 
       return { s, si, rows };
     });
@@ -1686,10 +1700,12 @@ function buildRegionSummary(p) {
 
       const clusters = [];
 
-      // IT always
-      const itFETB = itVal
-        + (otAbs && !otNull  ? (otVal  || 0) : 0)
-        + (icsAbs && !icsNull ? (icsVal || 0) : 0);
+      // IT always — IT-only mode: use raw itVal only; IT/OT/ICS mode: absorb sub-threshold workloads
+      const itFETB = p.itOnly
+        ? itVal
+        : itVal
+          + (otAbs && !otNull  ? (otVal  || 0) : 0)
+          + (icsAbs && !icsNull ? (icsVal || 0) : 0);
       const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
       const itReq    = itStored * (1 + p.rsv);
       const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp);
@@ -1700,10 +1716,10 @@ function buildRegionSummary(p) {
       modelTally[itModel] = modelTally[itModel] || { count:0, vendor:itVendor };
       modelTally[itModel].count++;
 
-      // Absorbed notes for IT
+      // Absorbed notes for IT — only shown in IT/OT/ICS mode
       const absorbed = [];
-      if (otAbs  && !otNull)  absorbed.push(`OT ${otVal.toFixed(1)} TB → absorbed`);
-      if (icsAbs && !icsNull) absorbed.push(`ICS ${icsVal.toFixed(1)} TB → absorbed`);
+      if (!p.itOnly && otAbs  && !otNull)  absorbed.push(`OT ${otVal.toFixed(1)} TB → absorbed`);
+      if (!p.itOnly && icsAbs && !icsNull) absorbed.push(`ICS ${icsVal.toFixed(1)} TB → absorbed`);
 
       // OT standalone
       if (!otAbs) {
