@@ -553,6 +553,64 @@
   .catalog-type-lbl.scalable {
     background: rgba(0,180,216,0.08); color: var(--rc); border-color: rgba(0,180,216,0.25);
   }
+
+  /* ── Inputs page ── */
+  .inputs-section { margin-top: 0; }
+  .inputs-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text-primary); text-transform: uppercase; letter-spacing: .07em;
+    padding: 1rem 1.5rem; background: var(--bg-surface);
+    border: 1px solid var(--border); border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .inputs-title-sub {
+    font-size: 10px; color: var(--text-muted); font-weight: 400;
+    font-family: 'DM Mono', monospace; letter-spacing: 0;
+  }
+  .inputs-tbl-outer { overflow-x: auto; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); }
+  .inputs-tbl { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .inputs-tbl thead th {
+    background: #0a1d45; color: #90CAF9;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 9.5px;
+    text-transform: uppercase; letter-spacing: .06em;
+    padding: 8px 12px; text-align: left; white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--border);
+  }
+  .inputs-tbl thead th.num-hdr { text-align: right; }
+  .inputs-tbl thead th.region-hdr-col { background: #0d1f45; }
+  .inputs-tbl tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+  .inputs-tbl tbody tr:hover td { background: rgba(255,255,255,0.025); }
+  .inputs-tbl tbody tr.region-group-start td { border-top: 2px solid rgba(0,180,216,0.2); }
+  .inputs-tbl td {
+    padding: 7px 12px; vertical-align: middle;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--text-secondary); border-right: 1px solid var(--border);
+  }
+  .inputs-tbl td:last-child { border-right: none; }
+  .inputs-tbl td.site-num { color: var(--text-muted); font-size: 10px; text-align: right; width: 28px; }
+  .inputs-tbl td.site-name { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 11px; color: var(--text-primary); white-space: nowrap; }
+  .inputs-tbl td.region-td { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+  .inputs-tbl td.fetb-td { text-align: right; }
+  .fetb-input {
+    width: 72px; background: rgba(0,180,216,0.06); border: 1px solid rgba(0,180,216,0.2);
+    border-radius: 4px; color: var(--text-primary); font-family: 'DM Mono', monospace;
+    font-size: 11px; padding: 3px 6px; text-align: right; outline: none;
+    transition: border-color .15s, background .15s;
+  }
+  .fetb-input:focus { border-color: var(--rc); background: rgba(0,180,216,0.12); }
+  .fetb-input.null-val { color: var(--text-muted); background: transparent; border-color: rgba(255,255,255,0.08); }
+  .fetb-input.null-val:focus { color: var(--text-primary); background: rgba(0,180,216,0.08); border-color: var(--rc); }
+  .inputs-wl-badge {
+    display: inline-block; font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 8.5px; padding: 1px 6px; border-radius: 3px; margin-right: 4px;
+  }
+  .inputs-wl-it  { background: rgba(21,101,192,0.2); color: #90CAF9; border: 1px solid rgba(21,101,192,0.3); }
+  .inputs-wl-ot  { background: rgba(46,125,50,0.2);  color: #A5D6A7; border: 1px solid rgba(46,125,50,0.3); }
+  .inputs-wl-ics { background: rgba(191,54,12,0.2);  color: #FFAB91; border: 1px solid rgba(191,54,12,0.3); }
+  .inputs-total-row td { background: rgba(0,180,216,0.06) !important; font-weight: 700; color: var(--rc); border-top: 2px solid rgba(0,180,216,0.3); }
+  .inputs-save-note { font-size: 9px; color: var(--text-muted); font-style: italic; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -595,6 +653,9 @@
     </button>
     <button class="view-tab inactive" id="tab-detail" onclick="switchView('detail')">
       <span class="view-tab-icon">&#8801;</span> Cluster Detail
+    </button>
+    <button class="view-tab inactive" id="tab-inputs" onclick="switchView('inputs')">
+      <span class="view-tab-icon">&#9998;</span> Inputs
     </button>
   </div>
 
@@ -831,6 +892,35 @@
     </div>
   </div>
   </div><!-- /view-detail -->
+  <!-- ── INPUTS VIEW ── -->
+  <div id="view-inputs" style="display:none">
+    <div class="inputs-section">
+      <div class="inputs-title">
+        Site FETB Inputs
+        <span class="inputs-title-sub">Click any value to edit · Changes apply to all calculations immediately</span>
+      </div>
+      <div class="inputs-tbl-outer">
+        <table class="inputs-tbl">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th>Site</th>
+              <th class="region-hdr-col">Region</th>
+              <th class="num-hdr"><span class="inputs-wl-badge inputs-wl-it">IT</span> FETB (TB)</th>
+              <th class="num-hdr"><span class="inputs-wl-badge inputs-wl-ot">OT</span> FETB (TB)</th>
+              <th class="num-hdr"><span class="inputs-wl-badge inputs-wl-ics">ICS</span> FETB (TB)</th>
+              <th class="num-hdr">Total FETB (TB)</th>
+            </tr>
+          </thead>
+          <tbody id="inputs-tbody"></tbody>
+          <tfoot id="inputs-tfoot"></tfoot>
+        </table>
+      </div>
+      <div class="inputs-save-note">Values are auto-saved. Leave blank or enter 0 for workloads with no data.</div>
+    </div>
+  </div>
+
+
 
   <div class="page-footer">
     Rubrik Sizing Dashboard &nbsp;·&nbsp; Platform: <span id="footer-hw">Rubrik Appliances</span>
@@ -840,7 +930,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v19';
+const STORAGE_KEY = 'rubrik_dashboard_v20';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -1882,15 +1972,106 @@ const sliderFmts = {
   out.textContent = sliderFmts[id](el.value);
 });
 
+
+// ── Inputs Table ────────────────────────────────────────────────────────────
+function buildInputsTable() {
+  const tbody = document.getElementById('inputs-tbody');
+  const tfoot = document.getElementById('inputs-tfoot');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  let grandIT = 0, grandOT = 0, grandICS = 0;
+  let prevRegion = null;
+
+  SITE_DEFAULTS.forEach(([num, name, defIT, defOT, defICS, region], si) => {
+    const tr = document.createElement('tr');
+    if (region !== prevRegion) tr.classList.add('region-group-start');
+    prevRegion = region;
+
+    const itVal  = fetbState[`${si}-IT`];
+    const otVal  = fetbState[`${si}-OT`];
+    const icsVal = fetbState[`${si}-ICS`];
+
+    const itNum  = itVal  ?? 0;
+    const otNum  = otVal  ?? 0;
+    const icsNum = icsVal ?? 0;
+    const total  = itNum + otNum + icsNum;
+
+    grandIT  += itNum;
+    grandOT  += otNum;
+    grandICS += icsNum;
+
+    const regionObj = REGIONS.find(r => r.key === region) || { flag: '', label: region };
+
+    const makeInput = (wl, val) => {
+      const isNull = val === null;
+      const inp = document.createElement('input');
+      inp.type  = 'number';
+      inp.min   = '0';
+      inp.step  = '0.01';
+      inp.className = 'fetb-input' + (isNull ? ' null-val' : '');
+      inp.value = isNull ? '' : val;
+      inp.placeholder = isNull ? '—' : '';
+      inp.title = `${name} ${wl} FETB`;
+      inp.addEventListener('input', () => {
+        const raw = inp.value.trim();
+        if (raw === '' || isNaN(parseFloat(raw))) {
+          fetbState[`${si}-${wl}`] = null;
+          inp.classList.add('null-val');
+        } else {
+          fetbState[`${si}-${wl}`] = parseFloat(raw);
+          inp.classList.remove('null-val');
+        }
+        // Update total cell
+        const itN  = fetbState[`${si}-IT`]  ?? 0;
+        const otN  = fetbState[`${si}-OT`]  ?? 0;
+        const icsN = fetbState[`${si}-ICS`] ?? 0;
+        tr.querySelector('.row-total').textContent = f(itN + otN + icsN);
+        recalcAll();
+        autoSave();
+      });
+      return inp;
+    };
+
+    tr.innerHTML = `
+      <td class="site-num">${num}</td>
+      <td class="site-name">${name}</td>
+      <td class="region-td">${regionObj.flag} ${regionObj.label}</td>
+      <td class="fetb-td"></td>
+      <td class="fetb-td"></td>
+      <td class="fetb-td"></td>
+      <td class="fetb-td" style="color:var(--text-primary);font-weight:600"><span class="row-total">${f(total)}</span></td>`;
+
+    tr.querySelectorAll('.fetb-td')[0].appendChild(makeInput('IT',  itVal));
+    tr.querySelectorAll('.fetb-td')[1].appendChild(makeInput('OT',  otVal));
+    tr.querySelectorAll('.fetb-td')[2].appendChild(makeInput('ICS', icsVal));
+
+    tbody.appendChild(tr);
+  });
+
+  // Footer totals row
+  const grand = grandIT + grandOT + grandICS;
+  tfoot.innerHTML = `
+    <tr class="inputs-total-row">
+      <td colspan="3" style="font-family:'Syne',sans-serif;font-size:11px;text-align:left">
+        Totals — ${SITE_DEFAULTS.length} Sites
+      </td>
+      <td class="fetb-td">${f(grandIT)}</td>
+      <td class="fetb-td">${f(grandOT)}</td>
+      <td class="fetb-td">${f(grandICS)}</td>
+      <td class="fetb-td">${f(grand)}</td>
+    </tr>`;
+}
+
 // ── View switching ────────────────────────────────────────────────────────
 function switchView(view) {
-  const isSummary = view === 'summary';
-  document.getElementById('view-summary').style.display = isSummary ? '' : 'none';
-  document.getElementById('view-detail').style.display  = isSummary ? 'none' : '';
-  document.getElementById('tab-summary').className = 'view-tab ' + (isSummary ? 'active' : 'inactive');
-  document.getElementById('tab-detail').className  = 'view-tab ' + (isSummary ? 'inactive' : 'active');
-  // Rebuild table rows on first switch to detail (buildTable is idempotent)
-  if (!isSummary) recalcAll();
+  const views = ['summary', 'detail', 'inputs'];
+  views.forEach(v => {
+    document.getElementById('view-' + v).style.display = v === view ? '' : 'none';
+    document.getElementById('tab-' + v).className = 'view-tab ' + (v === view ? 'active' : 'inactive');
+  });
+  if (view === 'detail') recalcAll();
+  if (view === 'inputs') buildInputsTable();
 }
 
 // ── Select dropdown wiring (hwp, ofs) ────────────────────────────────────
