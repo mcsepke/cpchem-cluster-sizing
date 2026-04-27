@@ -665,7 +665,7 @@
       </div>
       <div class="ctl-group">
         <div class="ctl-lbl">% Production Workloads</div>
-        <div class="ctl-row"><input type="range" id="prodpct" min="20" max="100" step="1" value="75"><span class="ctl-val" id="prodpct-v">75%</span></div>
+        <div class="ctl-row"><input type="range" id="prodpct" min="20" max="100" step="1" value="70"><span class="ctl-val" id="prodpct-v">70%</span></div>
       </div>
       <div class="ctl-group">
         <div class="ctl-lbl">Non-Prod Retention (days)</div>
@@ -676,8 +676,8 @@
       <div class="ctl-group">
         <div class="ctl-lbl">Hardware Platform</div>
         <select id="hwp" class="ctl-select">
+          <option value="2" selected>HPE Hardware</option>
           <option value="1">Rubrik Appliances</option>
-          <option value="2">HPE Hardware</option>
           <option value="3">Combination</option>
         </select>
       </div>
@@ -840,7 +840,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v18';
+const STORAGE_KEY = 'rubrik_dashboard_v19';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -867,7 +867,7 @@ const REGIONS = [
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 1, prodpct: 75, npret: 14, ofs: 1 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // HPE hardware catalog
