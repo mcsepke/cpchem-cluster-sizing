@@ -380,15 +380,6 @@
   .toggle-option.active { color: var(--rc); }
   .toggle-option.inactive { color: var(--text-muted); }
 
-  /* Workload mode banner */
-  .wl-mode-banner {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 5px 14px; border-radius: 6px; font-size: 11px;
-    font-family: 'Syne', sans-serif; font-weight: 700;
-    border: 1px solid rgba(0,180,216,0.3);
-    background: rgba(0,180,216,0.08); color: var(--rc);
-  }
-
   /* Off-site copy row switch */
   .offsite-cell { padding: 3px 6px !important; }
   .os-toggle-wrap { display: flex; align-items: center; gap: 4px; }
@@ -609,6 +600,8 @@
   .inputs-wl-it  { background: rgba(21,101,192,0.2); color: #90CAF9; border: 1px solid rgba(21,101,192,0.3); }
   .inputs-wl-ot  { background: rgba(46,125,50,0.2);  color: #A5D6A7; border: 1px solid rgba(46,125,50,0.3); }
   .inputs-wl-ics { background: rgba(191,54,12,0.2);  color: #FFAB91; border: 1px solid rgba(191,54,12,0.3); }
+  .rs-wl-oticscombo { width: auto !important; padding: 1px 7px !important; }
+  .wl-badge.wl-oticscombo, .rs-wl-oticscombo, .rs-appl.oticscombo { background: rgba(255,214,0,0.15); color: #FFD600; border: 1px solid rgba(255,214,0,0.35); }
   .inputs-total-row td { background: rgba(0,180,216,0.06) !important; font-weight: 700; color: var(--rc); border-top: 2px solid rgba(0,180,216,0.3); }
   .inputs-save-note { font-size: 9px; color: var(--text-muted); font-style: italic; margin-top: 6px; }
 </style>
@@ -686,20 +679,6 @@
         </div>
       </div>
 
-      <!-- Workload Mode toggle -->
-      <div class="ctl-group">
-        <div class="ctl-lbl">Workload Scope</div>
-        <div class="toggle-wrap" style="margin-top:4px">
-          <span class="toggle-option inactive" id="wl-lbl-all">IT / OT / ICS Separate Clusters</span>
-          <label class="toggle">
-            <input type="checkbox" id="wl-it-only" checked>
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-option active" id="wl-lbl-it">IT Cluster Only</span>
-        </div>
-        <div style="margin-top:6px"><span class="wl-mode-banner" id="wl-mode-banner">IT Cluster Only — Absorbs OT &amp; ICS</span></div>
-      </div>
-
       <div class="ctl-group">
         <div class="ctl-lbl">Data Reduction Ratio</div>
         <div class="ctl-row"><input type="range" id="drr" min="1" max="5" step="0.1" value="2.8"><span class="ctl-val" id="drr-v">2.8:1</span></div>
@@ -718,7 +697,7 @@
       </div>
       <div class="ctl-group">
         <div class="ctl-lbl">Small Site Threshold</div>
-        <div class="ctl-row"><input type="range" id="thr" min="1" max="20" step="0.1" value="3.5"><span class="ctl-val" id="thr-v">3.5 TB</span></div>
+        <div class="ctl-row"><input type="range" id="thr" min="1" max="20" step="0.1" value="7.0"><span class="ctl-val" id="thr-v">7.0 TB</span></div>
       </div>
       <div class="ctl-group">
         <div class="ctl-lbl">Production Retention (days)</div>
@@ -748,7 +727,7 @@
         <div class="ctl-lbl">Off-Site Copy Mode</div>
         <select id="ofs" class="ctl-select" style="border-color:rgba(124,77,255,0.4);color:#7c3aed">
           <option value="1">Instant Archive → RCV</option>
-          <option value="2">Rep to Cloud Cluster</option>
+          <option value="2" selected>Rep to Cloud Cluster</option>
           <option value="3">Manual (per-row)</option>
         </select>
       </div>
@@ -897,7 +876,7 @@
     <div class="inputs-section">
       <div class="inputs-title">
         Site FETB Inputs
-        <span class="inputs-title-sub">Click any value to edit · Changes apply to all calculations immediately</span>
+        <span class="inputs-title-sub">Click any value to edit · Changes apply to all calculations immediately · All workloads shown regardless of scenario</span>
       </div>
       <div class="inputs-tbl-outer">
         <table class="inputs-tbl">
@@ -910,6 +889,7 @@
               <th class="num-hdr"><span class="inputs-wl-badge inputs-wl-ot">OT</span> FETB (TB)</th>
               <th class="num-hdr"><span class="inputs-wl-badge inputs-wl-ics">ICS</span> FETB (TB)</th>
               <th class="num-hdr">Total FETB (TB)</th>
+              <th id="inputs-scenario-hdr" style="white-space:nowrap">Scenario Role</th>
             </tr>
           </thead>
           <tbody id="inputs-tbody"></tbody>
@@ -930,10 +910,10 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v23';
+const STORAGE_KEY = 'rubrik_dashboard_v26';
 
 const SITE_DEFAULTS = [
-  [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
+  [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
   [2,  "Cedar Bayou, TX",          104.0, 7.0,   15.0,  "US"        ],
   [3,  "Conroe, TX",               4.51,  null,  0.5,   "US"        ],
   [4,  "Kingwood, TX",             7.67,  1.14,  3.33,  "US"        ],
@@ -957,7 +937,7 @@ const REGIONS = [
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 3.5, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 1 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 7.0, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 2 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // HPE hardware catalog
@@ -977,6 +957,10 @@ const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
 const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'HPE Hardware', 3: 'Combination' };
 
 
+// Minimum HPE fixed-node usable capacity for IT clusters
+// IT clusters that fall below this threshold are bumped up to the 14TB single-node
+const HPE_IT_MIN_CAP = 14;
+
 function selectRubrik(reqTB) {
   for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c, 'rubrik'];
   return ["R7424+", 180, 'rubrik'];
@@ -984,12 +968,15 @@ function selectRubrik(reqTB) {
 
 const HPE_FIXED_BUFFER = 0.20; // 20% free capacity buffer for fixed single-node HPE configs
 
-function selectHPE(reqTB) {
+function selectHPE(reqTB, isIT) {
   // Fixed single-node: non-expandable, so size for 3-5 yr longevity.
   // Require that Year-3 data fills no more than 80% of the node
   // → effective requirement = reqTB / (1 - HPE_FIXED_BUFFER)
   const fixedReqTB = reqTB / (1 - HPE_FIXED_BUFFER);
+  // For IT clusters, enforce a 14TB minimum fixed-node size.
+  // Skip any catalog entry below HPE_IT_MIN_CAP when sizing IT clusters.
   for (const [m, c] of HPE_FIXED) {
+    if (isIT && c < HPE_IT_MIN_CAP) continue;
     if (c >= fixedReqTB) return [m, c, 'hpe'];
   }
   // Scalable: 4-node minimum, same node size throughout.
@@ -1023,16 +1010,16 @@ function selectHPE(reqTB) {
   return [`DL360 ${nodes}-Node 60TB`, nodes * nodeSize, 'hpe'];
 }
 
-function selectCombination(reqTB) {
+function selectCombination(reqTB, isIT) {
   // Combination: HPE for < 20TB required, Rubrik for >= 20TB
-  if (reqTB < 20) return selectHPE(reqTB);
+  if (reqTB < 20) return selectHPE(reqTB, isIT);
   return selectRubrik(reqTB);
 }
 
-function selectHardware(reqTB, hwp) {
+function selectHardware(reqTB, hwp, isIT) {
   if (hwp === 1) return selectRubrik(reqTB);
-  if (hwp === 2) return selectHPE(reqTB);
-  return selectCombination(reqTB);
+  if (hwp === 2) return selectHPE(reqTB, isIT);
+  return selectCombination(reqTB, isIT);
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -1046,7 +1033,10 @@ SITE_DEFAULTS.forEach(([,, it, ot, ics], si) => {
 // ── Storage ────────────────────────────────────────────────────────────────
 function getStateSnapshot() {
   const sliders = {};
-  Object.keys(SLIDER_DEFAULTS).forEach(id => { sliders[id] = document.getElementById(id).value; });
+  Object.keys(SLIDER_DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) sliders[id] = el.value;
+  });
   const fetb = {};
   Object.keys(fetbState).forEach(k => { fetb[k] = fetbState[k]; });
   return { sliders, fetb, savedAt: new Date().toISOString() };
@@ -1060,7 +1050,7 @@ function applySnapshot(snap) {
       if (!el) return;
       el.value = val;
       const out = document.getElementById(id + '-v');
-      if (out) out.textContent = sliderFmts[id](val);
+      if (out && sliderFmts[id]) out.textContent = sliderFmts[id](val);
     });
   }
   if (snap.fetb) {
@@ -1174,12 +1164,28 @@ function getParams() {
     hwp:     parseInt(document.getElementById('hwp').value),
     prodpct: parseInt(document.getElementById('prodpct').value) / 100,
     npret:   parseInt(document.getElementById('npret').value),
-    itOnly:  document.getElementById('wl-it-only').checked,
     ofs:     parseInt(document.getElementById('ofs').value),
     // ofs: 1=RCV (select-all RCV), 2=Cloud Cluster (select-all CC), 3=Manual (per-row)
     get osAll() { return this.ofs !== 3; },
     get osCC()  { return this.ofs === 2; },
   };
+}
+
+// ── OT/ICS absorption / combination rule ─────────────────────────────────
+// Both below threshold → absorbed into IT
+// Either at/above threshold → OT+ICS combined into one cluster (not IT, not separate)
+function calcOTICSMode(otVal, icsVal, thr) {
+  const otNull  = otVal  === null;
+  const icsNull = icsVal === null;
+  const otBig  = !otNull  && otVal  >= thr;
+  const icsBig = !icsNull && icsVal >= thr;
+  if (!otBig && !icsBig) {
+    // Both below threshold (or null) → absorb both into IT cluster
+    return { otAbs: true, icsAbs: true, combined: false, combinedFETB: 0 };
+  }
+  // At least one is at/above threshold → combine OT+ICS into one cluster
+  const combinedFETB = (otNull ? 0 : otVal) + (icsNull ? 0 : icsVal);
+  return { otAbs: false, icsAbs: false, combined: true, combinedFETB };
 }
 
 // Per-row offsite state: key = "si-wl", value = true (CC) / false (RCV)
@@ -1259,7 +1265,6 @@ function recalcAll() {
 
   // Update hardware platform UI elements
   const hwLabel = HW_LABELS[p.hwp] || 'Rubrik Appliances';
-  const hwpVEl = document.getElementById('hwp-v'); if (hwpVEl) hwpVEl.textContent = hwLabel;
   document.getElementById('tbl-hw-pill').textContent = hwLabel;
   document.getElementById('footer-hw').textContent  = hwLabel;
   // hwp is now a <select> — no tick UI needed
@@ -1274,22 +1279,15 @@ function recalcAll() {
     <span>Rolling ${p.ret}-day window — storage constant per year, source FETB compounds annually</span>`;
 
   // Update workload mode UI
-  const isITOnly = p.itOnly;
-  document.getElementById('wl-mode-banner').textContent = isITOnly ? 'IT Cluster Only — Absorbs OT & ICS' : 'IT / OT / ICS Separate Clusters';
-  document.getElementById('wl-mode-banner').style.color = isITOnly ? '#FFD600' : 'var(--rc)';
-  document.getElementById('wl-lbl-it').className  = 'toggle-option ' + (isITOnly ? 'active'   : 'inactive');
-  document.getElementById('wl-lbl-all').className = 'toggle-option ' + (isITOnly ? 'inactive' : 'active');
   const itSubEl = document.getElementById('it-fetb-sub');
-  if (itSubEl) itSubEl.textContent = 'incl. absorbed OT / ICS workloads';
+  if (itSubEl) itSubEl.textContent = 'incl. absorbed OT / ICS workloads (below threshold)';
 
   // Update off-site UI from ofs slider
   const OFS_LABELS = { 1: 'Instant Archive → RCV', 2: 'Rep to Cloud Cluster', 3: 'Manual (per-row)' };
   const ofsLabel = OFS_LABELS[p.ofs] || 'Instant Archive → RCV';
   // ofs is now a <select> — no tick/val UI needed
   const legendEl = document.getElementById('absorbed-legend');
-  if (legendEl) legendEl.textContent = isITOnly
-    ? 'IT Cluster Only — OT & ICS absorbed into IT cluster'
-    : 'Dimmed rows = below threshold, absorbed into IT cluster';
+  if (legendEl) legendEl.textContent = 'Dimmed rows = absorbed (OT/ICS both below threshold) or rolled into combined OT+ICS cluster';
   const modePill = document.getElementById('os-mode-pill');
   if (modePill) modePill.textContent = ofsLabel;
   document.getElementById('offsite-section').style.display = 'block';
@@ -1304,9 +1302,8 @@ function recalcAll() {
     const icsVal = fetbState[`${si}-ICS`];
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    // In IT-only mode, OT and ICS are always absorbed
-    const otAbs   = isITOnly || otNull  || otVal  < p.thr;
-    const icsAbs  = isITOnly || icsNull || icsVal < p.thr;
+    // Compute absorption / combined cluster mode using the new threshold rule
+    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
 
     ['IT','OT','ICS'].forEach(wl => {
       const tr = document.querySelector(`tr[data-si="${si}"][data-wl="${wl}"]`);
@@ -1316,7 +1313,9 @@ function recalcAll() {
       tr.style.display = '';
 
       const isNull     = fetbState[`${si}-${wl}`] === null;
-      const isAbsorbed = (wl === 'OT' && otAbs) || (wl === 'ICS' && icsAbs);
+      // In combined mode the OT row carries the OT+ICS cluster, ICS row is absorbed
+      const isAbsorbed = (wl === 'OT' && otAbs)
+                      || (wl === 'ICS' && (icsAbs || combined));
       isAbsorbed ? tr.classList.add('absorbed') : tr.classList.remove('absorbed');
 
 
@@ -1324,18 +1323,27 @@ function recalcAll() {
       // Determine cluster FETB
       let clusterFETB = null;
       if (wl === 'IT') {
-        // IT-only mode: size IT cluster on IT FETB alone (no absorption of OT/ICS)
-        // IT/OT/ICS mode: absorb sub-threshold OT/ICS into IT cluster
-        // IT-absorbs-all mode: include ALL OT+ICS into IT cluster regardless of threshold
-        // IT/OT/ICS mode: only absorb sub-threshold workloads
-        clusterFETB = isITOnly
-          ? itVal + (otNull ? 0 : otVal||0) + (icsNull ? 0 : icsVal||0)
-          : itVal
-            + (otAbs  && !otNull  ? (otVal  || 0) : 0)
-            + (icsAbs && !icsNull ? (icsVal || 0) : 0);
+        // IT cluster = IT FETB + any sub-threshold OT/ICS that get absorbed
+        clusterFETB = itVal
+          + (otAbs && !otNull ? (otVal||0) : 0)
+          + (icsAbs && !icsNull ? (icsVal||0) : 0);
         totalIT += clusterFETB; totalClusters++;
-      } else if (wl === 'OT'  && !otAbs)  { clusterFETB = otVal;  totalOTICS += clusterFETB; totalClusters++; }
-      else       if (wl === 'ICS' && !icsAbs) { clusterFETB = icsVal; totalOTICS += clusterFETB; totalClusters++; }
+      } else if (wl === 'OT' && combined) {
+        // OT row represents the combined OT+ICS cluster — relabel badge & show combined FETB
+        clusterFETB = combinedFETB; totalOTICS += clusterFETB; totalClusters++;
+        const wlBadge = tr.querySelector('.wl-badge');
+        if (wlBadge) { wlBadge.textContent = 'OT+ICS'; wlBadge.className = 'wl-badge wl-oticscombo'; }
+        const fetbInp = tr.querySelector('.fetb-cell input');
+        if (fetbInp) { fetbInp.value = combinedFETB.toFixed(2); fetbInp.readOnly = true; fetbInp.title = 'Combined OT+ICS FETB'; fetbInp.style.color = '#FFD600'; }
+      } else if (wl === 'OT' && !otAbs) {
+        clusterFETB = otVal; totalOTICS += clusterFETB; totalClusters++;
+        // Restore OT badge in case it was previously OT+ICS
+        const wlBadge = tr.querySelector('.wl-badge');
+        if (wlBadge && wlBadge.textContent === 'OT+ICS') { wlBadge.textContent = 'OT'; wlBadge.className = 'wl-badge wl-ot'; }
+        const fetbInp = tr.querySelector('.fetb-cell input');
+        if (fetbInp) { fetbInp.readOnly = false; fetbInp.style.color = ''; fetbInp.title = ''; }
+      }
+      // ICS is either absorbed into IT or rolled into the combined OT+ICS cluster — never standalone
 
       // Off-site cell — per-row toggle only in Manual mode (ofs===3)
       const osCell = tr.querySelector('.offsite-cell');
@@ -1369,15 +1377,28 @@ function recalcAll() {
       }
 
       if (clusterFETB === null) {
+        // Restore OT badge if it was previously OT+ICS
+        if (wl === 'OT') {
+          const wlBadge = tr.querySelector('.wl-badge');
+          if (wlBadge && wlBadge.textContent === 'OT+ICS') { wlBadge.textContent = 'OT'; wlBadge.className = 'wl-badge wl-ot'; }
+          const fetbInp = tr.querySelector('.fetb-cell input');
+          if (fetbInp) { fetbInp.readOnly = false; fetbInp.style.color = ''; }
+        }
         const rawD = wl === 'OT' ? otVal : icsVal;
         const showD = !isNull && rawD !== null;
         tr.querySelector('.fb-cell').textContent = showD ? f(rawD / p.drr) : '—';
         tr.querySelector('.di-cell').textContent = showD ? f(rawD * p.dcr / p.drr) : '—';
         ['r1-cell','r2-cell','r3-cell'].forEach(c => { tr.querySelector('.' + c).textContent = '—'; tr.querySelector('.' + c).className = c + ' num'; });
-        tr.querySelector('.app-cell').innerHTML  = isNull ? '<span class="appl-badge absorbed-badge">N/A</span>' : '<span class="appl-badge absorbed-badge">absorbed</span>';
+        const absLabel = (wl === 'ICS' && combined)
+          ? '<span class="appl-badge absorbed-badge">→ OT+ICS cluster</span>'
+          : isNull ? '<span class="appl-badge absorbed-badge">N/A</span>'
+          : '<span class="appl-badge absorbed-badge">absorbed</span>';
+        tr.querySelector('.app-cell').innerHTML  = absLabel;
         tr.querySelector('.cap-cell').textContent = '—';
         tr.querySelector('.lic-cell').textContent = '—';
-        tr.querySelector('.util-cell').innerHTML  = isNull
+        tr.querySelector('.util-cell').innerHTML  = (wl === 'ICS' && combined)
+          ? '<span class="pct-na" style="font-size:10px">See OT row</span>'
+          : isNull
           ? '<span class="pct-na" style="font-size:10px">No data</span>'
           : '<span class="pct-na" style="font-size:10px">See IT row</span>';
         return;
@@ -1398,7 +1419,7 @@ function recalcAll() {
         cell.className = `r${yr}-cell ${yr === p.syr ? 'req-active' : 'req-dim'}`;
       });
 
-      const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp);
+      const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp, wl === 'IT');
       totalLic += appCap;
       const pctUsed   = (y[p.syr - 1] / appCap) * 100;
       const pctCapped = Math.min(pctUsed, 100);
@@ -1431,6 +1452,13 @@ function recalcAll() {
 
   buildRegionSummary(p);
   buildOffsiteSummary(p);
+  // Rebuild inputs table if it's visible so values stay in sync
+  if (document.getElementById('view-inputs') && document.getElementById('view-inputs').style.display !== 'none') {
+    buildInputsTable();
+  } else {
+    // Always update the inputs footer totals even if tab is hidden
+    _updateInputsFooter();
+  }
 }
 
 
@@ -1548,8 +1576,7 @@ function buildOffsiteSummary(p) {
       const icsVal = fetbState[`${si}-ICS`];
       const otNull  = otVal  === null;
       const icsNull = icsVal === null;
-      const otAbs   = p.itOnly || otNull  || otVal  < p.thr;
-      const icsAbs  = p.itOnly || icsNull || icsVal < p.thr;
+      const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
 
       const rows = [];
 
@@ -1566,11 +1593,15 @@ function buildOffsiteSummary(p) {
         rows.push({ wl, isCC, stored: result.stored, rcvCap: result.rcvCap });
       };
 
-      // Off-site uses raw workload FETB for each workload individually
+      // Off-site: IT always; OT+ICS combined if combined mode, else individually
       addRow('IT', itVal);
-      // Always include OT/ICS offsite rows (absorbed or standalone)
-      if (!otNull)  addRow('OT',  otVal);
-      if (!icsNull) addRow('ICS', icsVal);
+      if (combined) {
+        // One combined off-site stream for OT+ICS
+        if (combinedFETB > 0) addRow('OT+ICS', combinedFETB);
+      } else {
+        if (!otNull)  addRow('OT',  otVal);
+        if (!icsNull) addRow('ICS', icsVal);
+      }
 
       return { s, si, rows };
     });
@@ -1653,7 +1684,7 @@ function buildOffsiteSummary(p) {
       card.className = 'offsite-site-card';
       let inner = `<div class="offsite-site-name"><span class="offsite-site-num">${num}</span>${name}</div><div class="offsite-clusters">`;
       rows.forEach(({ wl, isCC, stored, rcvCap }) => {
-        const wlc = wl.toLowerCase();
+        const wlc = wl === 'OT+ICS' ? 'oticscombo' : wl.toLowerCase();
         const typeBadge = isCC
           ? `<span class="offsite-type-badge offsite-type-cc">→ Cloud Cluster</span>`
           : `<span class="offsite-type-badge offsite-type-rcv">→ RCV</span>`;
@@ -1780,21 +1811,16 @@ function buildRegionSummary(p) {
       const icsVal = fetbState[`${si}-ICS`];
       const otNull  = otVal  === null;
       const icsNull = icsVal === null;
-      const otAbs   = p.itOnly || otNull  || otVal  < p.thr;
-      const icsAbs  = p.itOnly || icsNull || icsVal < p.thr;
+      const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
 
       const clusters = [];
 
-      // IT always — IT-only mode: use raw itVal only; IT/OT/ICS mode: absorb sub-threshold workloads
-      // IT-absorbs-all: include ALL OT+ICS; IT/OT/ICS: only sub-threshold ones
-      const itFETB = p.itOnly
-        ? itVal + (otNull ? 0 : otVal||0) + (icsNull ? 0 : icsVal||0)
-        : itVal
-          + (otAbs && !otNull  ? (otVal  || 0) : 0)
-          + (icsAbs && !icsNull ? (icsVal || 0) : 0);
+      const itFETB = itVal
+        + (otAbs && !otNull  ? (otVal  || 0) : 0)
+        + (icsAbs && !icsNull ? (icsVal || 0) : 0);
       const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
       const itReq    = itStored * (1 + p.rsv);
-      const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp);
+      const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp, true); // IT cluster
       const itPct    = (itStored / itCap * 100).toFixed(1);
       clusters.push({ wl:'IT', model:itModel, cap:itCap, vendor:itVendor, pct:itPct });
       regionClusters++; regionLic += itCap;
@@ -1802,29 +1828,17 @@ function buildRegionSummary(p) {
       modelTally[itModel] = modelTally[itModel] || { count:0, vendor:itVendor };
       modelTally[itModel].count++;
 
-      // Absorbed notes for IT — only shown in IT/OT/ICS mode
+      // Absorbed notes for IT
       const absorbed = [];
       if (otAbs  && !otNull)  absorbed.push(`OT ${f(otVal)} TB → absorbed`);
       if (icsAbs && !icsNull) absorbed.push(`ICS ${f(icsVal)} TB → absorbed`);
 
-      // OT standalone
-      if (!otAbs) {
-        const stored = calcStoredSplit(otVal, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+      // Combined OT+ICS cluster (when either is at/above threshold)
+      if (combined) {
+        const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
         const req    = stored * (1 + p.rsv);
-        const [m, c, v] = selectHardware(req, p.hwp);
-        clusters.push({ wl:'OT', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
-        regionClusters++; regionLic += c;
-        if (v === 'hpe') regionHPE++; else regionRubrik++;
-        modelTally[m] = modelTally[m] || { count:0, vendor:v };
-        modelTally[m].count++;
-      }
-
-      // ICS standalone
-      if (!icsAbs) {
-        const stored = calcStoredSplit(icsVal, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
-        const req    = stored * (1 + p.rsv);
-        const [m, c, v] = selectHardware(req, p.hwp);
-        clusters.push({ wl:'ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
+        const [m, c, v] = selectHardware(req, p.hwp, false); // OT+ICS cluster
+        clusters.push({ wl:'OT+ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
         if (v === 'hpe') regionHPE++; else regionRubrik++;
         modelTally[m] = modelTally[m] || { count:0, vendor:v };
@@ -1970,11 +1984,39 @@ const sliderFmts = {
 
 
 // ── Inputs Table ────────────────────────────────────────────────────────────
+function _updateInputsFooter() {
+  const tfoot = document.getElementById('inputs-tfoot');
+  if (!tfoot) return;
+  let grandIT = 0, grandOT = 0, grandICS = 0;
+  SITE_DEFAULTS.forEach(([,,,,], si) => {
+    grandIT  += fetbState[`${si}-IT`]  ?? 0;
+    grandOT  += fetbState[`${si}-OT`]  ?? 0;
+    grandICS += fetbState[`${si}-ICS`] ?? 0;
+  });
+  const grand = grandIT + grandOT + grandICS;
+  tfoot.innerHTML = `
+    <tr class="inputs-total-row">
+      <td colspan="3" style="font-family:'Syne',sans-serif;font-size:11px;text-align:left">
+        Totals — ${SITE_DEFAULTS.length} Sites
+      </td>
+      <td class="fetb-td">${f(grandIT)}</td>
+      <td class="fetb-td">${f(grandOT)}</td>
+      <td class="fetb-td">${f(grandICS)}</td>
+      <td class="fetb-td">${f(grand)}</td>
+    </tr>`;
+}
+
 function buildInputsTable() {
   const tbody = document.getElementById('inputs-tbody');
   const tfoot = document.getElementById('inputs-tfoot');
   if (!tbody) return;
   tbody.innerHTML = '';
+
+  const p = getParams();
+
+  // Update scenario column header
+  const scenHdr = document.getElementById('inputs-scenario-hdr');
+  if (scenHdr) scenHdr.textContent = 'Cluster Role';
 
   let grandIT = 0, grandOT = 0, grandICS = 0;
   let prevRegion = null;
@@ -1999,6 +2041,22 @@ function buildInputsTable() {
 
     const regionObj = REGIONS.find(r => r.key === region) || { flag: '', label: region };
 
+    // Scenario role for each workload
+    const otNull  = otVal  === null;
+    const icsNull = icsVal === null;
+    const { otAbs: otA, icsAbs: icsA, combined: comb, combinedFETB: combFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+
+    let roleLines = [];
+    roleLines.push('<span style="color:#90CAF9;font-size:9px">IT → IT Cluster</span>');
+    if (comb) {
+      roleLines.push(`<span style="color:#FFD600;font-size:9px">OT+ICS → Combined Cluster (${f(combFETB)} TB total)</span>`);
+    } else {
+      if (otNull)  roleLines.push('<span style="color:var(--text-muted);font-size:9px">OT → no data</span>');
+      else if (otA) roleLines.push(`<span style="color:#A5D6A7;font-size:9px">OT (${f(otVal)}TB) → absorbed into IT (below ${f(p.thr)}TB)</span>`);
+      if (icsNull) roleLines.push('<span style="color:var(--text-muted);font-size:9px">ICS → no data</span>');
+      else if (icsA) roleLines.push(`<span style="color:#FFAB91;font-size:9px">ICS (${f(icsVal)}TB) → absorbed into IT (below ${f(p.thr)}TB)</span>`);
+    }
+
     const makeInput = (wl, val) => {
       const isNull = val === null;
       const inp = document.createElement('input');
@@ -2018,7 +2076,6 @@ function buildInputsTable() {
           fetbState[`${si}-${wl}`] = parseFloat(raw);
           inp.classList.remove('null-val');
         }
-        // Update total cell
         const itN  = fetbState[`${si}-IT`]  ?? 0;
         const otN  = fetbState[`${si}-OT`]  ?? 0;
         const icsN = fetbState[`${si}-ICS`] ?? 0;
@@ -2036,7 +2093,8 @@ function buildInputsTable() {
       <td class="fetb-td"></td>
       <td class="fetb-td"></td>
       <td class="fetb-td"></td>
-      <td class="fetb-td" style="color:var(--text-primary);font-weight:600"><span class="row-total">${f(total)}</span></td>`;
+      <td class="fetb-td" style="color:var(--text-primary);font-weight:600"><span class="row-total">${f(total)}</span></td>
+      <td style="font-size:9px;line-height:1.6;vertical-align:middle">${roleLines.join('<br>')}</td>`;
 
     tr.querySelectorAll('.fetb-td')[0].appendChild(makeInput('IT',  itVal));
     tr.querySelectorAll('.fetb-td')[1].appendChild(makeInput('OT',  otVal));
@@ -2056,6 +2114,7 @@ function buildInputsTable() {
       <td class="fetb-td">${f(grandOT)}</td>
       <td class="fetb-td">${f(grandICS)}</td>
       <td class="fetb-td">${f(grand)}</td>
+      <td></td>
     </tr>`;
 }
 
@@ -2072,12 +2131,6 @@ function switchView(view) {
 
 // ── Select dropdown wiring (hwp, ofs) ────────────────────────────────────
 ['hwp', 'ofs'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
-});
-
-// ── Toggle and checkbox wiring ────────────────────────────────────────────
-['wl-it-only'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
 });
