@@ -289,8 +289,8 @@
   }
   .rs-site:hover { background: var(--bg-card-alt); }
   .rs-site-name {
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
-    color: var(--text-primary); margin-bottom: 7px;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12.5px;
+    color: var(--text-primary); margin-bottom: 9px;
     display: flex; align-items: center; gap: 6px;
   }
   .rs-site-num {
@@ -300,26 +300,27 @@
   }
   .rs-clusters { display: flex; flex-direction: column; gap: 4px; }
   .rs-cluster {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 10px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11.5px; color: var(--text-secondary);
+    margin-bottom: 4px;
   }
   .rs-wl {
-    display: inline-block; padding: 1px 5px; border-radius: 2px;
-    font-family: 'Syne', sans-serif; font-size: 8.5px; font-weight: 700;
-    letter-spacing: 0.04em; flex-shrink: 0; width: 28px; text-align: center;
+    display: inline-block; padding: 2px 6px; border-radius: 3px;
+    font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.04em; flex-shrink: 0; width: 36px; text-align: center;
   }
   .rs-wl-it  { background: #0d47a1; color: #90caf9; }
   .rs-wl-ot  { background: #1b5e20; color: #a5d6a7; }
   .rs-wl-ics { background: #bf360c; color: #ffccbc; }
   .rs-appl {
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 9.5px;
-    padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    padding: 2px 8px; border-radius: 3px; flex-shrink: 0;
   }
   .rs-appl.rubrik { background: rgba(0,180,216,0.12); color: var(--rc); border: 1px solid rgba(0,180,216,0.25); }
   .rs-appl.hpe   { background: rgba(179,136,255,0.12); color: #B388FF; border: 1px solid rgba(179,136,255,0.25); }
   .rs-cap { font-size: 9.5px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
   .rs-pct { font-size: 9.5px; font-weight: 500; font-family: 'DM Mono', monospace; flex-shrink: 0; }
-  .rs-absorbed { font-size: 9px; color: var(--text-muted); font-style: italic; margin-left: 34px; }
+  .rs-absorbed { font-size: 10px; color: var(--text-muted); font-style: italic; margin-left: 44px; margin-top: 2px; }
   /* Region totals footer row */
   .region-footer {
     background: #0a1d45;
@@ -1882,13 +1883,14 @@ function buildRegionSummary(p) {
       let inner = `<div class="rs-site-name"><span class="rs-site-num">${num}</span>${name}</div><div class="rs-clusters">`;
 
       clusters.forEach(({ wl, model, cap, vendor, pct }) => {
-        const wlc = wl.toLowerCase();
+        const wlc = wl === 'OT+ICS' ? 'oticscombo' : wl.toLowerCase();
         const [,,txtCls] = (() => { const pc = parseFloat(pct); return pc>=90?['','','pct-high']:pc>=70?['','','pct-mid']:['','','pct-low']; })();
+        // Use wl-badge styling for consistency with Cluster Detail page
+        const badgeCls = wl === 'OT+ICS' ? 'wl-badge wl-oticscombo' : `rs-wl rs-wl-${wlc}`;
         inner += `
           <div class="rs-cluster">
-            <span class="rs-wl rs-wl-${wlc}">${wl}</span>
+            <span class="${badgeCls}">${wl}</span>
             <span class="rs-appl ${vendor}">${model}</span>
-            <span class="rs-cap">${cap} TB</span>
             <span class="rs-pct ${txtCls}">${pct}%</span>
           </div>`;
       });
