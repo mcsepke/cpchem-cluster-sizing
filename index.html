@@ -690,14 +690,14 @@
       <div class="ctl-group">
         <div class="ctl-lbl">Workload Scope</div>
         <div class="toggle-wrap" style="margin-top:4px">
-          <span class="toggle-option active" id="wl-lbl-all">IT / OT / ICS</span>
+          <span class="toggle-option inactive" id="wl-lbl-all">IT / OT / ICS Separate Clusters</span>
           <label class="toggle">
-            <input type="checkbox" id="wl-it-only">
+            <input type="checkbox" id="wl-it-only" checked>
             <span class="toggle-slider"></span>
           </label>
-          <span class="toggle-option inactive" id="wl-lbl-it">IT Only</span>
+          <span class="toggle-option active" id="wl-lbl-it">IT Cluster Only</span>
         </div>
-        <div style="margin-top:6px"><span class="wl-mode-banner" id="wl-mode-banner">IT / OT / ICS Mode</span></div>
+        <div style="margin-top:6px"><span class="wl-mode-banner" id="wl-mode-banner">IT Cluster Only — Absorbs OT &amp; ICS</span></div>
       </div>
 
       <div class="ctl-group">
@@ -930,7 +930,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v20';
+const STORAGE_KEY = 'rubrik_dashboard_v23';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  2.11,  62.5,  "US"        ],
@@ -1275,12 +1275,12 @@ function recalcAll() {
 
   // Update workload mode UI
   const isITOnly = p.itOnly;
-  document.getElementById('wl-mode-banner').textContent = isITOnly ? 'IT Only Mode — Phase 1' : 'IT / OT / ICS Mode';
+  document.getElementById('wl-mode-banner').textContent = isITOnly ? 'IT Cluster Only — Absorbs OT & ICS' : 'IT / OT / ICS Separate Clusters';
   document.getElementById('wl-mode-banner').style.color = isITOnly ? '#FFD600' : 'var(--rc)';
+  document.getElementById('wl-lbl-it').className  = 'toggle-option ' + (isITOnly ? 'active'   : 'inactive');
   document.getElementById('wl-lbl-all').className = 'toggle-option ' + (isITOnly ? 'inactive' : 'active');
-  document.getElementById('wl-lbl-it').className  = 'toggle-option ' + (isITOnly ? 'active' : 'inactive');
   const itSubEl = document.getElementById('it-fetb-sub');
-  if (itSubEl) itSubEl.textContent = isITOnly ? 'IT workloads only — Phase 1' : 'incl. absorbed OT / ICS workloads';
+  if (itSubEl) itSubEl.textContent = 'incl. absorbed OT / ICS workloads';
 
   // Update off-site UI from ofs slider
   const OFS_LABELS = { 1: 'Instant Archive → RCV', 2: 'Rep to Cloud Cluster', 3: 'Manual (per-row)' };
@@ -1288,8 +1288,8 @@ function recalcAll() {
   // ofs is now a <select> — no tick/val UI needed
   const legendEl = document.getElementById('absorbed-legend');
   if (legendEl) legendEl.textContent = isITOnly
-    ? 'IT Only mode — OT & ICS excluded (Phase 1)'
-    : 'Dimmed = absorbed into IT cluster';
+    ? 'IT Cluster Only — OT & ICS absorbed into IT cluster'
+    : 'Dimmed rows = below threshold, absorbed into IT cluster';
   const modePill = document.getElementById('os-mode-pill');
   if (modePill) modePill.textContent = ofsLabel;
   document.getElementById('offsite-section').style.display = 'block';
@@ -1312,13 +1312,8 @@ function recalcAll() {
       const tr = document.querySelector(`tr[data-si="${si}"][data-wl="${wl}"]`);
       if (!tr) return;
 
-      // Hide OT/ICS rows entirely in IT-only mode
-      if (isITOnly && wl !== 'IT') {
-        tr.style.display = 'none';
-        return;
-      } else {
-        tr.style.display = '';
-      }
+      // In IT-absorbs-all mode: show OT/ICS rows as absorbed (dimmed), never hide them
+      tr.style.display = '';
 
       const isNull     = fetbState[`${si}-${wl}`] === null;
       const isAbsorbed = (wl === 'OT' && otAbs) || (wl === 'ICS' && icsAbs);
@@ -1331,8 +1326,10 @@ function recalcAll() {
       if (wl === 'IT') {
         // IT-only mode: size IT cluster on IT FETB alone (no absorption of OT/ICS)
         // IT/OT/ICS mode: absorb sub-threshold OT/ICS into IT cluster
+        // IT-absorbs-all mode: include ALL OT+ICS into IT cluster regardless of threshold
+        // IT/OT/ICS mode: only absorb sub-threshold workloads
         clusterFETB = isITOnly
-          ? itVal
+          ? itVal + (otNull ? 0 : otVal||0) + (icsNull ? 0 : icsVal||0)
           : itVal
             + (otAbs  && !otNull  ? (otVal  || 0) : 0)
             + (icsAbs && !icsNull ? (icsVal || 0) : 0);
@@ -1429,7 +1426,7 @@ function recalcAll() {
   document.getElementById('metrics').innerHTML = `
     <div class="met-card"><div class="met-card-lbl">Total clusters</div><div class="met-card-val">${totalClusters}</div><div class="met-card-sub">across ${SITE_DEFAULTS.length} sites</div></div>
     <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">${hwLabel} · sized for ${yrLabel}</div></div>
-    <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub" id="it-fetb-sub">incl. absorbed OT / ICS workloads</div></div>
+    <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub" id="it-fetb-sub">incl. absorbed OT &amp; ICS workloads</div></div>
     <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
 
   buildRegionSummary(p);
@@ -1571,11 +1568,9 @@ function buildOffsiteSummary(p) {
 
       // Off-site uses raw workload FETB for each workload individually
       addRow('IT', itVal);
-      // In IT-only mode, OT and ICS are excluded entirely from off-site
-      if (!p.itOnly) {
-        if (!otNull)  addRow('OT',  otVal);
-        if (!icsNull) addRow('ICS', icsVal);
-      }
+      // Always include OT/ICS offsite rows (absorbed or standalone)
+      if (!otNull)  addRow('OT',  otVal);
+      if (!icsNull) addRow('ICS', icsVal);
 
       return { s, si, rows };
     });
@@ -1791,8 +1786,9 @@ function buildRegionSummary(p) {
       const clusters = [];
 
       // IT always — IT-only mode: use raw itVal only; IT/OT/ICS mode: absorb sub-threshold workloads
+      // IT-absorbs-all: include ALL OT+ICS; IT/OT/ICS: only sub-threshold ones
       const itFETB = p.itOnly
-        ? itVal
+        ? itVal + (otNull ? 0 : otVal||0) + (icsNull ? 0 : icsVal||0)
         : itVal
           + (otAbs && !otNull  ? (otVal  || 0) : 0)
           + (icsAbs && !icsNull ? (icsVal || 0) : 0);
@@ -1808,8 +1804,8 @@ function buildRegionSummary(p) {
 
       // Absorbed notes for IT — only shown in IT/OT/ICS mode
       const absorbed = [];
-      if (!p.itOnly && otAbs  && !otNull)  absorbed.push(`OT ${otVal.toFixed(1)} TB → absorbed`);
-      if (!p.itOnly && icsAbs && !icsNull) absorbed.push(`ICS ${icsVal.toFixed(1)} TB → absorbed`);
+      if (otAbs  && !otNull)  absorbed.push(`OT ${f(otVal)} TB → absorbed`);
+      if (icsAbs && !icsNull) absorbed.push(`ICS ${f(icsVal)} TB → absorbed`);
 
       // OT standalone
       if (!otAbs) {
