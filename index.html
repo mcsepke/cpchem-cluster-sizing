@@ -756,6 +756,12 @@
       <div class="offsite-section-title">
         Off-Site Copy Summary
         <span class="offsite-pill" id="offsite-pill">RCV · Production data only · 30-day retention</span>
+        <!-- Year slider controls per-site data contribution sizing -->
+        <div class="offsite-year-ctl" style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Sized to:</span>
+          <input type="range" id="ofsy" min="1" max="3" step="1" value="1" style="width:90px;height:3px;background:var(--border-mid);border-radius:2px;outline:none;cursor:pointer">
+          <span class="year-val" id="ofsy-v" style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--rc);min-width:48px;text-align:right">Year 1</span>
+        </div>
       </div>
       <div class="offsite-blocks" id="offsite-blocks"></div>
     </div>
@@ -911,7 +917,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v26';
+const STORAGE_KEY = 'rubrik_dashboard_v27';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -938,7 +944,7 @@ const REGIONS = [
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 7.0, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 2 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 7.0, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 2, ofsy: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // HPE hardware catalog
@@ -1166,6 +1172,7 @@ function getParams() {
     prodpct: parseInt(document.getElementById('prodpct').value) / 100,
     npret:   parseInt(document.getElementById('npret').value),
     ofs:     parseInt(document.getElementById('ofs').value),
+    ofsyr:   parseInt(document.getElementById('ofsy').value),
     // ofs: 1=RCV (select-all RCV), 2=Cloud Cluster (select-all CC), 3=Manual (per-row)
     get osAll() { return this.ofs !== 3; },
     get osCC()  { return this.ofs === 2; },
@@ -1293,7 +1300,7 @@ function recalcAll() {
   if (modePill) modePill.textContent = ofsLabel;
   document.getElementById('offsite-section').style.display = 'block';
   const osTypeLbl = p.ofs === 2 ? 'Rep to Cloud Cluster' : p.ofs === 3 ? 'Per-row selection' : 'Instant Archive to RCV';
-  document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Yr 1 · CC: Azure PAYG + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
+  document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Year ${p.ofsyr} · CC: Azure PAYG + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
 
   let totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
 
@@ -1471,17 +1478,18 @@ function recalcAll() {
 // Required capacity = Required Usable WITHOUT reserve (prod FETB only)
 // RCV = 2.0 × prod FETB
 
-function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC) {
-  // Always Year 1 growth for off-site comparison consistency
+function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC, ofsyr) {
+  // Off-site sizing year (1, 2, or 3) — applies AGR^year compounding
+  const yr = ofsyr || 1;
   const prodFETB = clusterFETB * prodpct;
-  const grownYr1 = prodFETB * (1 + agr); // Year 1: FETB × (1+AGR)^1 = one year of growth
+  const grown    = prodFETB * Math.pow(1 + agr, yr);
   if (isCC) {
-    // Required usable without reserve — 30-day retention, prod only, Year 1 growth
-    const stored = (grownYr1 / drr) * (1 + (30 - 1) * dcr);
+    // Required usable without reserve — 30-day retention, prod only, year-N growth
+    const stored = (grown / drr) * (1 + (30 - 1) * dcr);
     return { stored, rcvCap: null };
   } else {
-    // RCV = 2.0 × prod FETB at Year 1 growth
-    const rcvCap = grownYr1 * 2.0;
+    // RCV = 2.0 × prod FETB at year-N growth
+    const rcvCap = grown * 2.0;
     return { stored: rcvCap, rcvCap };
   }
 }
@@ -1583,7 +1591,7 @@ function buildOffsiteSummary(p) {
 
       const addRow = (wl, fetb) => {
         const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
-        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC);
+        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
         if (isCC) {
           regionCCStoredTB += result.stored;
           anyCCInRegion = true;
@@ -1646,10 +1654,10 @@ function buildOffsiteSummary(p) {
       ccCard.innerHTML = `
         <div style="flex:1;min-width:0">
           <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--rc);margin-bottom:6px">
-            ☁ ${flag} ${label} Cloud Cluster — 1 cluster for all ${sites.length} site${sites.length>1?'s':''} &nbsp;<span style="font-size:9px;color:var(--text-muted);font-weight:400">(Year 1 sizing)</span>
+            ☁ ${flag} ${label} Cloud Cluster — 1 cluster for all ${sites.length} site${sites.length>1?'s':''} &nbsp;<span style="font-size:9px;color:var(--text-muted);font-weight:400">(Year ${p.ofsyr} sizing)</span>
           </div>
           <div style="font-size:10px;color:var(--text-secondary);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
-            <span>Data to store (Yr 1): <strong style="color:var(--text-primary)">${f(regionCCStoredTB)} TB</strong></span>
+            <span>Data to store (Yr ${p.ofsyr}): <strong style="color:var(--text-primary)">${f(regionCCStoredTB)} TB</strong></span>
             <span>VM type: <strong style="color:var(--text-primary)">${ccConfig.vmType}</strong></span>
             <span>Nodes: <strong style="color:var(--text-primary)">${ccConfig.nodes} × ${ccConfig.nodeSize}TB</strong></span>
             <span>Total usable: <strong style="color:var(--rc)">${ccConfig.totalCap} TB</strong></span>
@@ -1973,8 +1981,9 @@ const sliderFmts = {
   prodpct: v => `${v}%`,
   npret:   v => `${v} days`,
   ofs:     v => ({ 1:'Instant Archive → RCV', 2:'Rep to Cloud Cluster', 3:'Manual (per-row)' }[parseInt(v)] || 'RCV'),
+  ofsy:    v => `Year ${v}`,
 };
-['syr','drr','dcr','agr','rsv','thr','ret','prodpct','npret'].forEach(id => {
+['syr','drr','dcr','agr','rsv','thr','ret','prodpct','npret','ofsy'].forEach(id => {
   const el  = document.getElementById(id);
   const out = document.getElementById(id + '-v');
   el.addEventListener('input', () => {
