@@ -262,7 +262,7 @@
     justify-content: space-between; flex-wrap: wrap; gap: 8px;
     border-bottom: 1px solid var(--border);
   }
-  .region-hdr:not(:first-child) { border-top: 2px solid rgba(0,180,216,0.2); }
+  .region-hdr:not(:first-child) { border-top: 5px solid rgba(0,180,216,0.55); box-shadow: 0 -4px 0 rgba(0,180,216,0.12); }
   .region-name {
     font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
     color: #fff; display: flex; align-items: center; gap: 8px;
@@ -416,7 +416,7 @@
     justify-content: space-between; flex-wrap: wrap; gap: 8px;
     border-bottom: 1px solid var(--border);
   }
-  .offsite-region-hdr:not(:first-child) { border-top: 2px solid rgba(124,77,255,0.2); }
+  .offsite-region-hdr:not(:first-child) { border-top: 5px solid rgba(124,77,255,0.55); box-shadow: 0 -4px 0 rgba(124,77,255,0.12); }
   .offsite-region-name {
     font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
     color: #fff; display: flex; align-items: center; gap: 8px;
@@ -663,6 +663,62 @@
     margin-top: 4px;
   }
   /* Off-site year slider in offsite section is separate — leave that one editable everywhere */
+
+  /* ── Collapsible region blocks (Summary View) ── */
+  .region-block-wrap, .offsite-block-wrap { display: contents; }
+  .region-content, .offsite-content {
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.18s ease;
+  }
+  .region-content.collapsed, .offsite-content.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    border-bottom: none;
+  }
+  .expand-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--text-secondary);
+    font-family: 'Syne', sans-serif;
+    font-size: 9.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; transition: background .15s, color .15s;
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-left: 12px; flex-shrink: 0;
+    user-select: none;
+  }
+  .expand-btn:hover { background: rgba(0,180,216,0.15); color: var(--rc); border-color: rgba(0,180,216,0.4); }
+  .expand-btn .chev { display: inline-block; transition: transform 0.2s; font-size: 11px; line-height: 1; }
+  .expand-btn.expanded .chev { transform: rotate(90deg); }
+  .expand-all-btn {
+    background: rgba(0,180,216,0.12);
+    border: 1px solid rgba(0,180,216,0.4);
+    color: var(--rc);
+    font-family: 'Syne', sans-serif;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 5px 12px; border-radius: 5px;
+    cursor: pointer; transition: background .15s;
+    margin-left: auto;
+    user-select: none;
+  }
+  .expand-all-btn:hover { background: rgba(0,180,216,0.22); }
+  .expand-all-btn.all-expanded {
+    background: rgba(255,214,0,0.12);
+    border-color: rgba(255,214,0,0.4);
+    color: #FFD600;
+  }
+
+  /* ── Country flag icons — inline SVG ── */
+  .flag-icon {
+    display: inline-block; vertical-align: middle;
+    width: 28px; height: 20px;
+    border-radius: 3px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+  .flag-icon svg { display: block; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -802,6 +858,7 @@
       <div class="region-summary-title">
         Regional Appliance Summary
         <span class="rs-sub" id="rs-sub-label">Sized to Year 3 · Rubrik Appliances</span>
+        <button class="expand-all-btn" id="rs-expand-all" onclick="toggleAllRegions('rs')">▸ Expand All</button>
       </div>
       <div class="region-blocks" id="region-blocks"></div>
     </div>
@@ -811,6 +868,7 @@
       <div class="offsite-section-title">
         Off-Site Copy Summary
         <span class="offsite-pill" id="offsite-pill">RCV · Production data only · 30-day retention</span>
+        <button class="expand-all-btn" id="os-expand-all" onclick="toggleAllRegions('os')" style="margin-left:0">▸ Expand All</button>
         <!-- Year slider controls per-site data contribution sizing -->
         <div class="offsite-year-ctl" style="margin-left:auto;display:flex;align-items:center;gap:10px">
           <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Sized to:</span>
@@ -998,6 +1056,56 @@ const REGIONS = [
   { key: "Belgium",   label: "Belgium",        flag: "🇧🇪" },
   { key: "Singapore", label: "Singapore",      flag: "🇸🇬" },
 ];
+
+// ── SVG flags by region key ────────────────────────────────────────────────
+function flagSVG(key) {
+  const flags = {
+    US: `<svg viewBox="0 0 60 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <rect width="60" height="32" fill="#bb133e"/>
+      <path d="M0 4h60M0 12h60M0 20h60M0 28h60" stroke="#fff" stroke-width="2.5"/>
+      <rect width="26" height="16" fill="#002868"/>
+      <g fill="#fff" font-size="3" font-family="Arial">
+        <circle cx="3"  cy="3"  r="0.8"/><circle cx="9"  cy="3"  r="0.8"/><circle cx="15" cy="3"  r="0.8"/><circle cx="21" cy="3"  r="0.8"/>
+        <circle cx="6"  cy="6"  r="0.8"/><circle cx="12" cy="6"  r="0.8"/><circle cx="18" cy="6"  r="0.8"/>
+        <circle cx="3"  cy="9"  r="0.8"/><circle cx="9"  cy="9"  r="0.8"/><circle cx="15" cy="9"  r="0.8"/><circle cx="21" cy="9"  r="0.8"/>
+        <circle cx="6"  cy="12" r="0.8"/><circle cx="12" cy="12" r="0.8"/><circle cx="18" cy="12" r="0.8"/>
+      </g>
+    </svg>`,
+    Belgium: `<svg viewBox="0 0 60 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <rect x="0"  width="20" height="32" fill="#000"/>
+      <rect x="20" width="20" height="32" fill="#FAE042"/>
+      <rect x="40" width="20" height="32" fill="#ED2939"/>
+    </svg>`,
+    Singapore: `<svg viewBox="0 0 60 32" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <rect width="60" height="16" fill="#EF3340"/>
+      <rect y="16" width="60" height="16" fill="#fff"/>
+      <g fill="#fff">
+        <circle cx="13" cy="8" r="5.2"/>
+        <circle cx="15" cy="8" r="5.2" fill="#EF3340"/>
+        <g transform="translate(20 8)" font-family="Arial" font-size="2.6">
+          <polygon points="0,-2.5 0.6,-0.8 2.4,-0.8 0.9,0.3 1.5,2 0,1 -1.5,2 -0.9,0.3 -2.4,-0.8 -0.6,-0.8" fill="#fff"/>
+        </g>
+        <g transform="translate(15.5 4.5)">
+          <polygon points="0,-1.4 0.4,-0.5 1.3,-0.5 0.5,0.2 0.8,1.1 0,0.5 -0.8,1.1 -0.5,0.2 -1.3,-0.5 -0.4,-0.5" fill="#fff"/>
+        </g>
+        <g transform="translate(20.5 4.5)">
+          <polygon points="0,-1.4 0.4,-0.5 1.3,-0.5 0.5,0.2 0.8,1.1 0,0.5 -0.8,1.1 -0.5,0.2 -1.3,-0.5 -0.4,-0.5" fill="#fff"/>
+        </g>
+        <g transform="translate(13 11)">
+          <polygon points="0,-1.4 0.4,-0.5 1.3,-0.5 0.5,0.2 0.8,1.1 0,0.5 -0.8,1.1 -0.5,0.2 -1.3,-0.5 -0.4,-0.5" fill="#fff"/>
+        </g>
+        <g transform="translate(23 11)">
+          <polygon points="0,-1.4 0.4,-0.5 1.3,-0.5 0.5,0.2 0.8,1.1 0,0.5 -0.8,1.1 -0.5,0.2 -1.3,-0.5 -0.4,-0.5" fill="#fff"/>
+        </g>
+        <g transform="translate(18 12.5)">
+          <polygon points="0,-1.4 0.4,-0.5 1.3,-0.5 0.5,0.2 0.8,1.1 0,0.5 -0.8,1.1 -0.5,0.2 -1.3,-0.5 -0.4,-0.5" fill="#fff"/>
+        </g>
+      </g>
+    </svg>`
+  };
+  return `<span class="flag-icon" title="${key}">${flags[key] || ''}</span>`;
+}
+
 
 const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 7.0, ret: 30, hwp: 1, prodpct: 70, npret: 14, ofs: 2, ofsy: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
@@ -1692,20 +1800,27 @@ function buildOffsiteSummary(p) {
     const rcvTotalMonthly    = regionRCVCap * RCV_PER_TB_MONTH;
     const rcvTotalAnnual     = rcvTotalMonthly * 12;
 
-    // Region header
+    // Region header — with collapse toggle button
     const hdr = document.createElement('div');
     hdr.className = 'offsite-region-hdr';
     hdr.innerHTML = `
       <div class="offsite-region-name">
-        <span style="font-size:16px">${flag}</span>${label}
+        ${flagSVG(key)}<span style="margin-left:4px">${label}</span>
         <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'DM Mono',monospace">
           ${sites.length} site${sites.length>1?'s':''}</span>
+        <button class="expand-btn" data-section="os" data-region="${key}" onclick="toggleRegion('os','${key}', this)"><span class="chev">▸</span> Expand</button>
       </div>
       <div class="offsite-region-totals">
         ${anyCCInRegion?`<div class="offsite-stat"><div class="offsite-stat-val" style="color:var(--rc)">1</div><div class="offsite-stat-lbl">Cloud Cluster</div></div>`:''}
         ${regionRCVCount>0?`<div class="offsite-stat"><div class="offsite-stat-val">${regionRCVCount}</div><div class="offsite-stat-lbl">RCV Stream${regionRCVCount>1?'s':''}</div></div>`:''}
       </div>`;
     container.appendChild(hdr);
+
+    // Collapsible content wrapper for ALL detail blocks (CC card + per-site grid)
+    const osCollapseDiv = document.createElement('div');
+    osCollapseDiv.className = 'offsite-content collapsed';
+    osCollapseDiv.dataset.section = 'os';
+    osCollapseDiv.dataset.region = key;
 
     // Cloud cluster summary card (one per region)
     if (ccConfig) {
@@ -1717,7 +1832,7 @@ function buildOffsiteSummary(p) {
       ccCard.innerHTML = `
         <div style="flex:1;min-width:0">
           <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--rc);margin-bottom:6px">
-            ☁ ${flag} ${label} Cloud Cluster — 1 cluster for all ${sites.length} site${sites.length>1?'s':''} &nbsp;<span style="font-size:9px;color:var(--text-muted);font-weight:400">(Year ${p.ofsyr} sizing)</span>
+            ☁ <span>${label} Cloud Cluster — 1 cluster for all ${sites.length} site${sites.length>1?'s':''}</span> &nbsp;<span style="font-size:9px;color:var(--text-muted);font-weight:400">(Year ${p.ofsyr} sizing)</span>
           </div>
           <div style="font-size:10px;color:var(--text-secondary);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
             <span>Data to store (Yr ${p.ofsyr}): <strong style="color:var(--text-primary)">${f(regionCCStoredTB)} TB</strong></span>
@@ -1743,7 +1858,7 @@ function buildOffsiteSummary(p) {
           </div>
           <div style="font-size:9px;color:var(--text-muted);margin-top:4px;font-style:italic">${ccConfig.note} · ${ccConfig.nodes===1?' Single-node (below 32TB minimum)':ccConfig.nodeSize===32?'3-node cluster · 32TB/node':`${ccConfig.nodes}-node cluster · ${ccConfig.nodeSize}TB/node`}</div>
         </div>`;
-      container.appendChild(ccCard);
+      osCollapseDiv.appendChild(ccCard);
     }
 
     // Per-site grid (shows individual site contribution)
@@ -1774,7 +1889,9 @@ function buildOffsiteSummary(p) {
       card.innerHTML = inner;
       grid.appendChild(card);
     });
-    container.appendChild(grid);
+    // Add grid to existing osCollapseDiv (CC card already added) and append to container
+    osCollapseDiv.appendChild(grid);
+    container.appendChild(osCollapseDiv);
 
     // Footer
     const foot = document.createElement('div');
@@ -1783,7 +1900,7 @@ function buildOffsiteSummary(p) {
     const totalOffsiteAnnual  = totalOffsiteMonthly * 12;
 
     foot.innerHTML = `
-      <div class="offsite-footer-title">${flag} ${label} Off-Site Total</div>
+      <div class="offsite-footer-title">${label} Off-Site Total</div>
       <div class="offsite-footer-stats">
         ${ccConfig?`
           <div class="ofs-item">
@@ -1920,15 +2037,16 @@ function buildRegionSummary(p) {
       return { s, si, clusters, absorbed };
     });
 
-    // Region header
+    // Region header — with collapse toggle button
     const hdr = document.createElement('div');
     hdr.className = 'region-hdr';
     hdr.innerHTML = `
       <div class="region-name">
-        <span class="region-flag">${flag}</span>${label}
+        ${flagSVG(key)}<span style="margin-left:4px">${label}</span>
         <span style="font-size:10px;color:var(--text-muted);font-weight:400;font-family:'DM Mono',monospace">
           ${sites.length} site${sites.length>1?'s':''} · ${regionClusters} cluster${regionClusters>1?'s':''}
         </span>
+        <button class="expand-btn" data-section="rs" data-region="${key}" onclick="toggleRegion('rs','${key}', this)"><span class="chev">▸</span> Expand</button>
       </div>
       <div class="region-totals">
         <div class="region-stat">
@@ -1975,7 +2093,13 @@ function buildRegionSummary(p) {
       grid.appendChild(card);
     });
 
-    container.appendChild(grid);
+    // Wrap region site grid in collapsible content div
+    const rsCollapseDiv = document.createElement('div');
+    rsCollapseDiv.className = 'region-content collapsed';
+    rsCollapseDiv.dataset.section = 'rs';
+    rsCollapseDiv.dataset.region = key;
+    rsCollapseDiv.appendChild(grid);
+    container.appendChild(rsCollapseDiv);
 
     // Region totals footer row
     const foot = document.createElement('div');
@@ -2022,7 +2146,7 @@ function buildRegionSummary(p) {
     }
 
     foot.innerHTML = `
-      <div class="region-footer-title">${flag} ${label} Region Total</div>
+      <div class="region-footer-title">${label} Region Total</div>
       <div class="region-footer-stats">${statsHtml}</div>
       ${breakdownHtml}`;
     container.appendChild(foot);
@@ -2190,6 +2314,73 @@ function buildInputsTable() {
       <td class="fetb-td">${f(grand)}</td>
       <td></td>
     </tr>`;
+}
+
+
+// ── Region collapse / expand controls ─────────────────────────────────────
+function toggleRegion(section, regionKey, btn) {
+  const target = document.querySelector(
+    `.${section==='rs'?'region':'offsite'}-content[data-section="${section}"][data-region="${regionKey}"]`
+  );
+  if (!target) return;
+  const willExpand = target.classList.contains('collapsed');
+  if (willExpand) {
+    target.classList.remove('collapsed');
+    target.style.maxHeight = target.scrollHeight + 'px';
+    btn.classList.add('expanded');
+    btn.innerHTML = '<span class="chev">▾</span> Collapse';
+  } else {
+    target.style.maxHeight = '0px';
+    target.classList.add('collapsed');
+    btn.classList.remove('expanded');
+    btn.innerHTML = '<span class="chev">▸</span> Expand';
+  }
+  syncExpandAllButton(section);
+}
+
+function toggleAllRegions(section) {
+  const btn = document.getElementById(section === 'rs' ? 'rs-expand-all' : 'os-expand-all');
+  const cls = section === 'rs' ? 'region-content' : 'offsite-content';
+  const items = document.querySelectorAll(`.${cls}[data-section="${section}"]`);
+  const anyCollapsed = Array.from(items).some(el => el.classList.contains('collapsed'));
+  // If any are collapsed, expand all; otherwise collapse all
+  items.forEach(el => {
+    const region = el.dataset.region;
+    const expandBtn = document.querySelector(`.expand-btn[data-section="${section}"][data-region="${region}"]`);
+    if (anyCollapsed) {
+      el.classList.remove('collapsed');
+      el.style.maxHeight = el.scrollHeight + 'px';
+      if (expandBtn) { expandBtn.classList.add('expanded'); expandBtn.innerHTML = '<span class="chev">▾</span> Collapse'; }
+    } else {
+      el.style.maxHeight = '0px';
+      el.classList.add('collapsed');
+      if (expandBtn) { expandBtn.classList.remove('expanded'); expandBtn.innerHTML = '<span class="chev">▸</span> Expand'; }
+    }
+  });
+  if (btn) {
+    if (anyCollapsed) {
+      btn.classList.add('all-expanded');
+      btn.innerHTML = '▾ Collapse All';
+    } else {
+      btn.classList.remove('all-expanded');
+      btn.innerHTML = '▸ Expand All';
+    }
+  }
+}
+
+function syncExpandAllButton(section) {
+  const btn = document.getElementById(section === 'rs' ? 'rs-expand-all' : 'os-expand-all');
+  if (!btn) return;
+  const cls = section === 'rs' ? 'region-content' : 'offsite-content';
+  const items = document.querySelectorAll(`.${cls}[data-section="${section}"]`);
+  const anyCollapsed = Array.from(items).some(el => el.classList.contains('collapsed'));
+  if (anyCollapsed) {
+    btn.classList.remove('all-expanded');
+    btn.innerHTML = '▸ Expand All';
+  } else {
+    btn.classList.add('all-expanded');
+    btn.innerHTML = '▾ Collapse All';
+  }
 }
 
 // ── View switching ────────────────────────────────────────────────────────
