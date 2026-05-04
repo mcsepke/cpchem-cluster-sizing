@@ -605,6 +605,64 @@
   .wl-badge.wl-oticscombo, .rs-wl-oticscombo, .rs-appl.oticscombo { background: rgba(255,214,0,0.15); color: #FFD600; border: 1px solid rgba(255,214,0,0.35); }
   .inputs-total-row td { background: rgba(0,180,216,0.06) !important; font-weight: 700; color: var(--rc); border-top: 2px solid rgba(0,180,216,0.3); }
   .inputs-save-note { font-size: 9px; color: var(--text-muted); font-style: italic; margin-top: 6px; }
+
+  /* ── Read-only Sizing Parameters (Summary View) ── */
+  .controls-panel.controls-readonly {
+    background: rgba(0,180,216,0.04);
+    border-color: rgba(0,180,216,0.18);
+  }
+  .controls-panel.controls-readonly .controls-title::after {
+    content: "  ·  view only";
+    color: var(--text-muted);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    font-weight: 400;
+    text-transform: none;
+    margin-left: 4px;
+  }
+  /* Disable interaction with all controls */
+  .controls-panel.controls-readonly input,
+  .controls-panel.controls-readonly select {
+    pointer-events: none;
+    cursor: default;
+    opacity: 1;
+  }
+  /* Hide the slider track + thumb when read-only — show only the value */
+  .controls-panel.controls-readonly input[type="range"] {
+    display: none;
+  }
+  /* Hide the slider tick rows below year & hwp sliders */
+  .controls-panel.controls-readonly .year-ticks,
+  .controls-panel.controls-readonly .hw-ticks {
+    display: none;
+  }
+  /* Hide the dropdown arrow + native chrome — make the select look like a label */
+  .controls-panel.controls-readonly select.ctl-select {
+    background-image: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--rc) !important;
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    pointer-events: none;
+  }
+  /* Promote the value-display spans to be the primary visible value */
+  .controls-panel.controls-readonly .ctl-val,
+  .controls-panel.controls-readonly .year-val,
+  .controls-panel.controls-readonly .hw-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--rc);
+    min-width: 0;
+  }
+  /* Tighten the row layout when there's no slider */
+  .controls-panel.controls-readonly .ctl-row {
+    margin-top: 4px;
+  }
+  /* Off-site year slider in offsite section is separate — leave that one editable everywhere */
 </style>
 </head>
 <body>
@@ -631,7 +689,6 @@
         <div class="cpchem-logo-bottom">ChevronPhillips Chemical</div>
       </div>
       <div class="hdr-badges">
-        <div class="badge">CLUSTER PLANNER</div>
         <button class="btn btn-reset"    onclick="resetToDefaults()">&#8635; Reset</button>
       </div>
       <div class="save-status" id="save-status">Edit FETB values inline · Changes auto-saved</div>
@@ -660,7 +717,7 @@
     <span>Rolling 30-day window — storage is constant per year, source FETB compounds annually</span>
   </div>
 
-  <div class="controls-panel">
+  <div class="controls-panel controls-readonly">
     <div class="controls-title">Sizing Parameters</div>
     <div class="controls-grid">
 
@@ -2142,6 +2199,9 @@ function switchView(view) {
     document.getElementById('view-' + v).style.display = v === view ? '' : 'none';
     document.getElementById('tab-' + v).className = 'view-tab ' + (v === view ? 'active' : 'inactive');
   });
+  // Sizing Parameters panel: read-only on Summary View; editable on Inputs & Cluster Detail
+  const cp = document.querySelector('.controls-panel');
+  if (cp) cp.classList.toggle('controls-readonly', view === 'summary');
   if (view === 'detail') recalcAll();
   if (view === 'inputs') buildInputsTable();
 }
