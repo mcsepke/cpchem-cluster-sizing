@@ -642,14 +642,14 @@
 
   <!-- View toggle -->
   <div class="view-tabs">
-    <button class="view-tab active" id="tab-summary" onclick="switchView('summary')">
-      <span class="view-tab-icon">&#9776;</span> Summary View
+    <button class="view-tab inactive" id="tab-inputs" onclick="switchView('inputs')">
+      <span class="view-tab-icon">&#9998;</span> Inputs
     </button>
     <button class="view-tab inactive" id="tab-detail" onclick="switchView('detail')">
       <span class="view-tab-icon">&#8801;</span> Cluster Detail
     </button>
-    <button class="view-tab inactive" id="tab-inputs" onclick="switchView('inputs')">
-      <span class="view-tab-icon">&#9998;</span> Inputs
+    <button class="view-tab active" id="tab-summary" onclick="switchView('summary')">
+      <span class="view-tab-icon">&#9776;</span> Summary View
     </button>
   </div>
 
@@ -726,7 +726,7 @@
       <!-- Off-Site Copy Mode -->
       <div class="ctl-group">
         <div class="ctl-lbl">Off-Site Copy Mode</div>
-        <select id="ofs" class="ctl-select" style="border-color:rgba(124,77,255,0.4);color:#7c3aed">
+        <select id="ofs" class="ctl-select" style="border-color:rgba(124,77,255,0.4);color:#ffffff">
           <option value="1">Instant Archive → RCV</option>
           <option value="2" selected>Rep to Cloud Cluster</option>
           <option value="3">Manual (per-row)</option>
@@ -917,7 +917,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v28';
+const STORAGE_KEY = 'rubrik_dashboard_v29';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -1495,9 +1495,12 @@ function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC, ofs
 }
 
 // Given total TB needed for a region Cloud Cluster, return the node configuration
+// Cloud Cluster sizing: enforce ≤ 90% utilisation — add nodes if needed
+const CC_MAX_UTIL = 0.90;
+
 function selectCCNodes(totalStoredTB) {
-  if (totalStoredTB < 32) {
-    // Single node, 32TB Dense
+  if (totalStoredTB < 32 * CC_MAX_UTIL) {
+    // Single 32TB Dense node — fits within 90% utilisation
     const vmMo   = CC_DENSE_MONTHLY_RESERVED;
     const diskMo = CC_DISK_MONTHLY_PER_NODE;
     return {
@@ -1505,12 +1508,17 @@ function selectCCNodes(totalStoredTB) {
       vmType: CC_DENSE_VM,
       nodeVMMonthly: vmMo, nodeDiskMonthly: diskMo,
       nodeMonthly: vmMo + diskMo,
-      note: '1 Dense node (below 32TB min)'
+      note: '1 Dense node (below 28.8TB / 90% of 32TB)'
     };
   }
   const isDense  = totalStoredTB < 96;
   const nodeSize = isDense ? 32 : 64;
-  const nodes    = Math.max(3, Math.ceil(totalStoredTB / nodeSize));
+  // Capacity needed to keep utilisation ≤ 90% → totalStoredTB / 0.90
+  const targetCap = totalStoredTB / CC_MAX_UTIL;
+  // Minimum 3 nodes for multi-node cluster
+  let nodes = Math.max(3, Math.ceil(targetCap / nodeSize));
+  // Defensive: bump again if for any reason still over 90%
+  while ((totalStoredTB / (nodes * nodeSize)) > CC_MAX_UTIL) nodes++;
   const vmType   = isDense ? CC_DENSE_VM : CC_EXTRA_DENSE_VM;
   const vmMo     = isDense ? CC_DENSE_MONTHLY_RESERVED : CC_EXTRA_DENSE_MONTHLY_RESERVED;
   const diskMo   = CC_DISK_MONTHLY_PER_NODE;
@@ -1519,7 +1527,7 @@ function selectCCNodes(totalStoredTB) {
     vmType,
     nodeVMMonthly: vmMo, nodeDiskMonthly: diskMo,
     nodeMonthly: vmMo + diskMo,
-    note: `${nodes} × ${nodeSize}TB ${isDense ? 'Dense' : 'Extra Dense'} nodes`
+    note: `${nodes} × ${nodeSize}TB ${isDense ? 'Dense' : 'Extra Dense'} nodes (≤90% utilisation)`
   };
 }
 
