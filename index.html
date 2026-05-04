@@ -1614,12 +1614,54 @@ function recalcAll() {
   fr.innerHTML = `<td class="foot-label" colspan="3">Total license capacity required</td><td colspan="9"></td><td class="foot-total">${totalLic} TB</td><td></td>`;
   tfoot.appendChild(fr);
 
+  // Compute Off-Site total — depends on selected mode (RCV / CC / Manual)
+  let offsiteTotalTB = 0;
+  let offsiteCardLbl = '';
+  let offsiteCardSub = '';
+  let offsiteValColor = '';
+
+  SITE_DEFAULTS.forEach(([num, name, defIT, defOT, defICS, region], si) => {
+    const itVal2  = fetbState[`${si}-IT`]  || 0;
+    const otVal2  = fetbState[`${si}-OT`];
+    const icsVal2 = fetbState[`${si}-ICS`];
+    const otNull2  = otVal2  === null;
+    const icsNull2 = icsVal2 === null;
+    const { combined: comb2, combinedFETB: combF2 } = calcOTICSMode(otVal2, icsVal2, p.thr);
+
+    const evalRow = (wl, fetb) => {
+      const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
+      const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
+      offsiteTotalTB += result.stored;
+    };
+
+    evalRow('IT', itVal2);
+    if (comb2) {
+      if (combF2 > 0) evalRow('OT+ICS', combF2);
+    } else {
+      if (!otNull2)  evalRow('OT',  otVal2);
+      if (!icsNull2) evalRow('ICS', icsVal2);
+    }
+  });
+
+  if (p.ofs === 1) {
+    offsiteCardLbl = 'Total Required RCV';
+    offsiteCardSub = `Year ${p.ofsyr} · all sites archive to RCV`;
+    offsiteValColor = '#CE93D8';
+  } else if (p.ofs === 2) {
+    offsiteCardLbl = 'Total Replicated to Cloud Cluster';
+    offsiteCardSub = `Year ${p.ofsyr} · all sites replicate to CC`;
+    offsiteValColor = 'var(--rc)';
+  } else {
+    offsiteCardLbl = 'Total Off-Site Capacity';
+    offsiteCardSub = `Year ${p.ofsyr} · per-row mix of RCV & CC`;
+    offsiteValColor = '#FFD600';
+  }
+
   // Metrics
   document.getElementById('metrics').innerHTML = `
     <div class="met-card"><div class="met-card-lbl">Total clusters</div><div class="met-card-val">${totalClusters}</div><div class="met-card-sub">across ${SITE_DEFAULTS.length} sites</div></div>
     <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">${hwLabel} · sized for ${yrLabel}</div></div>
-    <div class="met-card"><div class="met-card-lbl">Effective IT FETB</div><div class="met-card-val">${f(totalIT,0)} TB</div><div class="met-card-sub" id="it-fetb-sub">incl. absorbed OT &amp; ICS workloads</div></div>
-    <div class="met-card"><div class="met-card-lbl">Standalone OT + ICS</div><div class="met-card-val">${f(totalOTICS,0)} TB</div><div class="met-card-sub">own dedicated cluster FETB</div></div>`;
+    <div class="met-card"><div class="met-card-lbl">${offsiteCardLbl}</div><div class="met-card-val" style="color:${offsiteValColor}">${f(offsiteTotalTB,0)} TB</div><div class="met-card-sub">${offsiteCardSub}</div></div>`;
 
   buildRegionSummary(p);
   buildOffsiteSummary(p);
