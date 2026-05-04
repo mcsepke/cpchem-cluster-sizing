@@ -86,8 +86,8 @@
   .btn-reset    { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); color: var(--text-muted); }
   .btn-reset:hover { background: rgba(255,255,255,0.1); color: var(--text-secondary); }
 
-  .save-status { font-size: 10px; color: var(--text-muted); text-align: right; min-height: 14px; letter-spacing: 0.03em; transition: color 0.3s; }
-  .save-status.saved { color: #a5d6a7; }
+  .save-status { font-size: 13px; color: #ef5350; text-align: right; min-height: 18px; letter-spacing: 0.08em; font-weight: 700; text-transform: uppercase; transition: color 0.3s; font-family: 'Syne', sans-serif; }
+  .save-status.saved { color: #ff8a80; }
 
   /* ── Callout ── */
   .model-callout { background: rgba(0,180,216,0.08); border: 1px solid rgba(0,180,216,0.3); border-radius: var(--radius-sm); padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; font-size: 11px; color: #90CAF9; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -632,8 +632,6 @@
       </div>
       <div class="hdr-badges">
         <div class="badge">CLUSTER PLANNER</div>
-        <button class="btn btn-save"     onclick="saveToStorage()">&#10003; Save</button>
-        <button class="btn btn-download" onclick="downloadSnapshot()">&#8595; Download Snapshot</button>
         <button class="btn btn-reset"    onclick="resetToDefaults()">&#8635; Reset</button>
       </div>
       <div class="save-status" id="save-status">Edit FETB values inline · Changes auto-saved</div>
