@@ -719,6 +719,116 @@
     flex-shrink: 0;
   }
   .flag-icon svg { display: block; width: 100%; height: 100%; }
+
+  /* ── Chad Mode — Executive Glance ── */
+  .btn-chad {
+    background: linear-gradient(135deg, #FFD600 0%, #FF6F00 100%);
+    border: 1px solid rgba(255,214,0,0.6);
+    color: #1a1a1a;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.2);
+    box-shadow: 0 2px 6px rgba(255,111,0,0.35);
+  }
+  .btn-chad:hover {
+    background: linear-gradient(135deg, #FFEB3B 0%, #FF8F00 100%);
+    box-shadow: 0 3px 10px rgba(255,111,0,0.5);
+  }
+  .btn-chad.active {
+    background: linear-gradient(135deg, #00E5FF 0%, #00B0FF 100%);
+    color: #000;
+    border-color: rgba(0,229,255,0.7);
+    box-shadow: 0 0 16px rgba(0,229,255,0.6), inset 0 0 8px rgba(255,255,255,0.2);
+  }
+
+  /* Hide everything except chad-view when chad mode is active */
+  body.chad-mode .controls-panel,
+  body.chad-mode .model-callout,
+  body.chad-mode .view-tabs,
+  body.chad-mode #metrics,
+  body.chad-mode #view-summary,
+  body.chad-mode #view-detail,
+  body.chad-mode #view-inputs,
+  body.chad-mode .page-footer { display: none !important; }
+  body:not(.chad-mode) #chad-view { display: none !important; }
+
+  #chad-view { padding: 1rem 0; }
+  .chad-toptiles {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .chad-tile {
+    background: linear-gradient(135deg, rgba(0,180,216,0.08) 0%, rgba(0,40,80,0.4) 100%);
+    border: 2px solid rgba(0,180,216,0.35);
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .chad-tile.cc  { background: linear-gradient(135deg, rgba(0,180,216,0.10) 0%, rgba(0,40,80,0.4) 100%); border-color: rgba(0,180,216,0.5); }
+  .chad-tile.rcv { background: linear-gradient(135deg, rgba(206,147,216,0.10) 0%, rgba(70,20,90,0.4) 100%); border-color: rgba(206,147,216,0.5); }
+  .chad-tile-lbl {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.12em; margin-bottom: 12px;
+  }
+  .chad-tile-val {
+    font-family: 'Syne', sans-serif; font-size: 64px; font-weight: 800;
+    color: var(--rc); line-height: 1; letter-spacing: -1px;
+  }
+  .chad-tile-val.gold { color: #FFD600; }
+  .chad-tile-val.purple { color: #CE93D8; }
+  .chad-tile-unit { font-size: 28px; font-weight: 600; color: var(--text-secondary); margin-left: 8px; }
+
+  .chad-region {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 18px;
+    border-left: 6px solid var(--rc);
+  }
+  .chad-region-hdr {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .chad-region-name {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px;
+    color: var(--text-primary); letter-spacing: -0.5px;
+  }
+  .chad-region-flag { width: 44px; height: 30px; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.15); flex-shrink: 0; }
+  .chad-region-flag svg { display: block; width: 100%; height: 100%; }
+  .chad-region-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  @media (max-width: 768px) { .chad-region-grid { grid-template-columns: 1fr; } }
+  .chad-region-section-title {
+    font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .chad-models {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .chad-model-row {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
+    color: var(--text-primary);
+  }
+  .chad-model-count {
+    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+    color: var(--rc); min-width: 36px; text-align: right;
+  }
+  .chad-model-name { color: var(--text-primary); }
+  .chad-model-cap { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text-muted); margin-left: auto; }
+  .chad-region-os {
+    font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
+    line-height: 1.1; letter-spacing: -0.5px;
+  }
+  .chad-region-os.cc  { color: var(--rc); }
+  .chad-region-os.rcv { color: #CE93D8; }
+  .chad-region-os.mixed { color: #FFD600; }
+  .chad-region-os-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
 </style>
 </head>
 <body>
@@ -745,6 +855,7 @@
         <div class="cpchem-logo-bottom">ChevronPhillips Chemical</div>
       </div>
       <div class="hdr-badges">
+        <button class="btn btn-chad" id="btn-chad" onclick="toggleChadMode()">&#9889; Chad Mode</button>
         <button class="btn btn-reset"    onclick="resetToDefaults()">&#8635; Reset</button>
       </div>
       <div class="save-status" id="save-status">Edit FETB values inline · Changes auto-saved</div>
@@ -849,6 +960,9 @@
 
 
   <div class="metrics-grid" id="metrics"></div>
+  <!-- Chad Mode view -->
+  <div id="chad-view"></div>
+
 
   <!-- ── SUMMARY VIEW ── -->
   <div id="view-summary">
@@ -2358,6 +2472,171 @@ function buildInputsTable() {
     </tr>`;
 }
 
+
+
+// ── Chad Mode ─────────────────────────────────────────────────────────────
+function toggleChadMode() {
+  const body = document.body;
+  const btn  = document.getElementById('btn-chad');
+  const on   = !body.classList.contains('chad-mode');
+  body.classList.toggle('chad-mode', on);
+  btn.classList.toggle('active', on);
+  btn.innerHTML = on ? '&#9889; Chad Mode <span style="font-size:9px;font-weight:700;letter-spacing:.06em">&nbsp;ON</span>' : '&#9889; Chad Mode';
+  if (on) buildChadView();
+}
+
+function buildChadView() {
+  const p = getParams();
+  const yrLabel = `Year ${p.syr}`;
+  const hwLabel = HW_LABELS[p.hwp] || 'Rubrik';
+  let totalClusters = 0, totalLic = 0;
+
+  // Per-region: cluster appliance tally, off-site totals (CC stored / RCV cap)
+  const regionData = {};
+  REGIONS.forEach(({key, label}) => regionData[key] = {
+    label, modelTally: {}, ccStoredTB: 0, rcvCapTB: 0, ccCount: 0, rcvCount: 0
+  });
+
+  SITE_DEFAULTS.forEach(([num, name, defIT, defOT, defICS, region], si) => {
+    const itVal  = fetbState[`${si}-IT`]  || 0;
+    const otVal  = fetbState[`${si}-OT`];
+    const icsVal = fetbState[`${si}-ICS`];
+    const otNull  = otVal  === null;
+    const icsNull = icsVal === null;
+    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+
+    // IT cluster
+    const itFETB = itVal
+      + (otAbs && !otNull  ? (otVal  || 0) : 0)
+      + (icsAbs && !icsNull ? (icsVal || 0) : 0);
+    const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+    const itReq    = itStored * (1 + p.rsv);
+    const [itModel, itCap] = selectHardware(itReq, p.hwp, true);
+    regionData[region].modelTally[itModel] = regionData[region].modelTally[itModel] || { count:0, cap:itCap };
+    regionData[region].modelTally[itModel].count++;
+    totalClusters++;
+    totalLic += itCap;
+
+    // Combined OT+ICS cluster
+    if (combined) {
+      const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+      const req    = stored * (1 + p.rsv);
+      const [m, c] = selectHardware(req, p.hwp, false);
+      regionData[region].modelTally[m] = regionData[region].modelTally[m] || { count:0, cap:c };
+      regionData[region].modelTally[m].count++;
+      totalClusters++;
+      totalLic += c;
+    }
+
+    // Off-site: track per region using same logic as buildOffsiteSummary
+    const evalRow = (wl, fetb) => {
+      const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
+      const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
+      if (isCC) { regionData[region].ccStoredTB += result.stored; regionData[region].ccCount++; }
+      else      { regionData[region].rcvCapTB   += result.rcvCap;  regionData[region].rcvCount++; }
+    };
+    evalRow('IT', itVal);
+    if (combined) {
+      if (combinedFETB > 0) evalRow('OT+ICS', combinedFETB);
+    } else {
+      if (!otNull)  evalRow('OT',  otVal);
+      if (!icsNull) evalRow('ICS', icsVal);
+    }
+  });
+
+  // Compute global off-site total based on selected mode
+  let totalOffsite = 0;
+  REGIONS.forEach(r => totalOffsite += regionData[r.key].ccStoredTB + regionData[r.key].rcvCapTB);
+
+  // Pick the off-site headline label
+  let osLbl, osColorCls, osUnit;
+  if (p.ofs === 1)      { osLbl = 'Total Required RCV';                      osColorCls = 'purple'; osUnit = 'TB'; }
+  else if (p.ofs === 2) { osLbl = 'Total Replicated to Cloud Cluster';       osColorCls = '';       osUnit = 'TB'; }
+  else                  { osLbl = 'Total Off-Site Capacity';                  osColorCls = 'gold';   osUnit = 'TB'; }
+
+  // ── Render ──
+  let html = `
+    <div class="chad-toptiles">
+      <div class="chad-tile">
+        <div class="chad-tile-lbl">Total Clusters</div>
+        <div class="chad-tile-val">${totalClusters}</div>
+      </div>
+      <div class="chad-tile">
+        <div class="chad-tile-lbl">Total License Capacity</div>
+        <div class="chad-tile-val">${totalLic}<span class="chad-tile-unit">TB</span></div>
+      </div>
+      <div class="chad-tile ${p.ofs===1?'rcv':p.ofs===2?'cc':''}">
+        <div class="chad-tile-lbl">${osLbl}</div>
+        <div class="chad-tile-val ${osColorCls}">${f(totalOffsite,0)}<span class="chad-tile-unit">${osUnit}</span></div>
+      </div>
+    </div>`;
+
+  // Per-region cards
+  REGIONS.forEach(({key, label}) => {
+    const d = regionData[key];
+    if (Object.keys(d.modelTally).length === 0 && d.ccCount === 0 && d.rcvCount === 0) return;
+
+    // Determine off-site display per region
+    let osVal = '', osCls = 'cc', osSub = '';
+    if (d.ccStoredTB > 0 && d.rcvCapTB > 0) {
+      // mixed
+      osVal = `${f(d.ccStoredTB, 0)} TB CC + ${f(d.rcvCapTB, 0)} TB RCV`;
+      osCls = 'mixed';
+      osSub = `${d.ccCount} CC + ${d.rcvCount} RCV stream${(d.ccCount+d.rcvCount)>1?'s':''}`;
+    } else if (d.ccStoredTB > 0) {
+      osVal = `${f(d.ccStoredTB, 0)} TB`;
+      osCls = 'cc';
+      osSub = 'Cloud Cluster · 1 cluster · ' + d.ccCount + ' streams';
+    } else {
+      osVal = `${f(d.rcvCapTB, 0)} TB`;
+      osCls = 'rcv';
+      osSub = `RCV · ${d.rcvCount} stream${d.rcvCount>1?'s':''}`;
+    }
+
+    // Sort models: by capacity descending so largest first
+    const sortedModels = Object.keys(d.modelTally).sort((a,b) => d.modelTally[b].cap - d.modelTally[a].cap);
+    const totalRegionLic = sortedModels.reduce((sum,m) => sum + d.modelTally[m].count * d.modelTally[m].cap, 0);
+
+    let modelsHtml = '';
+    sortedModels.forEach(mdl => {
+      const { count, cap } = d.modelTally[mdl];
+      modelsHtml += `
+        <div class="chad-model-row">
+          <span class="chad-model-count">${count}×</span>
+          <span class="chad-model-name">${mdl}</span>
+          <span class="chad-model-cap">${cap} TB usable</span>
+        </div>`;
+    });
+
+    html += `
+      <div class="chad-region">
+        <div class="chad-region-hdr">
+          <div class="chad-region-flag">${flagSVG(key).replace('<span class="flag-icon" title="' + key + '">','').replace('</span>','')}</div>
+          <div class="chad-region-name">${label}</div>
+        </div>
+        <div class="chad-region-grid">
+          <div>
+            <div class="chad-region-section-title">Appliances / Nodes — ${totalRegionLic} TB Licensed</div>
+            <div class="chad-models">${modelsHtml}</div>
+          </div>
+          <div>
+            <div class="chad-region-section-title">Off-Site (Year ${p.ofsyr})</div>
+            <div class="chad-region-os ${osCls}">${osVal}</div>
+            <div class="chad-region-os-sub">${osSub}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('chad-view').innerHTML = html;
+}
+
+// Rebuild Chad view automatically when data changes (if chad mode is active)
+const _origRecalc = recalcAll;
+recalcAll = function() {
+  _origRecalc();
+  if (document.body.classList.contains('chad-mode')) buildChadView();
+};
 
 // ── Region collapse / expand controls ─────────────────────────────────────
 function toggleRegion(section, regionKey, btn) {
