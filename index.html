@@ -829,6 +829,277 @@
   .chad-region-os.rcv { color: #CE93D8; }
   .chad-region-os.mixed { color: #FFD600; }
   .chad-region-os-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+  /* ── Business Justification mode ── */
+  .btn-bj {
+    background: rgba(34,139,34,0.18); border-color: rgba(34,139,34,0.5); color: #a5d6a7;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .btn-bj:hover { background: rgba(34,139,34,0.28); color: #fff; border-color: #1a5c2a; }
+  .btn-bj.active { background: #1a5c2a; color: #fff; border-color: #1a5c2a; box-shadow: 0 2px 10px rgba(34,139,34,0.45); }
+
+  body.bj-mode .controls-panel,
+  body.bj-mode .model-callout,
+  body.bj-mode .view-tabs,
+  body.bj-mode #metrics,
+  body.bj-mode #view-summary,
+  body.bj-mode #view-detail,
+  body.bj-mode #view-inputs,
+  body.bj-mode #chad-view,
+  body.bj-mode .page-footer { display: none !important; }
+  body:not(.bj-mode) #bj-view { display: none !important; }
+
+  /* When both chad-mode and bj-mode are off, ignore. When bj-mode is on, force-hide chad even if its class lingers */
+  body.bj-mode { /* state marker */ }
+
+  #bj-view { padding: 0.5rem 0 2rem; }
+
+  .bj-header {
+    background: linear-gradient(135deg, #001B4E 0%, #002a72 100%);
+    border: 1px solid rgba(0,180,216,0.3);
+    border-radius: var(--radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .bj-header-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 22px; color: #ffffff; letter-spacing: -0.3px;
+  }
+  .bj-header-sub {
+    font-size: 11px; color: #90CAF9; margin-top: 4px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-family: 'DM Mono', monospace;
+  }
+  .bj-header-cust {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 13px; color: var(--rc);
+    padding: 6px 14px; background: rgba(0,180,216,0.1);
+    border: 1px solid rgba(0,180,216,0.3); border-radius: 6px;
+  }
+
+  /* Tab navigation strip */
+  .bj-tabs {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    background: rgba(0,0,0,0.3);
+    padding: 4px; border-radius: 8px; margin-bottom: 1.25rem;
+  }
+  .bj-tab {
+    flex: 1 1 auto; min-width: 110px;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.04em;
+    padding: 9px 14px; border-radius: 6px; border: none;
+    cursor: pointer; transition: all 0.15s;
+    text-transform: uppercase;
+    background: transparent; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .bj-tab:hover { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+  .bj-tab.active {
+    background: #1a5c2a; color: #ffffff;
+    box-shadow: 0 2px 8px rgba(34,139,34,0.35);
+  }
+  .bj-tab-icon { font-size: 14px; line-height: 1; }
+
+  .bj-pane { display: none; }
+  .bj-pane.active { display: block; }
+
+  /* Section card layouts */
+  .bj-section-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 24px; color: var(--text-primary);
+    margin-bottom: 0.5rem; letter-spacing: -0.3px;
+  }
+  .bj-section-sub {
+    font-size: 12px; color: var(--text-muted);
+    margin-bottom: 1.5rem; font-style: italic;
+  }
+  .bj-cols-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; margin-bottom: 1.25rem;
+  }
+  @media (max-width: 1100px) { .bj-cols-3 { grid-template-columns: 1fr; } }
+  .bj-cols-2 {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 1.25rem;
+  }
+  @media (max-width: 900px) { .bj-cols-2 { grid-template-columns: 1fr; } }
+
+  .bj-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .bj-card.problem { border-left: 4px solid #ef5350; }
+  .bj-card.solution { border-left: 4px solid #66bb6a; }
+  .bj-card.urgent { border-left: 4px solid #ffb74d; }
+
+  .bj-card-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 16px; color: var(--text-primary);
+    margin-bottom: 0.85rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bj-card-title.problem  { color: #ef5350; }
+  .bj-card-title.solution { color: #66bb6a; }
+  .bj-card-title.urgent   { color: #ffb74d; }
+  .bj-card-icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; flex-shrink: 0;
+  }
+  .bj-card-icon.problem  { background: rgba(239,83,80,0.15);  color: #ef5350;  border: 1px solid rgba(239,83,80,0.3); }
+  .bj-card-icon.solution { background: rgba(102,187,106,0.15); color: #66bb6a; border: 1px solid rgba(102,187,106,0.3); }
+  .bj-card-icon.urgent   { background: rgba(255,183,77,0.15);  color: #ffb74d; border: 1px solid rgba(255,183,77,0.3); }
+
+  .bj-list { list-style: none; padding: 0; margin: 0; }
+  .bj-list li {
+    padding: 0.55rem 0 0.55rem 1.25rem;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 12.5px; line-height: 1.55;
+    color: var(--text-secondary);
+  }
+  .bj-list li:last-child { border-bottom: none; }
+  .bj-list li::before {
+    content: "▸"; position: absolute; left: 0; top: 0.55rem;
+    color: var(--rc); font-weight: 700;
+  }
+  .bj-list li strong { color: var(--text-primary); font-weight: 700; }
+
+  /* Comparison cards (Current vs Future) */
+  .bj-compare-head {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 8px 14px; border-radius: 6px 6px 0 0;
+    margin-bottom: 0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bj-compare-head.current  { background: rgba(239,83,80,0.18);  color: #ffcdd2; border: 1px solid rgba(239,83,80,0.4); border-bottom: none; }
+  .bj-compare-head.future   { background: rgba(102,187,106,0.18); color: #c8e6c9; border: 1px solid rgba(102,187,106,0.4); border-bottom: none; }
+  .bj-compare-body {
+    background: var(--bg-card);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 0.5rem 0.5rem 0.85rem;
+  }
+  .bj-compare-item {
+    padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .bj-compare-item:last-child { border-bottom: none; }
+  .bj-compare-item-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12.5px;
+    margin-bottom: 4px;
+  }
+  .bj-compare-head.current ~ .bj-compare-body .bj-compare-item-title,
+  .bj-compare-body.current .bj-compare-item-title { color: #ef5350; }
+  .bj-compare-head.future ~ .bj-compare-body .bj-compare-item-title,
+  .bj-compare-body.future .bj-compare-item-title { color: #66bb6a; }
+  .bj-compare-item-text {
+    font-size: 12px; color: var(--text-secondary); line-height: 1.55;
+  }
+
+  /* Stats / metric tiles inside BJ */
+  .bj-metrics {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    gap: 12px; margin: 1.25rem 0;
+  }
+  .bj-metric {
+    background: rgba(0,180,216,0.05);
+    border: 1px solid rgba(0,180,216,0.25);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .bj-metric-val {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 28px; color: var(--rc); line-height: 1;
+  }
+  .bj-metric-lbl {
+    font-size: 10px; color: var(--text-muted); margin-top: 6px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* Sizing & Licensing tables */
+  .bj-sizing-tbl {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+    margin-top: 0.5rem;
+  }
+  .bj-sizing-tbl th {
+    background: #0a1d45; color: #90CAF9;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .bj-sizing-tbl th.num { text-align: right; }
+  .bj-sizing-tbl td {
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    font-family: 'DM Mono', monospace; color: var(--text-secondary);
+  }
+  .bj-sizing-tbl td:last-child, .bj-sizing-tbl th:last-child { border-right: none; }
+  .bj-sizing-tbl td.workload { font-family: 'Syne', sans-serif; font-weight: 600; color: var(--text-primary); }
+  .bj-sizing-tbl td.num { text-align: right; font-weight: 600; color: var(--text-primary); }
+  .bj-sizing-tbl tbody tr:hover td { background: rgba(0,180,216,0.04); }
+  .bj-sizing-tbl tfoot td {
+    background: rgba(0,180,216,0.08);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; color: var(--rc);
+    border-top: 2px solid rgba(0,180,216,0.4);
+  }
+
+  /* Action plan timeline */
+  .bj-timeline {
+    display: flex; flex-direction: column; gap: 0;
+    margin-top: 1rem;
+  }
+  .bj-timeline-row {
+    display: grid; grid-template-columns: 130px 110px 1fr 130px 80px;
+    gap: 12px; align-items: center;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    transition: background 0.15s;
+  }
+  .bj-timeline-row:hover { background: rgba(0,180,216,0.04); }
+  .bj-timeline-row.header {
+    background: #0a1d45; color: #90CAF9;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .bj-timeline-row .date { font-family: 'DM Mono', monospace; color: var(--text-muted); }
+  .bj-timeline-row .task { font-family: 'Syne', sans-serif; font-weight: 600; color: var(--text-primary); }
+  .bj-timeline-row .owner { font-size: 11px; color: var(--text-secondary); }
+  .bj-timeline-row .company { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .bj-status {
+    display: inline-block; padding: 3px 8px; border-radius: 4px;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em;
+    text-align: center; white-space: nowrap;
+  }
+  .bj-status.complete    { background: rgba(102,187,106,0.18); color: #a5d6a7; border: 1px solid rgba(102,187,106,0.4); }
+  .bj-status.working     { background: rgba(255,183,77,0.18); color: #ffd180; border: 1px solid rgba(255,183,77,0.4); }
+  .bj-status.notstarted  { background: rgba(255,255,255,0.06); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.12); }
+
+  /* Highlighted callouts */
+  .bj-callout {
+    background: linear-gradient(90deg, rgba(0,180,216,0.08), rgba(0,180,216,0.02));
+    border-left: 4px solid var(--rc);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.5rem; margin: 1rem 0;
+    font-size: 13px; line-height: 1.65;
+    color: var(--text-secondary);
+  }
+  .bj-callout strong { color: var(--rc); }
+  .bj-callout-urgent {
+    background: linear-gradient(90deg, rgba(255,183,77,0.10), rgba(255,183,77,0.02));
+    border-left-color: #ffb74d;
+  }
+  .bj-callout-urgent strong { color: #ffb74d; }
 </style>
 </head>
 <body>
@@ -856,6 +1127,7 @@
       </div>
       <div class="hdr-badges">
         <button class="btn btn-chad" id="btn-chad" onclick="toggleChadMode()">&#9889; Chad Mode</button>
+        <button class="btn btn-bj" id="btn-bj" onclick="toggleBJMode()">&#128202; Business Justification</button>
         <button class="btn btn-reset"    onclick="resetToDefaults()">&#8635; Reset</button>
       </div>
       <div class="save-status" id="save-status">Edit FETB values inline · Changes auto-saved</div>
@@ -962,6 +1234,324 @@
   <div class="metrics-grid" id="metrics"></div>
   <!-- Chad Mode view -->
   <div id="chad-view"></div>
+  <!-- Business Justification View -->
+  <div id="bj-view">
+    <div class="bj-header">
+      <div>
+        <div class="bj-header-title">Rubrik Business Justification</div>
+        <div class="bj-header-sub">Cyber Resilience &amp; Data Protection Modernization</div>
+      </div>
+      <div class="bj-header-cust">ChevronPhillips Chemical · CPChem</div>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="bj-tabs" id="bj-tabs">
+      <button class="bj-tab active" data-pane="why"        onclick="switchBJTab('why')"><span class="bj-tab-icon">&#10067;</span>Why Rubrik</button>
+      <button class="bj-tab"        data-pane="onprem"     onclick="switchBJTab('onprem')"><span class="bj-tab-icon">&#127970;</span>On-Prem</button>
+      <button class="bj-tab"        data-pane="azure"      onclick="switchBJTab('azure')"><span class="bj-tab-icon">&#9729;</span>Azure Cloud</button>
+      <button class="bj-tab"        data-pane="cloud"      onclick="switchBJTab('cloud')"><span class="bj-tab-icon">&#128640;</span>Cloud Strategy</button>
+      <button class="bj-tab"        data-pane="assumptions" onclick="switchBJTab('assumptions')"><span class="bj-tab-icon">&#128203;</span>Assumptions</button>
+      <button class="bj-tab"        data-pane="sizing"     onclick="switchBJTab('sizing')"><span class="bj-tab-icon">&#128200;</span>Sizing &amp; Licensing</button>
+      <button class="bj-tab"        data-pane="actionplan" onclick="switchBJTab('actionplan')"><span class="bj-tab-icon">&#128467;</span>Action Plan</button>
+    </div>
+
+    <!-- ── PANE: Why Rubrik ── -->
+    <div class="bj-pane active" id="bj-pane-why">
+      <div class="bj-section-title">Why Do Anything · Why Rubrik · Why Now</div>
+      <div class="bj-section-sub">Partner with Rubrik to deliver the most performant, scalable, and simple to manage cyber resilient solution for CPChem's most critical data.</div>
+
+      <div class="bj-cols-3">
+        <div class="bj-card problem">
+          <div class="bj-card-title problem"><span class="bj-card-icon problem">!</span>Why Do Anything</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">Veritas NetBackup &amp; native Microsoft tools have created critical pain points:</div>
+          <ul class="bj-list">
+            <li><strong>Operational Failures at Remote Sites</strong> — Large file servers cannot complete replications within 24-hour windows; backup windows missed.</li>
+            <li><strong>Antiquated Identity Protection</strong> — AD recovery relies on manual, outdated tools. Native Entra ID tools too limited for modern needs.</li>
+            <li><strong>Poor Azure Recovery &amp; Support</strong> — Significant trouble restoring Azure VMs in recent DR exercise. Veritas cloud support quality is declining.</li>
+            <li><strong>Small Team, High Manual Burden</strong> — A small IT team manages a massive number of systems. Veritas environment pulls them away from strategic initiatives.</li>
+          </ul>
+        </div>
+
+        <div class="bj-card solution">
+          <div class="bj-card-title solution"><span class="bj-card-icon solution">&#10003;</span>Why Rubrik</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">Consolidates protection into a single, automated, cyber-resilient platform.</div>
+          <ul class="bj-list">
+            <li><strong>Superior Cloud Efficiency (Azure)</strong> — Rubrik Cloud Vault provides a secure, air-gapped, immutable storage target. Logical, not physical — data cannot be encrypted or deleted by attackers.</li>
+            <li><strong>20–40% Azure Cost Savings</strong> — Exocompute (ephemeral worker nodes) eliminates expensive persistent cloud clusters or snapshots.</li>
+            <li><strong>Modern Identity &amp; OT Protection</strong> — Full forest-level orchestration and granular attribute comparison for AD/Entra ID. Replaces manual processes with rapid, automated recovery.</li>
+            <li><strong>Optimized for Nutanix AHV</strong> — Designed for CPChem's new standard. Near-zero RTO via Live Mount and automated discovery/policy application for AHV VMs.</li>
+          </ul>
+        </div>
+
+        <div class="bj-card urgent">
+          <div class="bj-card-title urgent"><span class="bj-card-icon urgent">&#9888;</span>Why Now</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">Delaying the transition increases financial &amp; security risks.</div>
+          <ul class="bj-list">
+            <li><strong>September Renewal Deadline</strong> — Veritas renewal is in September. Deciding by March/April allows phased deployment through Q2/Q3, avoiding lock-in to another multi-year cycle with declining vendor support.</li>
+            <li><strong>The "Luck" Factor in Cyber RTO</strong> — Recent incident met 24-hour RTO but team acknowledged they "probably got lucky." Rubrik replaces luck with guaranteed immutability and proactive anomaly detection.</li>
+            <li><strong>Consolidation Savings</strong> — Moving to a single platform eliminates redundant tools and can deliver better technology at lower total cost than current "business as usual" spend.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bj-section-title" style="margin-top:1.5rem">CPChem Cyber Resilience Objectives</div>
+      <div class="bj-cols-2">
+        <div>
+          <div class="bj-compare-head current"><span style="font-size:14px">&#9888;</span>Current Challenges</div>
+          <div class="bj-compare-body current">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Insufficient Retention</div><div class="bj-compare-item-text">Current 30-day window risks permanent data loss if breaches or failures go undetected.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Replication Bottlenecks</div><div class="bj-compare-item-text">Large remote file servers fail to complete full replications within 24 hours.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Recovery Reliability</div><div class="bj-compare-item-text">Recent DR engagements revealed significant difficulties restoring Azure VMs.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Declining Support</div><div class="bj-compare-item-text">Veritas support quality for cloud workloads has noticeably deteriorated.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Administrative Burden</div><div class="bj-compare-item-text">Complex Veritas environment overburdens a small IT team, diverting focus from strategic projects.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="bj-compare-head future"><span style="font-size:14px">&#10003;</span>How Rubrik Helps · Rubrik Security Cloud</div>
+          <div class="bj-compare-body future">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Cost · Reduced Cloud Costs</div><div class="bj-compare-item-text">15–25% cloud bill savings vs. Azure &amp; traditional tools. Tiering capabilities further reduce cost.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Complexity · Standardized Operations</div><div class="bj-compare-item-text">Reliably orchestrates backup processes, eliminates manual intervention. Single unified interface. Performance &amp; reliability at scale. Meets backup window SLA.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Cyber · Faster Ransomware Recovery</div><div class="bj-compare-item-text">No cyber awareness or application threat surface (avg dwell time 5–7 days). Stronger platform security with immutability standard and no admin backdoors.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bj-callout bj-callout-urgent">
+        <strong>Decision Window:</strong> Veritas renewal in September requires a March/April decision to enable phased deployment through Q2 and Q3 2026 — avoiding another multi-year lock-in with a vendor whose cloud support is declining.
+      </div>
+    </div>
+
+    <!-- ── PANE: On-Prem Comparison ── -->
+    <div class="bj-pane" id="bj-pane-onprem">
+      <div class="bj-section-title">On-Prem: Veritas vs. Rubrik</div>
+      <div class="bj-section-sub">Modernizing the on-premises data protection platform.</div>
+
+      <div class="bj-cols-2">
+        <div>
+          <div class="bj-compare-head current"><span style="font-size:14px">&#9888;</span>Current State · Veritas</div>
+          <div class="bj-compare-body current">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Complex Legacy Architecture</div><div class="bj-compare-item-text">"Build your own" model relies on distinct servers, creating a Single Point of Failure and requiring advanced sizing.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Weak Cyber Resilience</div><div class="bj-compare-item-text">Dependent on basic OS security and reactive third-party bolt-ons with manual thresholds causing false positives.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Operational Burden</div><div class="bj-compare-item-text">Fragmented consoles required for management, coupled with a nightmarish component-by-component upgrade sequence.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Cloud &amp; Compliance Gaps</div><div class="bj-compare-item-text">Cloud IaaS backups are not immutable, remain vulnerable to takeover, and lack native posture management.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="bj-compare-head future"><span style="font-size:14px">&#10003;</span>Future State · Rubrik</div>
+          <div class="bj-compare-body future">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Modern Unified Architecture</div><div class="bj-compare-item-text">Scale-out, masterless architecture eliminates SPOFs. Managed globally via a single SaaS control plane.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Unmatched Cyber Resilience</div><div class="bj-compare-item-text">Immutable by default (Native Air Gap) with Zero Trust Security and a cyber recovery guarantee.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Intelligent &amp; Rapid Recovery</div><div class="bj-compare-item-text">Seamless rolling upgrades alongside automated Clean Rooms and orchestrated playbooks for safe failover.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Future-Proof Platform</div><div class="bj-compare-item-text">Unified posture management natively secures sensitive data, SaaS environments (M365), and Identity systems.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANE: Azure Cloud Comparison ── -->
+    <div class="bj-pane" id="bj-pane-azure">
+      <div class="bj-section-title">Azure Cloud: Native vs. Rubrik</div>
+      <div class="bj-section-sub">Modernizing Azure workload protection — VMs, SQL, Files, and Blob.</div>
+
+      <div class="bj-cols-2">
+        <div>
+          <div class="bj-compare-head current"><span style="font-size:14px">&#9888;</span>Current State · Azure Native</div>
+          <div class="bj-compare-body current">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Fragmented Visibility</div><div class="bj-compare-item-text">Aggregated views require stitching together multiple tools, making it extremely difficult to verify hybrid coverage.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Hidden &amp; Unpredictable Costs</div><div class="bj-compare-item-text">Moving VM recovery points to the archive tier converts incrementals to full backups, severely inflating capacity costs.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Weak Cyber Posture</div><div class="bj-compare-item-text">Immutable Vaults can be toggled off or misconfigured. Threat monitoring lacks deep blast-radius analysis.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Limited Recovery Capabilities</div><div class="bj-compare-item-text">Searches are limited to single snapshots. Cross-region exports and cross-subscription restores are restricted and slow.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="bj-compare-head future"><span style="font-size:14px">&#10003;</span>Future State · Rubrik</div>
+          <div class="bj-compare-body future">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Unified Workload Protection</div><div class="bj-compare-item-text">A single, automated control plane protects VMs, SQL, Blob, Files, and Nutanix Cloud on Azure — ensuring no workloads slip through the cracks.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Cost Predictability &amp; Optimization</div><div class="bj-compare-item-text">Automates smart lifecycle tiering to immutable vaults using incremental-forever backups to minimize storage footprint.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">True Cyber Resilience</div><div class="bj-compare-item-text">Logically air-gapped backups isolate data, utilizing machine learning and Google Mandiant intelligence for proactive hunting.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Rapid Orchestrated Recovery</div><div class="bj-compare-item-text">Global Search finds files across all snapshots instantly. Live Mount provides near-zero RTOs anywhere in the cloud.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANE: Cloud Strategy ── -->
+    <div class="bj-pane" id="bj-pane-cloud">
+      <div class="bj-section-title">Cloud Strategy: Veritas/Cohesity vs Rubrik</div>
+      <div class="bj-section-sub">Why Rubrik is the right choice over alternatives for cloud-era data protection.</div>
+
+      <div class="bj-cols-2">
+        <div>
+          <div class="bj-compare-head current"><span style="font-size:14px">&#9888;</span>Future State · Veritas / Cohesity</div>
+          <div class="bj-compare-body current">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Chaotic Management</div><div class="bj-compare-item-text">Environments feel like operating disjointed point solutions rather than a unified data protection fabric.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Vulnerable to Cloud Takeovers</div><div class="bj-compare-item-text">If the primary cloud environment is compromised by threat actors, standard backup data remains highly susceptible.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">High-Stakes Recovery Guesswork</div><div class="bj-compare-item-text">Manual recovery runbooks and brutal cycles of building/tearing down clean rooms push downtime to weeks.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Data &amp; Identity Blind Spots</div><div class="bj-compare-item-text">No live intelligence — left hunting for answers post-attack with no easy way to surgically recover identity systems.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="bj-compare-head future"><span style="font-size:14px">&#10003;</span>Future State · Rubrik</div>
+          <div class="bj-compare-body future">
+            <div class="bj-compare-item"><div class="bj-compare-item-title">True Single Management Plane</div><div class="bj-compare-item-text">Unify your entire data protection world with one intuitive command center designed to drastically reduce daily friction.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Cloud Takeover Resistance</div><div class="bj-compare-item-text">Effortlessly recover using a logically air-gapped platform specifically engineered to survive compromised cloud environments.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Cyber Recovery Orchestration</div><div class="bj-compare-item-text">Self-learning intelligence maps the blast radius, allowing precise one-shot recovery of the entire stack.</div></div>
+            <div class="bj-compare-item"><div class="bj-compare-item-title">Data &amp; Identity Posture Management</div><div class="bj-compare-item-text">Continuous live intelligence locks down sensitive data pre-attack and pinpoints clean states for surgical identity recovery.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANE: Assumptions ── -->
+    <div class="bj-pane" id="bj-pane-assumptions">
+      <div class="bj-section-title">Sizing Assumptions</div>
+      <div class="bj-section-sub">Inputs and ground rules underlying the Rubrik solution sizing for CPChem.</div>
+
+      <div class="bj-cols-2">
+        <div class="bj-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(0,180,216,0.15);color:var(--rc);border:1px solid rgba(0,180,216,0.3)">&#9729;</span>Cloud Workloads</div>
+          <ul class="bj-list">
+            <li><strong>Azure VMs in Protection</strong> — 505 VMs, 545TB allocated (50% consumed for UCL Licensing = <strong>275TB</strong>)</li>
+            <li><strong>Azure SQL &amp; SQL Managed Instances</strong> — 6.1TB</li>
+            <li><strong>Azure File Shares</strong> — 16TB</li>
+            <li><strong>Azure VMs &amp; SQL/MI</strong> protected by Exo-compute &amp; Immutable Object Storage</li>
+            <li><strong>Azure Files, SQL &amp; SAP HANA</strong> backups protected by Azure Cloud Cluster</li>
+            <li><strong>Frequency &amp; Retention</strong> — Daily for 30 days · Immutable tiering to Rubrik Cloud Vault</li>
+          </ul>
+        </div>
+
+        <div class="bj-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(255,214,0,0.15);color:#FFD600;border:1px solid rgba(255,214,0,0.3)">&#9881;</span>Frequency, Retention &amp; Growth</div>
+          <ul class="bj-list">
+            <li><strong>Frequency &amp; Retention</strong> — Daily for 30 days</li>
+            <li><strong>Instant Archiving</strong> — up to 14 days for production workloads</li>
+            <li><strong>Data Reduction</strong> — 2.8:1 for VMs and SQL Databases · 1.2:1 for NAS (Azure Files)</li>
+            <li><strong>Annual Growth</strong> — 10% · Sized for 3 years</li>
+          </ul>
+        </div>
+
+        <div class="bj-card" id="bj-ot-ics-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(255,214,0,0.15);color:#FFD600;border:1px solid rgba(255,214,0,0.35)">&#128737;</span>OT &amp; ICS Systems</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px;line-height:1.55">
+            OT and ICS workloads at each site are absorbed into that site's IT cluster <em>unless</em> either OT or ICS exceeds the
+            <strong style="color:var(--rc)" id="bj-otics-thr">7.0 TB</strong> Small Site Threshold —
+            in which case a dedicated cluster is provisioned to host the combined OT + ICS workload at that site.
+          </div>
+          <div id="bj-otics-dynamic"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANE: Sizing & Licensing ── -->
+    <div class="bj-pane" id="bj-pane-sizing">
+      <div class="bj-section-title">Sizing &amp; Rubrik Licensing</div>
+      <div class="bj-section-sub">3-year sizing across on-premises, cloud, and identity workloads.</div>
+
+      <div class="bj-metrics">
+        <div class="bj-metric"><div class="bj-metric-val" id="bj-licensing-3yr">486 TB</div><div class="bj-metric-lbl">On-Prem Enterprise Licensing (3yr)</div></div>
+        <div class="bj-metric"><div class="bj-metric-val">330 TB</div><div class="bj-metric-lbl">Universal Cloud Licenses (Yr 1)</div></div>
+        <div class="bj-metric"><div class="bj-metric-val" id="bj-rcv-onprem-yr1">725 TB</div><div class="bj-metric-lbl">RCV On-Prem · Yr 1</div></div>
+        <div class="bj-metric"><div class="bj-metric-val">615 TB</div><div class="bj-metric-lbl">RCV Cloud · Yr 1</div></div>
+        
+      </div>
+
+      <!-- Row 1: On-Prem (Cluster Licensing | RCV per Region) -->
+      <div class="bj-cols-2">
+        <div class="bj-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(0,180,216,0.15);color:var(--rc);border:1px solid rgba(0,180,216,0.3)">&#127970;</span>On-Prem Workloads — Cluster Licensing</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">Total licensed cluster capacity per region (sum of selected appliance/node usable capacity for IT, OT &amp; ICS clusters · live calculation)</div>
+          <table class="bj-sizing-tbl">
+            <thead><tr><th>Region</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
+            <tbody id="bj-onprem-rcv-tbody"></tbody>
+            <tfoot id="bj-onprem-rcv-tfoot"></tfoot>
+          </table>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);font-style:italic">* Total rounded up to nearest licensing increment (5 TB)</div>
+        </div>
+
+        <div class="bj-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(206,147,216,0.15);color:#CE93D8;border:1px solid rgba(206,147,216,0.3)">&#128190;</span>On-Prem Workloads — Rubrik Cloud Vault</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">RCV capacity per on-prem region (live calculation from main dashboard)</div>
+          <table class="bj-sizing-tbl">
+            <thead><tr><th>Region</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
+            <tbody id="bj-rcv-onprem-tbody"></tbody>
+            <tfoot id="bj-rcv-onprem-tfoot"></tfoot>
+          </table>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);font-style:italic">* Total rounded up to nearest licensing increment (5 TB)</div>
+        </div>
+      </div>
+
+      <!-- Row 2: Cloud (UCL Workloads | RCV Workloads) -->
+      <div class="bj-cols-2" style="margin-top:1rem">
+        <div class="bj-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(0,180,216,0.15);color:var(--rc);border:1px solid rgba(0,180,216,0.3)">&#9729;</span>Cloud Workloads — UCL Licensing</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">330TB UCL (Yr 1) for Azure VMs, Files, SQL/MI</div>
+          <table class="bj-sizing-tbl">
+            <thead><tr><th>UCL Workload</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
+            <tbody>
+              <tr><td class="workload">Azure VMs</td><td class="num">303 TB</td><td class="num">333 TB</td><td class="num">366 TB</td></tr>
+              <tr><td class="workload">Azure Files</td><td class="num">18 TB</td><td class="num">20 TB</td><td class="num">23 TB</td></tr>
+              <tr><td class="workload">Azure SQL/MI</td><td class="num">7 TB</td><td class="num">8 TB</td><td class="num">9 TB</td></tr>
+            </tbody>
+            <tfoot><tr><td>UCL Total *</td><td class="num">330 TB</td><td class="num">365 TB</td><td class="num">400 TB</td></tr></tfoot>
+          </table>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);font-style:italic">* Total rounded up to nearest licensing increment (5 TB)</div>
+        </div>
+
+        <div class="bj-card">
+          <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(206,147,216,0.15);color:#CE93D8;border:1px solid rgba(206,147,216,0.3)">&#128190;</span>Cloud Workloads — Rubrik Cloud Vault</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">RCV Backup Tier (Single Zone) for Azure VMs, Files, SQL/MI</div>
+          <table class="bj-sizing-tbl">
+            <thead><tr><th>RCV Workload</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th></tr></thead>
+            <tbody>
+              <tr><td class="workload">Azure VMs</td><td class="num">550 TB</td><td class="num">710 TB</td><td class="num">780 TB</td></tr>
+              <tr><td class="workload">Azure Files</td><td class="num">45 TB</td><td class="num">50 TB</td><td class="num">55 TB</td></tr>
+              <tr><td class="workload">Azure SQL/MI</td><td class="num">16 TB</td><td class="num">18 TB</td><td class="num">20 TB</td></tr>
+            </tbody>
+            <tfoot><tr><td>Cloud RCV Total *</td><td class="num">615 TB</td><td class="num">780 TB</td><td class="num">855 TB</td></tr></tfoot>
+          </table>
+          <div style="margin-top:8px;font-size:10px;color:var(--text-muted);font-style:italic">* Total rounded up to nearest licensing increment (5 TB)</div>
+        </div>
+      </div>
+
+      <div class="bj-callout">
+        <strong>Cloud Workload Footprint:</strong> 275TB Azure VMs + 16TB Azure Files + 6TB Azure SQL/MI = 297TB base + 10% growth → 330TB Yr 1, 360TB Yr 2, 395TB Yr 3.
+        Azure VMs and SQL/MI protected by Exocompute &amp; Immutable Object Storage. Azure Files, SQL, and SAP HANA backups protected by Azure Cloud Cluster.
+      </div>
+    </div>
+
+    <!-- ── PANE: Action Plan ── -->
+    <div class="bj-pane" id="bj-pane-actionplan">
+      <div class="bj-section-title">External Mutual Action Plan</div>
+      <div class="bj-section-sub">Joint Rubrik &amp; CPChem milestones from architecture through steady state.</div>
+
+      <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <div class="bj-timeline-row header">
+          <div>Due Date</div>
+          <div>Status</div>
+          <div>Task</div>
+          <div>Owner</div>
+          <div>Company</div>
+        </div>
+        <div class="bj-timeline">
+          <div class="bj-timeline-row"><div class="date">Jan 15, 2026</div><div><span class="bj-status complete">Complete</span></div><div class="task">Architecture workshops</div><div class="owner">Mark Csepke</div><div class="company">Rubrik</div></div>
+          <div class="bj-timeline-row"><div class="date">Mar 9, 2026</div><div><span class="bj-status working">Working</span></div><div class="task">Solution Design Review LTM</div><div class="owner">Mark &amp; Chad</div><div class="company">Rubrik</div></div>
+          <div class="bj-timeline-row"><div class="date">Mar 11, 2026</div><div><span class="bj-status working">Working</span></div><div class="task">Industry Analyst Meeting with CPChem</div><div class="owner">Mark &amp; Chad</div><div class="company">Rubrik / CPChem</div></div>
+          <div class="bj-timeline-row"><div class="date">Mar 24, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Solution Design &amp; Initial Proposal Review w/ CPChem</div><div class="owner">—</div><div class="company">Rubrik / LTM</div></div>
+          <div class="bj-timeline-row"><div class="date">Mar 24, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Proposal finalized</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">Apr 15, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Offer executed</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">May 15, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Pre-installation books finished</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">Jul 15, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Hardware arrival</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">Jul 27, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Workload onboarding</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">Aug 25, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Initial onboarding complete</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">Sep 25, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">30 days on Rubrik</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row"><div class="date">Oct 29, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Steady state</div><div class="owner">—</div><div class="company">—</div></div>
+          <div class="bj-timeline-row" style="border-bottom:none"><div class="date">Nov 9, 2026</div><div><span class="bj-status notstarted">Not Started</span></div><div class="task">Ongoing enablement</div><div class="owner">—</div><div class="company">—</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 
 
   <!-- ── SUMMARY VIEW ── -->
@@ -1779,6 +2369,8 @@ function recalcAll() {
 
   buildRegionSummary(p);
   buildOffsiteSummary(p);
+  buildBJSizing();
+  buildBJAssumptions();
   // Rebuild inputs table if it's visible so values stay in sync
   if (document.getElementById('view-inputs') && document.getElementById('view-inputs').style.display !== 'none') {
     buildInputsTable();
@@ -2475,10 +3067,252 @@ function buildInputsTable() {
 
 
 // ── Chad Mode ─────────────────────────────────────────────────────────────
+
+
+// ── Business Justification Mode ───────────────────────────────────────────
+function toggleBJMode() {
+  const body = document.body;
+  const btn  = document.getElementById('btn-bj');
+  const on   = !body.classList.contains('bj-mode');
+  // If turning on, also turn off chad mode
+  if (on && body.classList.contains('chad-mode')) {
+    body.classList.remove('chad-mode');
+    const cBtn = document.getElementById('btn-chad');
+    if (cBtn) { cBtn.classList.remove('active'); cBtn.innerHTML = '\u26a1 Chad Mode'; }
+  }
+  body.classList.toggle('bj-mode', on);
+  btn.classList.toggle('active', on);
+  btn.innerHTML = on
+    ? '\ud83d\udcca Business Justification <span style="font-size:9px;font-weight:700;letter-spacing:.06em">&nbsp;ON</span>'
+    : '\ud83d\udcca Business Justification';
+  if (on) buildBJSizing();
+}
+
+
+
+// Round a number up to the next multiple of 5 (used for licensing totals)
+function roundUpFive(n) { return Math.ceil(n / 5) * 5; }
+
+// ── Business Justification: dynamic Assumptions card ──────────────────────
+function buildBJAssumptions() {
+  const dynamicEl = document.getElementById('bj-otics-dynamic');
+  const thrEl     = document.getElementById('bj-otics-thr');
+  if (!dynamicEl) return;
+  const p = getParams();
+  if (thrEl) thrEl.textContent = `${f(p.thr)} TB`;
+
+  // Categorize each site
+  const dedicated  = []; // { name, ot, ics, combined } — needs its own OT+ICS cluster
+  const absorbed   = []; // { name, ot, ics } — both below threshold, absorbed into IT
+  const noData     = []; // no OT or ICS data
+
+  SITE_DEFAULTS.forEach(([num, name, defIT, defOT, defICS, region], si) => {
+    const otVal  = fetbState[`${si}-OT`];
+    const icsVal = fetbState[`${si}-ICS`];
+    const otNull  = otVal  === null;
+    const icsNull = icsVal === null;
+    const otZero  = !otNull  && otVal  === 0;
+    const icsZero = !icsNull && icsVal === 0;
+    // Site has no OT/ICS data at all
+    if ((otNull || otZero) && (icsNull || icsZero)) {
+      noData.push({ name });
+      return;
+    }
+    const { combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+    if (combined) {
+      dedicated.push({
+        name,
+        ot: otNull ? 0 : otVal,
+        ics: icsNull ? 0 : icsVal,
+        combined: combinedFETB
+      });
+    } else {
+      absorbed.push({
+        name,
+        ot: otNull ? 0 : otVal,
+        ics: icsNull ? 0 : icsVal
+      });
+    }
+  });
+
+  let html = '<ul class="bj-list">';
+
+  if (dedicated.length > 0) {
+    html += '<li><strong style="color:#FFD600">Dedicated OT+ICS Cluster Required</strong> — the following sites have OT or ICS workloads at or above the threshold:<ul style="margin:6px 0 0 16px;padding:0;list-style:none;font-size:11.5px">';
+    dedicated.forEach(s => {
+      const otStr  = s.ot  > 0 ? `OT ${f(s.ot)}TB` : '';
+      const icsStr = s.ics > 0 ? `ICS ${f(s.ics)}TB` : '';
+      const parts  = [otStr, icsStr].filter(Boolean).join(' + ');
+      html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#FFD600">▸</span><strong style="color:var(--text-primary)">${s.name}</strong> · ${parts} → <span style="color:#FFD600;font-weight:700">${f(s.combined)}TB combined cluster</span></li>`;
+    });
+    html += '</ul></li>';
+  }
+
+  if (absorbed.length > 0) {
+    html += '<li><strong style="color:#A5D6A7">Absorbed into Site IT Cluster</strong> — OT and ICS at these sites are below the threshold and protected by the site\'s IT cluster:<ul style="margin:6px 0 0 16px;padding:0;list-style:none;font-size:11.5px">';
+    absorbed.forEach(s => {
+      const otStr  = s.ot  > 0 ? `OT ${f(s.ot)}TB` : '';
+      const icsStr = s.ics > 0 ? `ICS ${f(s.ics)}TB` : '';
+      const parts  = [otStr, icsStr].filter(Boolean).join(' + ');
+      html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#A5D6A7">▸</span><strong style="color:var(--text-primary)">${s.name}</strong> · ${parts || 'no workload data'}</li>`;
+    });
+    html += '</ul></li>';
+  }
+
+  if (noData.length > 0) {
+    html += `<li><strong style="color:var(--text-muted)">No OT/ICS Workloads</strong> — ${noData.length} site${noData.length>1?'s':''} have no OT or ICS data and are protected by IT cluster only: <span style="color:var(--text-muted);font-size:11px">${noData.map(s => s.name).join(', ')}</span></li>`;
+  }
+
+  html += '</ul>';
+  dynamicEl.innerHTML = html;
+}
+
+// ── Business Justification: dynamic sizing tables ─────────────────────────
+function buildBJSizing() {
+  const tbodyOP   = document.getElementById('bj-onprem-rcv-tbody');
+  const tfootOP   = document.getElementById('bj-onprem-rcv-tfoot');
+  const yr1Metric = document.getElementById('bj-rcv-onprem-yr1');
+  if (!tbodyOP || !tfootOP) return;
+
+  const p = getParams();
+
+  // Compute per-region cluster LICENSED CAPACITY (sum of selected appliance/node
+  // usable capacity) for Year 1, 2, 3. This represents what's actually quoted &
+  // licensed — not raw stored data and not RCV. Uses the same hardware selection
+  // logic as the main dashboard via selectHardware().
+  const regionRCVTotals = {};      // separate table — RCV per-region (kept for combined table)
+  const regionLicTotals = {};      // key -> [yr1Lic, yr2Lic, yr3Lic]
+  REGIONS.forEach(r => {
+    regionRCVTotals[r.key] = [0, 0, 0];
+    regionLicTotals[r.key] = [0, 0, 0];
+  });
+
+  SITE_DEFAULTS.forEach(([num, name, defIT, defOT, defICS, region], si) => {
+    const itVal  = fetbState[`${si}-IT`]  || 0;
+    const otVal  = fetbState[`${si}-OT`];
+    const icsVal = fetbState[`${si}-ICS`];
+    const otNull  = otVal  === null;
+    const icsNull = icsVal === null;
+    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+
+    // RCV calc (still needed for the combined RCV table at the bottom)
+    const addAllYearsRCV = (fetb) => {
+      [1,2,3].forEach(yr => {
+        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, false, yr);
+        regionRCVTotals[region][yr-1] += result.rcvCap || 0;
+      });
+    };
+    addAllYearsRCV(itVal);
+    if (combined) {
+      if (combinedFETB > 0) addAllYearsRCV(combinedFETB);
+    } else {
+      if (!otNull)  addAllYearsRCV(otVal);
+      if (!icsNull) addAllYearsRCV(icsVal);
+    }
+
+    // ── CLUSTER LICENSING: for each year, size the IT cluster + any combined OT+ICS cluster ──
+    // IT cluster FETB includes any sub-threshold OT/ICS that get absorbed
+    const itFETB = itVal
+      + (otAbs && !otNull  ? (otVal  || 0) : 0)
+      + (icsAbs && !icsNull ? (icsVal || 0) : 0);
+
+    [1,2,3].forEach(yr => {
+      // IT cluster selection at year yr
+      if (itFETB > 0) {
+        const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
+        const itReq    = itStored * (1 + p.rsv);
+        const [, itCap] = selectHardware(itReq, p.hwp, true);  // IT cluster
+        regionLicTotals[region][yr-1] += itCap;
+      }
+      // Combined OT+ICS cluster
+      if (combined && combinedFETB > 0) {
+        const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
+        const req    = stored * (1 + p.rsv);
+        const [, cap] = selectHardware(req, p.hwp, false);  // OT+ICS cluster
+        regionLicTotals[region][yr-1] += cap;
+      }
+    });
+  });
+
+
+
+  // Render On-Prem CLUSTER LICENSING table (per region) — Table 1
+  const regionLabels = { US: 'United States', Belgium: 'Belgium', Singapore: 'Singapore' };
+  let opRowsHtml = '';
+  let opLicTotals = [0, 0, 0];
+  ['US', 'Belgium', 'Singapore'].forEach(key => {
+    const [y1, y2, y3] = regionLicTotals[key];
+    opLicTotals[0] += y1; opLicTotals[1] += y2; opLicTotals[2] += y3;
+    opRowsHtml += `<tr>
+      <td class="workload">${regionLabels[key]}</td>
+      <td class="num">${Math.round(y1)} TB</td>
+      <td class="num">${Math.round(y2)} TB</td>
+      <td class="num">${Math.round(y3)} TB</td>
+    </tr>`;
+  });
+  tbodyOP.innerHTML = opRowsHtml;
+  tfootOP.innerHTML = `<tr>
+    <td>Total Licensed Capacity *</td>
+    <td class="num">${roundUpFive(opLicTotals[0])} TB</td>
+    <td class="num">${roundUpFive(opLicTotals[1])} TB</td>
+    <td class="num">${roundUpFive(opLicTotals[2])} TB</td>
+  </tr>`;
+
+  // Render On-Prem RCV per-Region table — Table 2
+  const tbodyRCVOP = document.getElementById('bj-rcv-onprem-tbody');
+  const tfootRCVOP = document.getElementById('bj-rcv-onprem-tfoot');
+  if (tbodyRCVOP && tfootRCVOP) {
+    let rcvOpRowsHtml = '';
+    let rcvOpTotals = [0, 0, 0];
+    ['US', 'Belgium', 'Singapore'].forEach(key => {
+      const [y1, y2, y3] = regionRCVTotals[key];
+      rcvOpTotals[0] += y1; rcvOpTotals[1] += y2; rcvOpTotals[2] += y3;
+      rcvOpRowsHtml += `<tr>
+        <td class="workload">${regionLabels[key]}</td>
+        <td class="num">${Math.round(y1)} TB</td>
+        <td class="num">${Math.round(y2)} TB</td>
+        <td class="num">${Math.round(y3)} TB</td>
+      </tr>`;
+    });
+    tbodyRCVOP.innerHTML = rcvOpRowsHtml;
+    tfootRCVOP.innerHTML = `<tr>
+      <td>On-Prem RCV Total *</td>
+      <td class="num">${roundUpFive(rcvOpTotals[0])} TB</td>
+      <td class="num">${roundUpFive(rcvOpTotals[1])} TB</td>
+      <td class="num">${roundUpFive(rcvOpTotals[2])} TB</td>
+    </tr>`;
+
+    // Update the headline metric tile (Year 1 on-prem RCV total)
+    if (yr1Metric) yr1Metric.textContent = `${roundUpFive(rcvOpTotals[0])} TB`;
+  }
+
+  // Update the "On-Prem Enterprise Licensing (3yr)" metric tile to match Year 3 cluster licensing total
+  const licMetric = document.getElementById('bj-licensing-3yr');
+  if (licMetric) licMetric.textContent = `${roundUpFive(opLicTotals[2])} TB`;
+}
+
+function switchBJTab(pane) {
+  if (pane === 'assumptions') buildBJAssumptions();
+  if (pane === 'sizing') buildBJSizing();
+  document.querySelectorAll('.bj-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.pane === pane);
+  });
+  document.querySelectorAll('.bj-pane').forEach(p => {
+    p.classList.toggle('active', p.id === 'bj-pane-' + pane);
+  });
+  if (pane === 'sizing') buildBJSizing();
+}
+
 function toggleChadMode() {
   const body = document.body;
   const btn  = document.getElementById('btn-chad');
   const on   = !body.classList.contains('chad-mode');
+  // If turning on chad, also turn off BJ mode
+  if (on && body.classList.contains('bj-mode')) {
+    body.classList.remove('bj-mode');
+    const bBtn = document.getElementById('btn-bj');
+    if (bBtn) { bBtn.classList.remove('active'); bBtn.innerHTML = '\u{1F4CA} Business Justification'; }
+  }
   body.classList.toggle('chad-mode', on);
   btn.classList.toggle('active', on);
   btn.innerHTML = on ? '&#9889; Chad Mode <span style="font-size:9px;font-weight:700;letter-spacing:.06em">&nbsp;ON</span>' : '&#9889; Chad Mode';
