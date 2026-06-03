@@ -1491,8 +1491,8 @@
       <div class="ctl-group">
         <div class="ctl-lbl">Hardware Platform</div>
         <select id="hwp" class="ctl-select">
-          <option value="1" selected>Rubrik Appliances</option>
-          <option value="2">HPE Hardware</option>
+          <option value="1">Rubrik Appliances</option>
+          <option value="2" selected>HPE Hardware</option>
           <option value="3">Combination</option>
         </select>
       </div>
@@ -1955,12 +1955,12 @@
         <table class="catalog-tbl">
           <thead><tr><th>Configuration</th><th>Usable Capacity</th><th>Type</th></tr></thead>
           <tbody>
-            <tr><td><span class="catalog-model hpe">1-Node 3.5TB</span></td><td><span class="catalog-cap">3.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 7TB</span></td><td><span class="catalog-cap">7 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 10.5TB</span></td><td><span class="catalog-cap">10.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 14TB</span></td><td><span class="catalog-cap">14 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 17.5TB</span></td><td><span class="catalog-cap">17.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 21TB</span></td><td><span class="catalog-cap">21 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 4TB</span></td><td><span class="catalog-cap">4 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 8TB</span></td><td><span class="catalog-cap">8 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 12TB</span></td><td><span class="catalog-cap">12 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 16TB</span></td><td><span class="catalog-cap">16 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 20TB</span></td><td><span class="catalog-cap">20 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 24TB</span></td><td><span class="catalog-cap">24 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
             <tr><td><span class="catalog-model hpe">4+ Nodes × 5TB</span></td><td><span class="catalog-cap">20+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
             <tr><td><span class="catalog-model hpe">4+ Nodes × 10TB</span></td><td><span class="catalog-cap">40+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
             <tr><td><span class="catalog-model hpe">4+ Nodes × 20TB</span></td><td><span class="catalog-cap">80+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
@@ -2046,7 +2046,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v29';
+const STORAGE_KEY = 'rubrik_dashboard_v31';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -2123,18 +2123,18 @@ function flagSVG(key) {
 }
 
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 7.0, ret: 30, hwp: 1, prodpct: 70, npret: 14, ofs: 2, ofsy: 1 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, thr: 7.0, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 2, ofsy: 1 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // HPE hardware catalog
 // Fixed single-node (non-expandable) configs:
 const HPE_FIXED = [
-  ["DL360 1-Node 3.5TB",  3.5],
-  ["DL360 1-Node 7TB",    7.0],
-  ["DL360 1-Node 10.5TB", 10.5],
-  ["DL360 1-Node 14TB",   14.0],
-  ["DL360 1-Node 17.5TB", 17.5],
-  ["DL360 1-Node 21TB",   21.0],
+  ["DL360 1-Node 4TB",    4.0],
+  ["DL360 1-Node 8TB",    8.0],
+  ["DL360 1-Node 12TB",   12.0],
+  ["DL360 1-Node 16TB",   16.0],
+  ["DL360 1-Node 20TB",   20.0],
+  ["DL360 1-Node 24TB",   24.0],
 ];
 // Scalable multi-node configs (min 4 nodes, same size throughout):
 const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
@@ -2145,18 +2145,18 @@ const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'HPE Hardware', 3: 'Combination' 
 
 // Minimum HPE fixed-node usable capacity for IT clusters
 // IT clusters that fall below this threshold are bumped up to the 14TB single-node
-const HPE_IT_MIN_CAP = 14;
+const HPE_IT_MIN_CAP = 16;
 
 function selectRubrik(reqTB) {
   for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c, 'rubrik'];
   return ["R7424+", 180, 'rubrik'];
 }
 
-const HPE_FIXED_BUFFER = 0.20; // 20% free capacity buffer for fixed single-node HPE configs
+const HPE_FIXED_BUFFER = 0.30; // 30% free capacity buffer — single-node HPE configs sized to <= 70% utilization at end of sizing period
 
 function selectHPE(reqTB, isIT) {
-  // Fixed single-node: non-expandable, so size for 3-5 yr longevity.
-  // Require that Year-3 data fills no more than 80% of the node
+  // Fixed single-node: non-expandable, so size for 3-yr longevity.
+  // Require that Year-3 data fills no more than 70% of the node
   // → effective requirement = reqTB / (1 - HPE_FIXED_BUFFER)
   const fixedReqTB = reqTB / (1 - HPE_FIXED_BUFFER);
   // For IT clusters, enforce a 14TB minimum fixed-node size.
