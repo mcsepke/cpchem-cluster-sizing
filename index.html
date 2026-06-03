@@ -2046,7 +2046,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v31';
+const STORAGE_KEY = 'rubrik_dashboard_v32';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -2152,11 +2152,11 @@ function selectRubrik(reqTB) {
   return ["R7424+", 180, 'rubrik'];
 }
 
-const HPE_FIXED_BUFFER = 0.30; // 30% free capacity buffer — single-node HPE configs sized to <= 70% utilization at end of sizing period
+const HPE_FIXED_BUFFER = 0.20; // 20% free capacity buffer — single-node HPE configs sized to <= 80% utilization at end of sizing period
 
 function selectHPE(reqTB, isIT) {
   // Fixed single-node: non-expandable, so size for 3-yr longevity.
-  // Require that Year-3 data fills no more than 70% of the node
+  // Require that Year-3 data fills no more than 80% of the node
   // → effective requirement = reqTB / (1 - HPE_FIXED_BUFFER)
   const fixedReqTB = reqTB / (1 - HPE_FIXED_BUFFER);
   // For IT clusters, enforce a 14TB minimum fixed-node size.
