@@ -1247,6 +1247,50 @@
     font-family: 'DM Mono', monospace; font-size: 9px;
     color: var(--text-muted); margin-top: 2px;
   }
+
+  /* ── IT Only toggle ── */
+  .it-only-toggle {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 4px;
+  }
+  .it-only-toggle input[type="checkbox"] {
+    position: absolute; opacity: 0; pointer-events: none;
+  }
+  .it-only-slider {
+    position: relative;
+    flex-shrink: 0;
+    width: 38px; height: 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 11px;
+    transition: background .15s, border-color .15s;
+  }
+  .it-only-slider::before {
+    content: "";
+    position: absolute;
+    left: 2px; top: 2px;
+    width: 14px; height: 14px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    transition: transform .18s ease, background .15s;
+  }
+  .it-only-toggle input:checked ~ .it-only-slider {
+    background: rgba(255,214,0,0.25);
+    border-color: rgba(255,214,0,0.6);
+  }
+  .it-only-toggle input:checked ~ .it-only-slider::before {
+    transform: translateX(18px);
+    background: #FFD600;
+  }
+  .it-only-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+  .it-only-toggle input:checked ~ .it-only-label { color: #FFD600; font-weight: 600; }
 </style>
 <style>
   /* ── Password gate ── */
@@ -1514,6 +1558,16 @@
           <option value="2" selected>Rep to Cloud Cluster</option>
           <option value="3">Manual (per-row)</option>
         </select>
+      </div>
+
+      <!-- IT Only — absorb all OT & ICS workloads into IT cluster -->
+      <div class="ctl-group">
+        <div class="ctl-lbl">IT Only</div>
+        <label class="it-only-toggle" for="it-only">
+          <input type="checkbox" id="it-only">
+          <span class="it-only-slider"></span>
+          <span class="it-only-label" id="it-only-lbl">Off · OT/ICS sized separately</span>
+        </label>
       </div>
 
     </div>
@@ -2055,7 +2109,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v32';
+const STORAGE_KEY = 'rubrik_dashboard_v33';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -2360,6 +2414,7 @@ function getParams() {
     prodpct: parseInt(document.getElementById('prodpct').value) / 100,
     npret:   parseInt(document.getElementById('npret').value),
     ofs:     parseInt(document.getElementById('ofs').value),
+    itOnly:  document.getElementById('it-only').checked,
     ofsyr:   parseInt(document.getElementById('ofsy').value),
     // ofs: 1=RCV (select-all RCV), 2=Cloud Cluster (select-all CC), 3=Manual (per-row)
     get osAll() { return this.ofs !== 3; },
@@ -2370,9 +2425,13 @@ function getParams() {
 // ── OT/ICS absorption / combination rule ─────────────────────────────────
 // Both below threshold → absorbed into IT
 // Either at/above threshold → OT+ICS combined into one cluster (not IT, not separate)
-function calcOTICSMode(otVal, icsVal, thr) {
+function calcOTICSMode(otVal, icsVal, thr, itOnly) {
   const otNull  = otVal  === null;
   const icsNull = icsVal === null;
+  // IT Only mode: regardless of threshold, force all OT & ICS into the IT cluster
+  if (itOnly) {
+    return { otAbs: true, icsAbs: true, combined: false, combinedFETB: 0 };
+  }
   const otBig  = !otNull  && otVal  >= thr;
   const icsBig = !icsNull && icsVal >= thr;
   if (!otBig && !icsBig) {
@@ -2499,7 +2558,7 @@ function recalcAll() {
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
     // Compute absorption / combined cluster mode using the new threshold rule
-    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
     ['IT','OT','ICS'].forEach(wl => {
       const tr = document.querySelector(`tr[data-si="${si}"][data-wl="${wl}"]`);
@@ -2651,7 +2710,7 @@ function recalcAll() {
     const icsVal2 = fetbState[`${si}-ICS`];
     const otNull2  = otVal2  === null;
     const icsNull2 = icsVal2 === null;
-    const { combined: comb2, combinedFETB: combF2 } = calcOTICSMode(otVal2, icsVal2, p.thr);
+    const { combined: comb2, combinedFETB: combF2 } = calcOTICSMode(otVal2, icsVal2, p.thr, p.itOnly);
 
     const evalRow = (wl, fetb) => {
       const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
@@ -2825,7 +2884,7 @@ function buildOffsiteSummary(p) {
       const icsVal = fetbState[`${si}-ICS`];
       const otNull  = otVal  === null;
       const icsNull = icsVal === null;
-      const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+      const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
       const rows = [];
 
@@ -3069,7 +3128,7 @@ function buildRegionSummary(p) {
       const icsVal = fetbState[`${si}-ICS`];
       const otNull  = otVal  === null;
       const icsNull = icsVal === null;
-      const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+      const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
       const clusters = [];
 
@@ -3327,7 +3386,7 @@ function buildInputsTable() {
     // Scenario role for each workload
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    const { otAbs: otA, icsAbs: icsA, combined: comb, combinedFETB: combFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+    const { otAbs: otA, icsAbs: icsA, combined: comb, combinedFETB: combFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
     let roleLines = [];
     roleLines.push('<span style="color:#90CAF9;font-size:9px">IT → IT Cluster</span>');
@@ -3461,7 +3520,7 @@ function buildBJAssumptions() {
       noData.push({ name });
       return;
     }
-    const { combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+    const { combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
     if (combined) {
       dedicated.push({
         name,
@@ -3536,7 +3595,7 @@ function buildBJSizing() {
     const icsVal = fetbState[`${si}-ICS`];
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
     // RCV calc (still needed for the combined RCV table at the bottom)
     const addAllYearsRCV = (fetb) => {
@@ -3771,7 +3830,7 @@ function buildChadView() {
     const icsVal = fetbState[`${si}-ICS`];
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr);
+    const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
     // IT cluster
     const itFETB = itVal
@@ -3987,6 +4046,17 @@ function switchView(view) {
 }
 
 // ── Select dropdown wiring (hwp, ofs) ────────────────────────────────────
+// IT Only toggle wiring
+const itOnlyEl = document.getElementById('it-only');
+if (itOnlyEl) {
+  itOnlyEl.addEventListener('change', () => {
+    document.getElementById('it-only-lbl').textContent = itOnlyEl.checked
+      ? 'On · OT/ICS absorbed into IT'
+      : 'Off · OT/ICS sized separately';
+    recalcAll(); autoSave();
+  });
+}
+
 ['hwp', 'ofs'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
