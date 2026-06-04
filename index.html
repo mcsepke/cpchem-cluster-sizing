@@ -359,6 +359,15 @@
   }
   .rfs-model-chip.rubrik { background: rgba(0,180,216,0.1); color: var(--rc); border-color: rgba(0,180,216,0.3); }
   .rfs-model-chip.hpe   { background: rgba(179,136,255,0.1); color: #B388FF; border-color: rgba(179,136,255,0.3); }
+  .rfs-model-cap {
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: 1px solid currentColor;
+    opacity: 0.85;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+    font-size: 0.95em;
+  }
   .rfs-model-count {
     background: rgba(255,255,255,0.12); border-radius: 3px;
     padding: 0 5px; font-size: 10px; font-weight: 700;
@@ -3198,9 +3207,25 @@ function buildRegionSummary(p) {
     let breakdownHtml = '';
     if (sortedModels.length) {
       breakdownHtml = '<div class="rfs-breakdown"><div class="rfs-breakdown-lbl">Appliance / Node breakdown</div>';
+      // Build a capacity lookup from the catalog (handles both Rubrik appliances
+      // and HPE fixed nodes; HPE scalable model names embed node count + size).
+      const capLookup = {};
+      APPLIANCES.forEach(([m, c]) => { capLookup[m] = c; });
+      HPE_FIXED.forEach(([m, c]) => { capLookup[m] = c; });
+
+      function modelUsableTB(mdl) {
+        if (capLookup[mdl] !== undefined) return capLookup[mdl];
+        // HPE scalable model names are formatted like "DL360 4-Node 20TB"
+        const m = mdl.match(/(\d+)-Node\s+(\d+(?:\.\d+)?)TB/);
+        if (m) return parseInt(m[1], 10) * parseFloat(m[2]);
+        return null;
+      }
+
       sortedModels.forEach(mdl => {
         const { count, vendor } = modelTally[mdl];
-        breakdownHtml += `<span class="rfs-model-chip ${vendor}"><span class="rfs-model-count">${count}x</span>${mdl}</span>`;
+        const cap = modelUsableTB(mdl);
+        const capLabel = cap !== null ? `<span class="rfs-model-cap">${cap} TB</span>` : '';
+        breakdownHtml += `<span class="rfs-model-chip ${vendor}"><span class="rfs-model-count">${count}x</span>${mdl}${capLabel}</span>`;
       });
       breakdownHtml += '</div>';
     }
