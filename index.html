@@ -1564,9 +1564,9 @@
       <div class="ctl-group">
         <div class="ctl-lbl">IT Only</div>
         <label class="it-only-toggle" for="it-only">
-          <input type="checkbox" id="it-only">
+          <input type="checkbox" id="it-only" checked>
           <span class="it-only-slider"></span>
-          <span class="it-only-label" id="it-only-lbl">Off · OT/ICS sized separately</span>
+          <span class="it-only-label" id="it-only-lbl">On · OT/ICS absorbed into IT</span>
         </label>
       </div>
 
@@ -2018,12 +2018,12 @@
         <table class="catalog-tbl">
           <thead><tr><th>Configuration</th><th>Usable Capacity</th><th>Type</th></tr></thead>
           <tbody>
-            <tr><td><span class="catalog-model hpe">1-Node 4TB</span></td><td><span class="catalog-cap">4 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 8TB</span></td><td><span class="catalog-cap">8 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 12TB</span></td><td><span class="catalog-cap">12 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 16TB</span></td><td><span class="catalog-cap">16 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 20TB</span></td><td><span class="catalog-cap">20 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 24TB</span></td><td><span class="catalog-cap">24 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 3.5TB</span></td><td><span class="catalog-cap">3.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 7TB</span></td><td><span class="catalog-cap">7 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 10.5TB</span></td><td><span class="catalog-cap">10.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 14TB</span></td><td><span class="catalog-cap">14 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 17.5TB</span></td><td><span class="catalog-cap">17.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 21TB</span></td><td><span class="catalog-cap">21 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
             <tr><td><span class="catalog-model hpe">4+ Nodes × 5TB</span></td><td><span class="catalog-cap">20+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
             <tr><td><span class="catalog-model hpe">4+ Nodes × 10TB</span></td><td><span class="catalog-cap">40+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
             <tr><td><span class="catalog-model hpe">4+ Nodes × 20TB</span></td><td><span class="catalog-cap">80+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
@@ -2109,7 +2109,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v33';
+const STORAGE_KEY = 'rubrik_dashboard_v40';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -2192,12 +2192,12 @@ const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416"
 // HPE hardware catalog
 // Fixed single-node (non-expandable) configs:
 const HPE_FIXED = [
-  ["DL360 1-Node 4TB",    4.0],
-  ["DL360 1-Node 8TB",    8.0],
-  ["DL360 1-Node 12TB",   12.0],
-  ["DL360 1-Node 16TB",   16.0],
-  ["DL360 1-Node 20TB",   20.0],
-  ["DL360 1-Node 24TB",   24.0],
+  ["DL360 1-Node 3.5TB",  3.5],
+  ["DL360 1-Node 7TB",    7.0],
+  ["DL360 1-Node 10.5TB", 10.5],
+  ["DL360 1-Node 14TB",   14.0],
+  ["DL360 1-Node 17.5TB", 17.5],
+  ["DL360 1-Node 21TB",   21.0],
 ];
 // Scalable multi-node configs (min 4 nodes, same size throughout):
 const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
@@ -2208,42 +2208,56 @@ const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'HPE Hardware', 3: 'Combination' 
 
 // Minimum HPE fixed-node usable capacity for IT clusters
 // IT clusters that fall below this threshold are bumped up to the 14TB single-node
-const HPE_IT_MIN_CAP = 16;
+const HPE_IT_MIN_CAP = 14;
 
 function selectRubrik(reqTB) {
+  // No utilization cap on Rubrik appliances — pick the smallest SKU that meets the requirement.
   for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c, 'rubrik'];
   return ["R7424+", 180, 'rubrik'];
 }
 
-const HPE_FIXED_BUFFER = 0.20; // 20% free capacity buffer — single-node HPE configs sized to <= 80% utilization at end of sizing period
+// HPE single-node utilization cap: 1-node fixed configs are non-expandable, so we leave
+// 10% headroom (max 90% utilization at Year-3 stored data). No cap on scalable HPE or Rubrik.
+const HPE_FIXED_BUFFER = 0.10; // 10% free capacity buffer — 1-node HPE configs sized to <= 90% utilization at Year 3
+// US-only minimum: any 1-node HPE config selected for a US site must be at least 20TB usable.
+// Belgium and Singapore sites continue to use any catalog size (including 4/8/12/16TB).
+const HPE_US_1NODE_MIN_CAP = 17.5;
+// Site-level exemptions from the 1-node 90% utilization safety buffer.
+// Sites listed here may select a 1-node config even if Year-3 stored data exceeds 90% of the node's capacity.
+// (Use exact site names as they appear in SITE_DEFAULTS.)
+const HPE_1NODE_NO_BUFFER_SITES = new Set(['Orange, TX']);
 
-function selectHPE(reqTB, isIT) {
+function selectHPE(reqTB, isIT, region, siteName) {
   // Fixed single-node: non-expandable, so size for 3-yr longevity.
-  // Require that Year-3 data fills no more than 80% of the node
+  // Default: Year-3 data fills no more than 90% of the node
   // → effective requirement = reqTB / (1 - HPE_FIXED_BUFFER)
-  const fixedReqTB = reqTB / (1 - HPE_FIXED_BUFFER);
+  // Sites in HPE_1NODE_NO_BUFFER_SITES skip the buffer to allow up to 100% utilization.
+  const skipBuffer = siteName && HPE_1NODE_NO_BUFFER_SITES.has(siteName);
+  const fixedReqTB = skipBuffer ? reqTB : reqTB / (1 - HPE_FIXED_BUFFER);
   // For IT clusters, enforce a 14TB minimum fixed-node size.
-  // Skip any catalog entry below HPE_IT_MIN_CAP when sizing IT clusters.
+  // For US sites, enforce an additional 17.5TB minimum 1-node floor (extra buffer).
   for (const [m, c] of HPE_FIXED) {
     if (isIT && c < HPE_IT_MIN_CAP) continue;
+    if (region === 'US' && c < HPE_US_1NODE_MIN_CAP) continue;
     if (c >= fixedReqTB) return [m, c, 'hpe'];
   }
   // Scalable: 4-node minimum, same node size throughout.
-  // Scalable configs can add nodes later so no extra buffer needed beyond existing reserve.
-  // Pick the config that minimises total nodes while meeting reqTB.
+  // No utilization cap on scalable configs — additional nodes can be added later
+  // to address growth. Pick the smallest config that meets the raw requirement.
   // Prefer larger node sizes (fewer nodes for same capacity).
+  const scalableReqTB = reqTB;
   let bestModel = null, bestCap = Infinity, bestNodes = Infinity;
   for (const nodeSize of HPE_SCALABLE_SIZES) {
     const minNodes = 4;
     const minCap   = minNodes * nodeSize;
-    if (minCap >= reqTB) {
+    if (minCap >= scalableReqTB) {
       if (minNodes < bestNodes || (minNodes === bestNodes && minCap < bestCap)) {
         bestNodes = minNodes;
         bestCap   = minCap;
         bestModel = `DL360 4-Node ${nodeSize}TB`;
       }
     } else {
-      const nodesNeeded = Math.ceil(reqTB / nodeSize);
+      const nodesNeeded = Math.ceil(scalableReqTB / nodeSize);
       const totalCap    = nodesNeeded * nodeSize;
       if (nodesNeeded < bestNodes || (nodesNeeded === bestNodes && totalCap < bestCap)) {
         bestNodes = nodesNeeded;
@@ -2259,16 +2273,16 @@ function selectHPE(reqTB, isIT) {
   return [`DL360 ${nodes}-Node 60TB`, nodes * nodeSize, 'hpe'];
 }
 
-function selectCombination(reqTB, isIT) {
+function selectCombination(reqTB, isIT, region, siteName) {
   // Combination: HPE for < 20TB required, Rubrik for >= 20TB
-  if (reqTB < 20) return selectHPE(reqTB, isIT);
+  if (reqTB < 20) return selectHPE(reqTB, isIT, region, siteName);
   return selectRubrik(reqTB);
 }
 
-function selectHardware(reqTB, hwp, isIT) {
+function selectHardware(reqTB, hwp, isIT, region, siteName) {
   if (hwp === 1) return selectRubrik(reqTB);
-  if (hwp === 2) return selectHPE(reqTB, isIT);
-  return selectCombination(reqTB, isIT);
+  if (hwp === 2) return selectHPE(reqTB, isIT, region, siteName);
+  return selectCombination(reqTB, isIT, region, siteName);
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -2288,7 +2302,9 @@ function getStateSnapshot() {
   });
   const fetb = {};
   Object.keys(fetbState).forEach(k => { fetb[k] = fetbState[k]; });
-  return { sliders, fetb, savedAt: new Date().toISOString() };
+  const itOnlyEl = document.getElementById('it-only');
+  const itOnly = itOnlyEl ? itOnlyEl.checked : true;
+  return { sliders, fetb, itOnly, savedAt: new Date().toISOString() };
 }
 
 function applySnapshot(snap) {
@@ -2311,6 +2327,16 @@ function applySnapshot(snap) {
         if (input && v !== null) input.value = parseFloat(v).toFixed(2);
       }
     });
+  }
+  if (typeof snap.itOnly === 'boolean') {
+    const itOnlyEl = document.getElementById('it-only');
+    if (itOnlyEl) {
+      itOnlyEl.checked = snap.itOnly;
+      const lbl = document.getElementById('it-only-lbl');
+      if (lbl) lbl.textContent = snap.itOnly
+        ? 'On · OT/ICS absorbed into IT'
+        : 'Off · OT/ICS sized separately';
+    }
   }
 }
 
@@ -2351,6 +2377,13 @@ function resetToDefaults() {
       if (inp && raw !== null) inp.value = raw.toFixed(2);
     });
   });
+  // Reset IT Only toggle to its new default: ON
+  const itOnlyEl = document.getElementById('it-only');
+  if (itOnlyEl) {
+    itOnlyEl.checked = true;
+    const lbl = document.getElementById('it-only-lbl');
+    if (lbl) lbl.textContent = 'On · OT/ICS absorbed into IT';
+  }
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
   showStatus('✓ Reset to defaults');
   recalcAll();
@@ -2551,7 +2584,7 @@ function recalcAll() {
 
   let totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
 
-  SITE_DEFAULTS.forEach(([,], si) => {
+  SITE_DEFAULTS.forEach(([,siteName,,,,region], si) => {
     const itVal  = fetbState[`${si}-IT`]  || 0;
     const otVal  = fetbState[`${si}-OT`];
     const icsVal = fetbState[`${si}-ICS`];
@@ -2674,7 +2707,7 @@ function recalcAll() {
         cell.className = `r${yr}-cell ${yr === p.syr ? 'req-active' : 'req-dim'}`;
       });
 
-      const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp, wl === 'IT');
+      const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp, wl === 'IT', region, siteName);
       totalLic += appCap;
       const pctUsed   = (y[p.syr - 1] / appCap) * 100;
       const pctCapped = Math.min(pctUsed, 100);
@@ -3123,6 +3156,7 @@ function buildRegionSummary(p) {
 
     // Pre-compute per-site cluster data for totals
     const siteData = sites.map(({ s, si }) => {
+      const siteName = s[1];
       const itVal  = fetbState[`${si}-IT`]  || 0;
       const otVal  = fetbState[`${si}-OT`];
       const icsVal = fetbState[`${si}-ICS`];
@@ -3137,7 +3171,7 @@ function buildRegionSummary(p) {
         + (icsAbs && !icsNull ? (icsVal || 0) : 0);
       const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
       const itReq    = itStored * (1 + p.rsv);
-      const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp, true); // IT cluster
+      const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp, true, key, siteName); // IT cluster (region = key from REGIONS.forEach)
       const itPct    = (itStored / itCap * 100).toFixed(1);
       clusters.push({ wl:'IT', model:itModel, cap:itCap, vendor:itVendor, pct:itPct });
       regionClusters++; regionLic += itCap;
@@ -3154,7 +3188,7 @@ function buildRegionSummary(p) {
       if (combined) {
         const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
         const req    = stored * (1 + p.rsv);
-        const [m, c, v] = selectHardware(req, p.hwp, false); // OT+ICS cluster
+        const [m, c, v] = selectHardware(req, p.hwp, false, key, siteName); // OT+ICS cluster (region = key from REGIONS.forEach)
         clusters.push({ wl:'OT+ICS', model:m, cap:c, vendor:v, pct:(stored/c*100).toFixed(1) });
         regionClusters++; regionLic += c;
         if (v === 'hpe') regionHPE++; else regionRubrik++;
@@ -3623,14 +3657,14 @@ function buildBJSizing() {
       if (itFETB > 0) {
         const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
         const itReq    = itStored * (1 + p.rsv);
-        const [, itCap] = selectHardware(itReq, p.hwp, true);  // IT cluster
+        const [, itCap] = selectHardware(itReq, p.hwp, true, region, name);  // IT cluster
         regionLicTotals[region][yr-1] += itCap;
       }
       // Combined OT+ICS cluster
       if (combined && combinedFETB > 0) {
         const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
         const req    = stored * (1 + p.rsv);
-        const [, cap] = selectHardware(req, p.hwp, false);  // OT+ICS cluster
+        const [, cap] = selectHardware(req, p.hwp, false, region, name);  // OT+ICS cluster
         regionLicTotals[region][yr-1] += cap;
       }
     });
@@ -3838,7 +3872,7 @@ function buildChadView() {
       + (icsAbs && !icsNull ? (icsVal || 0) : 0);
     const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
     const itReq    = itStored * (1 + p.rsv);
-    const [itModel, itCap] = selectHardware(itReq, p.hwp, true);
+    const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);
     regionData[region].modelTally[itModel] = regionData[region].modelTally[itModel] || { count:0, cap:itCap };
     regionData[region].modelTally[itModel].count++;
     totalClusters++;
@@ -3848,7 +3882,7 @@ function buildChadView() {
     if (combined) {
       const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
       const req    = stored * (1 + p.rsv);
-      const [m, c] = selectHardware(req, p.hwp, false);
+      const [m, c] = selectHardware(req, p.hwp, false, region, name);
       regionData[region].modelTally[m] = regionData[region].modelTally[m] || { count:0, cap:c };
       regionData[region].modelTally[m].count++;
       totalClusters++;
