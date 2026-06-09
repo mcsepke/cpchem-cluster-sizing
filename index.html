@@ -1965,7 +1965,7 @@
             <th colspan="3" class="span-req" style="background:#1a3a6a">Required Usable + Reserve (TB)</th>
             <th rowspan="2" style="width:72px;background:#004a6e">Appliance</th>
             <th rowspan="2" style="width:54px;background:#00324a">Cap (TB)</th>
-            <th rowspan="2" style="width:58px;background:#005577">Lic TB</th>
+            <th rowspan="2" style="width:58px;background:#005577" title="Licensed capacity (HPE 1-node licensed at next-higher whole TB)">Lic TB</th>
             <th rowspan="2" style="width:130px;background:#1a3a1a">Capacity Utilized</th>
             <th rowspan="2" style="width:90px;background:#1a0a4e" id="offsite-col-hdr">Off-Site</th>
           </tr>
@@ -1997,15 +1997,15 @@
           Rubrik R7400 Series
         </div>
         <table class="catalog-tbl">
-          <thead><tr><th>Model</th><th>Usable Capacity</th><th>Type</th></tr></thead>
+          <thead><tr><th>Model</th><th>Usable</th><th>Licensed</th><th>Type</th></tr></thead>
           <tbody>
-            <tr><td><span class="catalog-model rubrik">R7402</span></td><td><span class="catalog-cap">15 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
-            <tr><td><span class="catalog-model rubrik">R7404</span></td><td><span class="catalog-cap">30 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
-            <tr><td><span class="catalog-model rubrik">R7408</span></td><td><span class="catalog-cap">60 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
-            <tr><td><span class="catalog-model rubrik">R7412</span></td><td><span class="catalog-cap">90 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
-            <tr><td><span class="catalog-model rubrik">R7416</span></td><td><span class="catalog-cap">120 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
-            <tr><td><span class="catalog-model rubrik">R7420</span></td><td><span class="catalog-cap">150 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
-            <tr><td><span class="catalog-model rubrik">R7424</span></td><td><span class="catalog-cap">180 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7402</span></td><td><span class="catalog-cap">15 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">15 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7404</span></td><td><span class="catalog-cap">30 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">30 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7408</span></td><td><span class="catalog-cap">60 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">60 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7412</span></td><td><span class="catalog-cap">90 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">90 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7416</span></td><td><span class="catalog-cap">120 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">120 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7420</span></td><td><span class="catalog-cap">150 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">150 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
+            <tr><td><span class="catalog-model rubrik">R7424</span></td><td><span class="catalog-cap">180 TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted)">180 TB</span></td><td><span class="catalog-note">Appliance</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -2016,21 +2016,21 @@
           &#9670; HPE DL360 Series
         </div>
         <table class="catalog-tbl">
-          <thead><tr><th>Configuration</th><th>Usable Capacity</th><th>Type</th></tr></thead>
+          <thead><tr><th>Configuration</th><th>Usable</th><th>Licensed</th><th>Type</th></tr></thead>
           <tbody>
-            <tr><td><span class="catalog-model hpe">1-Node 3.5TB</span></td><td><span class="catalog-cap">3.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 7TB</span></td><td><span class="catalog-cap">7 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 10.5TB</span></td><td><span class="catalog-cap">10.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 14TB</span></td><td><span class="catalog-cap">14 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 17.5TB</span></td><td><span class="catalog-cap">17.5 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">1-Node 21TB</span></td><td><span class="catalog-cap">21 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 5TB</span></td><td><span class="catalog-cap">20+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 10TB</span></td><td><span class="catalog-cap">40+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 20TB</span></td><td><span class="catalog-cap">80+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 30TB</span></td><td><span class="catalog-cap">120+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 40TB</span></td><td><span class="catalog-cap">160+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 50TB</span></td><td><span class="catalog-cap">200+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
-            <tr><td><span class="catalog-model hpe">4+ Nodes × 60TB</span></td><td><span class="catalog-cap">240+ TB</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 3.5TB</span></td><td><span class="catalog-cap">3.5 TB</span></td><td><span class="catalog-cap" style="color:#00B4D8">4 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 7TB</span></td><td><span class="catalog-cap">7 TB</span></td><td><span class="catalog-cap" style="color:#00B4D8">8 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 10.5TB</span></td><td><span class="catalog-cap">10.5 TB</span></td><td><span class="catalog-cap" style="color:#00B4D8">12 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 14TB</span></td><td><span class="catalog-cap">14 TB</span></td><td><span class="catalog-cap" style="color:#00B4D8">16 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 17.5TB</span></td><td><span class="catalog-cap">17.5 TB</span></td><td><span class="catalog-cap" style="color:#00B4D8">20 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">1-Node 21TB</span></td><td><span class="catalog-cap">21 TB</span></td><td><span class="catalog-cap" style="color:#00B4D8">24 TB</span></td><td><span class="catalog-type-lbl">Fixed</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 5TB</span></td><td><span class="catalog-cap">20+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 10TB</span></td><td><span class="catalog-cap">40+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 20TB</span></td><td><span class="catalog-cap">80+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 30TB</span></td><td><span class="catalog-cap">120+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 40TB</span></td><td><span class="catalog-cap">160+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 50TB</span></td><td><span class="catalog-cap">200+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
+            <tr><td><span class="catalog-model hpe">4+ Nodes × 60TB</span></td><td><span class="catalog-cap">240+ TB</span></td><td><span class="catalog-cap" style="color:var(--text-muted);font-style:italic">—</span></td><td><span class="catalog-type-lbl scalable">Scalable</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -2109,7 +2109,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v40';
+const STORAGE_KEY = 'rubrik_dashboard_v41';
 
 const SITE_DEFAULTS = [
   [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
@@ -2192,12 +2192,14 @@ const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416"
 // HPE hardware catalog
 // Fixed single-node (non-expandable) configs:
 const HPE_FIXED = [
-  ["DL360 1-Node 3.5TB",  3.5],
-  ["DL360 1-Node 7TB",    7.0],
-  ["DL360 1-Node 10.5TB", 10.5],
-  ["DL360 1-Node 14TB",   14.0],
-  ["DL360 1-Node 17.5TB", 17.5],
-  ["DL360 1-Node 21TB",   21.0],
+  // [model, usable TB, licensed TB]
+  // 1-node HPE configs are sized on usable capacity but licensed at the next-higher whole TB.
+  ["DL360 1-Node 3.5TB",  3.5,  4],
+  ["DL360 1-Node 7TB",    7.0,  8],
+  ["DL360 1-Node 10.5TB", 10.5, 12],
+  ["DL360 1-Node 14TB",   14.0, 16],
+  ["DL360 1-Node 17.5TB", 17.5, 20],
+  ["DL360 1-Node 21TB",   21.0, 24],
 ];
 // Scalable multi-node configs (min 4 nodes, same size throughout):
 const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
@@ -2222,6 +2224,15 @@ const HPE_FIXED_BUFFER = 0.10; // 10% free capacity buffer — 1-node HPE config
 // US-only minimum: any 1-node HPE config selected for a US site must be at least 20TB usable.
 // Belgium and Singapore sites continue to use any catalog size (including 4/8/12/16TB).
 const HPE_US_1NODE_MIN_CAP = 17.5;
+
+// Lookup the licensed TB for a given HPE 1-node model (next-higher whole TB).
+// For Rubrik appliances and HPE scalable configs, licensed = usable.
+const HPE_FIXED_LIC_BY_MODEL = {};
+HPE_FIXED.forEach(([m, usable, licensed]) => { HPE_FIXED_LIC_BY_MODEL[m] = licensed; });
+function licensedTB(model, usable) {
+  if (HPE_FIXED_LIC_BY_MODEL[model] !== undefined) return HPE_FIXED_LIC_BY_MODEL[model];
+  return usable; // Rubrik & HPE scalable: licensed at usable
+}
 // Site-level exemptions from the 1-node 90% utilization safety buffer.
 // Sites listed here may select a 1-node config even if Year-3 stored data exceeds 90% of the node's capacity.
 // (Use exact site names as they appear in SITE_DEFAULTS.)
@@ -2237,6 +2248,7 @@ function selectHPE(reqTB, isIT, region, siteName) {
   // For IT clusters, enforce a 14TB minimum fixed-node size.
   // For US sites, enforce an additional 17.5TB minimum 1-node floor (extra buffer).
   for (const [m, c] of HPE_FIXED) {
+    // c here is the USABLE capacity (sizing uses this; licensed comes from licensedTB())
     if (isIT && c < HPE_IT_MIN_CAP) continue;
     if (region === 'US' && c < HPE_US_1NODE_MIN_CAP) continue;
     if (c >= fixedReqTB) return [m, c, 'hpe'];
@@ -2582,7 +2594,7 @@ function recalcAll() {
   const osTypeLbl = p.ofs === 2 ? 'Rep to Cloud Cluster' : p.ofs === 3 ? 'Per-row selection' : 'Instant Archive to RCV';
   document.getElementById('offsite-pill').textContent = `${osTypeLbl} · Prod data only · Year ${p.ofsyr} · CC: Azure PAYG + Hot Blob $${AZURE_HOT_BLOB_PER_TB_MONTH}/TB/mo · RCV: $${RCV_PER_TB_MONTH}/TB/mo`;
 
-  let totalLic = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
+  let totalLic = 0, totalUsable = 0, totalClusters = 0, totalIT = 0, totalOTICS = 0;
 
   SITE_DEFAULTS.forEach(([,siteName,,,,region], si) => {
     const itVal  = fetbState[`${si}-IT`]  || 0;
@@ -2708,14 +2720,16 @@ function recalcAll() {
       });
 
       const [appModel, appCap, appVendor] = selectHardware(r[p.syr - 1], p.hwp, wl === 'IT', region, siteName);
-      totalLic += appCap;
+      const appLic = licensedTB(appModel, appCap);
+      totalLic    += appLic;
+      totalUsable += appCap;
       const pctUsed   = (y[p.syr - 1] / appCap) * 100;
       const pctCapped = Math.min(pctUsed, 100);
       const [barCls, txtCls] = utilColor(pctUsed);
       const vendorClass = appVendor === 'hpe' ? 'hpe-badge' : 'rubrik-badge';
       tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge ${vendorClass}">${appModel}</span>`;
       tr.querySelector('.cap-cell').textContent = `${appCap} TB`;
-      tr.querySelector('.lic-cell').textContent = `${appCap} TB`;
+      tr.querySelector('.lic-cell').textContent = `${appLic} TB`;
       tr.querySelector('.util-cell').innerHTML  = `
         <div class="util-wrap">
           <div class="util-bar-bg"><div class="util-bar-fill ${barCls}" style="width:${pctCapped.toFixed(1)}%"></div></div>
@@ -2728,7 +2742,9 @@ function recalcAll() {
   const tfoot = document.getElementById('tbl-foot');
   tfoot.innerHTML = '';
   const fr = document.createElement('tr');
-  fr.innerHTML = `<td class="foot-label" colspan="3">Total license capacity required</td><td colspan="9"></td><td class="foot-total">${totalLic} TB</td><td></td>`;
+  // Footer shows both licensed (the actual quote/PO number) and usable (the deployed storage).
+  // Footer: single row with both Usable and Licensed totals aligned under their respective columns.
+  fr.innerHTML = `<td class="foot-label" colspan="3">Total license capacity required</td><td colspan="8"></td><td class="foot-total" style="color:var(--text-secondary)">${totalUsable} TB</td><td class="foot-total">${totalLic} TB</td><td></td>`;
   tfoot.appendChild(fr);
 
   // Compute Off-Site total — depends on selected mode (RCV / CC / Manual)
@@ -2777,7 +2793,7 @@ function recalcAll() {
   // Metrics
   document.getElementById('metrics').innerHTML = `
     <div class="met-card"><div class="met-card-lbl">Total clusters</div><div class="met-card-val">${totalClusters}</div><div class="met-card-sub">across ${SITE_DEFAULTS.length} sites</div></div>
-    <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub">${hwLabel} · sized for ${yrLabel}</div></div>
+    <div class="met-card"><div class="met-card-lbl">Total license capacity</div><div class="met-card-val accent">${totalLic} TB</div><div class="met-card-sub" style="line-height:1.5"><span style="color:var(--text-muted)">Usable:</span> <strong style="color:var(--text-secondary)">${totalUsable} TB</strong> · ${hwLabel} · sized for ${yrLabel}</div></div>
     <div class="met-card"><div class="met-card-lbl">${offsiteCardLbl}</div><div class="met-card-val" style="color:${offsiteValColor}">${f(offsiteTotalTB,0)} TB</div><div class="met-card-sub">${offsiteCardSub}</div></div>`;
 
   buildRegionSummary(p);
@@ -3850,7 +3866,7 @@ function buildChadView() {
   const p = getParams();
   const yrLabel = `Year ${p.syr}`;
   const hwLabel = HW_LABELS[p.hwp] || 'Rubrik';
-  let totalClusters = 0, totalLic = 0;
+  let totalClusters = 0, totalLic = 0, totalUsable = 0;
 
   // Per-region: cluster appliance tally, off-site totals (CC stored / RCV cap)
   const regionData = {};
@@ -3873,20 +3889,24 @@ function buildChadView() {
     const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
     const itReq    = itStored * (1 + p.rsv);
     const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);
+    const itLic = licensedTB(itModel, itCap);
     regionData[region].modelTally[itModel] = regionData[region].modelTally[itModel] || { count:0, cap:itCap };
     regionData[region].modelTally[itModel].count++;
     totalClusters++;
-    totalLic += itCap;
+    totalLic    += itLic;
+    totalUsable += itCap;
 
     // Combined OT+ICS cluster
     if (combined) {
       const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
       const req    = stored * (1 + p.rsv);
       const [m, c] = selectHardware(req, p.hwp, false, region, name);
+      const oLic = licensedTB(m, c);
       regionData[region].modelTally[m] = regionData[region].modelTally[m] || { count:0, cap:c };
       regionData[region].modelTally[m].count++;
       totalClusters++;
-      totalLic += c;
+      totalLic    += oLic;
+      totalUsable += c;
     }
 
     // Off-site: track per region using same logic as buildOffsiteSummary
@@ -3925,6 +3945,7 @@ function buildChadView() {
       <div class="chad-tile">
         <div class="chad-tile-lbl">Total License Capacity</div>
         <div class="chad-tile-val">${totalLic}<span class="chad-tile-unit">TB</span></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;font-family:'DM Mono',monospace;letter-spacing:0.04em">Usable: <strong style="color:var(--text-secondary)">${totalUsable} TB</strong></div>
       </div>
       <div class="chad-tile ${p.ofs===1?'rcv':p.ofs===2?'cc':''}">
         <div class="chad-tile-lbl">${osLbl}</div>
