@@ -3669,19 +3669,20 @@ function buildBJSizing() {
       + (icsAbs && !icsNull ? (icsVal || 0) : 0);
 
     [1,2,3].forEach(yr => {
-      // IT cluster selection at year yr
+      // IT cluster selection at year yr — accumulate LICENSED capacity (not usable)
+      // so the BJ Cluster Licensing table and 3yr tile reflect quotable TB.
       if (itFETB > 0) {
         const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
         const itReq    = itStored * (1 + p.rsv);
-        const [, itCap] = selectHardware(itReq, p.hwp, true, region, name);  // IT cluster
-        regionLicTotals[region][yr-1] += itCap;
+        const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);  // IT cluster
+        regionLicTotals[region][yr-1] += licensedTB(itModel, itCap);
       }
       // Combined OT+ICS cluster
       if (combined && combinedFETB > 0) {
         const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
         const req    = stored * (1 + p.rsv);
-        const [, cap] = selectHardware(req, p.hwp, false, region, name);  // OT+ICS cluster
-        regionLicTotals[region][yr-1] += cap;
+        const [otModel, cap] = selectHardware(req, p.hwp, false, region, name);  // OT+ICS cluster
+        regionLicTotals[region][yr-1] += licensedTB(otModel, cap);
       }
     });
   });
