@@ -1291,6 +1291,21 @@
     letter-spacing: 0.04em;
   }
   .it-only-toggle input:checked ~ .it-only-label { color: #FFD600; font-weight: 600; }
+
+  /* ── Site-to-site replication control ── */
+  .repl-group { background: rgba(124,255,178,0.04); border: 1px solid rgba(124,255,178,0.22); border-radius: 8px; padding: 12px 14px; }
+  .repl-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 6px; }
+  .repl-wl-picker { display: flex; align-items: center; gap: 10px; transition: opacity .2s; }
+  .repl-wl-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .repl-chk { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
+  .repl-chk input[type="checkbox"] { width: 14px; height: 14px; accent-color: #2ecc8f; cursor: pointer; }
+  .repl-chk .wl-badge { font-size: 9.5px; padding: 1px 6px; }
+  .repl-note { font-size: 10.5px; color: #7CFFB2; margin-top: 8px; line-height: 1.5; font-style: italic; }
+  .repl-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .repl-pill { display: inline-block; font-size: 9px; font-weight: 700; color: #0a2e1c; background: #2ecc8f;
+    border-radius: 4px; padding: 1px 6px; white-space: nowrap; letter-spacing: .02em; }
+  .repl-in { font-size: 8px; font-weight: 600; color: #7CFFB2; white-space: nowrap; }
+  .rs-wl.rs-wl-repl, .offsite-type-repl { background: rgba(46,204,143,0.18); color: #7CFFB2; border: 1px solid rgba(46,204,143,0.4); }
 </style>
 <style>
   /* ── Password gate ── */
@@ -1570,6 +1585,25 @@
         </label>
       </div>
 
+      <!-- Site-to-Site Replication — Diegem ⇄ Tessenderlo -->
+      <div class="ctl-group repl-group" style="grid-column:1/-1">
+        <div class="ctl-lbl">Site Replication · Diegem &#8596; Tessenderlo</div>
+        <div class="repl-row">
+          <label class="it-only-toggle" for="repl-enable">
+            <input type="checkbox" id="repl-enable" checked>
+            <span class="it-only-slider"></span>
+            <span class="it-only-label" id="repl-enable-lbl">Off · No cross-site replication</span>
+          </label>
+          <div class="repl-wl-picker" id="repl-wl-picker">
+            <span class="repl-wl-lbl">Replicate</span>
+            <label class="repl-chk"><input type="checkbox" id="repl-it" checked><span class="wl-badge wl-it">IT</span></label>
+            <label class="repl-chk"><input type="checkbox" id="repl-ot" checked><span class="wl-badge wl-ot">OT</span></label>
+            <label class="repl-chk"><input type="checkbox" id="repl-ics" checked><span class="wl-badge wl-ics">ICS</span></label>
+          </div>
+        </div>
+        <div class="repl-note" id="repl-note"></div>
+      </div>
+
     </div>
   </div>
 
@@ -1797,6 +1831,8 @@
         <div class="bj-metric"><div class="bj-metric-val">615 TB</div><div class="bj-metric-lbl">RCV Cloud · Yr 1</div></div>
         
       </div>
+
+      <div id="bj-sizing-repl-note"></div>
 
       <!-- Row 1: On-Prem (Cluster Licensing | RCV per Region) -->
       <div class="bj-cols-2">
@@ -2316,7 +2352,14 @@ function getStateSnapshot() {
   Object.keys(fetbState).forEach(k => { fetb[k] = fetbState[k]; });
   const itOnlyEl = document.getElementById('it-only');
   const itOnly = itOnlyEl ? itOnlyEl.checked : true;
-  return { sliders, fetb, itOnly, savedAt: new Date().toISOString() };
+  const replEl = id => document.getElementById(id);
+  const repl = {
+    enabled: replEl('repl-enable') ? replEl('repl-enable').checked : false,
+    it:      replEl('repl-it')     ? replEl('repl-it').checked     : true,
+    ot:      replEl('repl-ot')     ? replEl('repl-ot').checked     : true,
+    ics:     replEl('repl-ics')    ? replEl('repl-ics').checked    : true,
+  };
+  return { sliders, fetb, itOnly, repl, savedAt: new Date().toISOString() };
 }
 
 function applySnapshot(snap) {
@@ -2349,6 +2392,14 @@ function applySnapshot(snap) {
         ? 'On · OT/ICS absorbed into IT'
         : 'Off · OT/ICS sized separately';
     }
+  }
+  if (snap.repl) {
+    const setChk = (id, val) => { const el = document.getElementById(id); if (el && typeof val === 'boolean') el.checked = val; };
+    setChk('repl-enable', snap.repl.enabled);
+    setChk('repl-it',     snap.repl.it);
+    setChk('repl-ot',     snap.repl.ot);
+    setChk('repl-ics',    snap.repl.ics);
+    updateReplUI();
   }
 }
 
@@ -2396,6 +2447,13 @@ function resetToDefaults() {
     const lbl = document.getElementById('it-only-lbl');
     if (lbl) lbl.textContent = 'On · OT/ICS absorbed into IT';
   }
+  // Reset replication to default: ON, all workloads selected (Diegem ⇄ Tessenderlo)
+  const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+  setChk('repl-enable', true);
+  setChk('repl-it', true);
+  setChk('repl-ot', true);
+  setChk('repl-ics', true);
+  updateReplUI();
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
   showStatus('✓ Reset to defaults');
   recalcAll();
@@ -2460,6 +2518,7 @@ function getParams() {
     npret:   parseInt(document.getElementById('npret').value),
     ofs:     parseInt(document.getElementById('ofs').value),
     itOnly:  document.getElementById('it-only').checked,
+    repl:    getReplConfig(),
     ofsyr:   parseInt(document.getElementById('ofsy').value),
     // ofs: 1=RCV (select-all RCV), 2=Cloud Cluster (select-all CC), 3=Manual (per-row)
     get osAll() { return this.ofs !== 3; },
@@ -2540,6 +2599,97 @@ function buildTable() {
       }
     });
   });
+}
+
+// ── Site-to-Site Replication (Diegem ⇄ Tessenderlo) ─────────────────────────
+// Resolve the two replication-partner site indices by name (order-independent).
+const REPL_PARTNERS = (() => {
+  let a = null, b = null;
+  SITE_DEFAULTS.forEach(([num, name], si) => {
+    if (/diegem/i.test(name))      a = si;
+    if (/tessenderlo/i.test(name)) b = si;
+  });
+  return { a, b };
+})();
+
+function getReplConfig() {
+  const el = id => document.getElementById(id);
+  return {
+    enabled: el('repl-enable') ? el('repl-enable').checked : false,
+    it:      el('repl-it')     ? el('repl-it').checked     : false,
+    ot:      el('repl-ot')     ? el('repl-ot').checked     : false,
+    ics:     el('repl-ics')    ? el('repl-ics').checked    : false,
+    aSi:     REPL_PARTNERS.a,
+    bSi:     REPL_PARTNERS.b,
+  };
+}
+
+// Is this site a participant in the cross-site replication pair?
+function isReplSite(si, repl) {
+  return !!repl && repl.enabled && repl.aSi !== null && repl.bSi !== null
+      && (si === repl.aSi || si === repl.bSi);
+}
+function replPartnerSi(si, repl) {
+  if (!isReplSite(si, repl)) return null;
+  return si === repl.aSi ? repl.bSi : repl.aSi;
+}
+function replPartnerShort(si, repl) {
+  const partner = replPartnerSi(si, repl);
+  if (partner === null) return '';
+  return (SITE_DEFAULTS[partner][1] || '').split(',')[0];
+}
+
+// Is this site/workload replicated cross-site (→ excluded from RCV / Cloud Cluster)?
+function isReplWorkload(si, wl, repl) {
+  if (!isReplSite(si, repl)) return false;
+  if (wl === 'IT')     return repl.it;
+  if (wl === 'OT')     return repl.ot;
+  if (wl === 'ICS')    return repl.ics;
+  if (wl === 'OT+ICS') return repl.ot && repl.ics; // combined stream excluded only if both selected
+  return false;
+}
+
+// Sum of replicated-out FETB a site sends to its partner (selected + present workloads).
+function replOutFETB(si, repl) {
+  let fetb = 0;
+  if (repl.it)  { const v = fetbState[`${si}-IT`];  if (v) fetb += v; }
+  if (repl.ot)  { const v = fetbState[`${si}-OT`];  if (v) fetb += v; }
+  if (repl.ics) { const v = fetbState[`${si}-ICS`]; if (v) fetb += v; }
+  return fetb;
+}
+
+// Per-year Required Usable (NO reserve) this site RECEIVES from its partner and
+// must hold on its receiving cluster.
+function replIncomingUsable(si, p, repl) {
+  const partner = replPartnerSi(si, repl);
+  if (partner === null) return [0, 0, 0];
+  const srcFETB = replOutFETB(partner, repl);
+  if (srcFETB <= 0) return [0, 0, 0];
+  return [1, 2, 3].map(yr =>
+    calcStoredSplit(srcFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret));
+}
+
+// Sync replication UI label / picker state / note line.
+function updateReplUI() {
+  const en = document.getElementById('repl-enable');
+  if (!en) return;
+  const on     = en.checked;
+  const lbl    = document.getElementById('repl-enable-lbl');
+  const picker = document.getElementById('repl-wl-picker');
+  const note   = document.getElementById('repl-note');
+  if (lbl) lbl.textContent = on
+    ? 'On · Diegem \u2194 Tessenderlo cross-site replication'
+    : 'Off · No cross-site replication';
+  if (picker) { picker.style.opacity = on ? '1' : '0.4'; picker.style.pointerEvents = on ? 'auto' : 'none'; }
+  if (note) {
+    if (on) {
+      const repl = getReplConfig();
+      const sel = [repl.it?'IT':null, repl.ot?'OT':null, repl.ics?'ICS':null].filter(Boolean).join(', ') || 'no workloads';
+      note.textContent = `Replicating ${sel} between Diegem & Tessenderlo. Each cluster is sized for its local data plus the partner's Required Usable (no reserve); these workloads are removed from the Cloud Cluster & RCV targets.`;
+    } else {
+      note.textContent = '';
+    }
+  }
 }
 
 // ── Recalc ─────────────────────────────────────────────────────────────────
@@ -2706,7 +2856,13 @@ function recalcAll() {
 
       // Calculate all 3 years with prod/non-prod split
       const y = [1,2,3].map(yr => calcStoredSplit(clusterFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret));
-      const r = y.map(v => v * (1 + p.rsv));
+      // Site-to-site replication: the receiving cluster (IT row) must also hold the
+      // partner's replicated copy — added as Required Usable WITHOUT reserve.
+      let replIn = [0, 0, 0];
+      if (wl === 'IT' && isReplSite(si, p.repl)) replIn = replIncomingUsable(si, p, p.repl);
+      const yTot = y.map((v, i) => v + replIn[i]);
+      const replInTB = replIn[p.syr - 1];
+      const r = yTot.map(v => v * (1 + p.rsv));
       const fb = clusterFETB / p.drr;
       const di = clusterFETB * p.dcr / p.drr;
 
@@ -2723,11 +2879,12 @@ function recalcAll() {
       const appLic = licensedTB(appModel, appCap);
       totalLic    += appLic;
       totalUsable += appCap;
-      const pctUsed   = (y[p.syr - 1] / appCap) * 100;
+      const pctUsed   = (yTot[p.syr - 1] / appCap) * 100;
       const pctCapped = Math.min(pctUsed, 100);
       const [barCls, txtCls] = utilColor(pctUsed);
       const vendorClass = appVendor === 'hpe' ? 'hpe-badge' : 'rubrik-badge';
-      tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge ${vendorClass}">${appModel}</span>`;
+      const replTitle = replInTB > 0 ? ` title="Includes ${f(replInTB)} TB Required Usable replicated in from ${replPartnerShort(si, p.repl)}"` : '';
+      tr.querySelector('.app-cell').innerHTML   = `<span class="appl-badge ${vendorClass}"${replTitle}>${appModel}${replInTB > 0 ? ' <span style="color:#7CFFB2;font-weight:700">&#8596;</span>' : ''}</span>`;
       tr.querySelector('.cap-cell').textContent = `${appCap} TB`;
       tr.querySelector('.lic-cell').textContent = `${appLic} TB`;
       tr.querySelector('.util-cell').innerHTML  = `
@@ -2735,6 +2892,26 @@ function recalcAll() {
           <div class="util-bar-bg"><div class="util-bar-fill ${barCls}" style="width:${pctCapped.toFixed(1)}%"></div></div>
           <span class="util-pct ${txtCls}">${pctUsed.toFixed(1)}%</span>
         </div>`;
+
+      // Off-site cell override for replication-pair sites (IT row)
+      if (wl === 'IT' && isReplSite(si, p.repl)) {
+        const osCell2 = tr.querySelector('.offsite-cell');
+        if (osCell2) {
+          const partner = replPartnerShort(si, p.repl);
+          let cellHtml = '';
+          if (p.repl.it) {
+            cellHtml += `<span class="repl-pill" title="IT replicates to ${partner} — no RCV / Cloud Cluster copy">&#8596; ${partner}</span>`;
+          } else {
+            cellHtml += p.osCC
+              ? '<span style="color:var(--rc);font-size:9px;font-weight:700">CC</span>'
+              : '<span style="color:#CE93D8;font-size:9px;font-weight:700">RCV</span>';
+          }
+          if (replInTB > 0) {
+            cellHtml += `<span class="repl-in" title="Required Usable (no reserve) replicated in from ${partner}, added to this cluster">+${f(replInTB)} TB in</span>`;
+          }
+          osCell2.innerHTML = `<div class="repl-cell">${cellHtml}</div>`;
+        }
+      }
     });
   });
 
@@ -2762,6 +2939,7 @@ function recalcAll() {
     const { combined: comb2, combinedFETB: combF2 } = calcOTICSMode(otVal2, icsVal2, p.thr, p.itOnly);
 
     const evalRow = (wl, fetb) => {
+      if (isReplWorkload(si, wl, p.repl)) return; // replicated cross-site → not on RCV / Cloud Cluster
       const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
       const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
       offsiteTotalTB += result.stored;
@@ -2936,8 +3114,14 @@ function buildOffsiteSummary(p) {
       const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
       const rows = [];
+      const replRows = [];
 
       const addRow = (wl, fetb) => {
+        if (isReplWorkload(si, wl, p.repl)) {
+          // Replicated cross-site to partner — shown as a replication row, not RCV/CC
+          replRows.push({ wl, partner: replPartnerShort(si, p.repl) });
+          return;
+        }
         const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
         const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
         if (isCC) {
@@ -2960,7 +3144,7 @@ function buildOffsiteSummary(p) {
         if (!icsNull) addRow('ICS', icsVal);
       }
 
-      return { s, si, rows };
+      return { s, si, rows, replRows };
     });
 
     // Size ONE cloud cluster for the entire region
@@ -3042,7 +3226,7 @@ function buildOffsiteSummary(p) {
     const grid = document.createElement('div');
     grid.className = 'offsite-sites';
 
-    siteCards.forEach(({ s, rows }) => {
+    siteCards.forEach(({ s, rows, replRows }) => {
       const [num, name] = s;
       const card = document.createElement('div');
       card.className = 'offsite-site-card';
@@ -3062,6 +3246,18 @@ function buildOffsiteSummary(p) {
             <span class="offsite-cap">${capStr}</span>
           </div>`;
       });
+      (replRows || []).forEach(({ wl, partner }) => {
+        const wlc = wl === 'OT+ICS' ? 'oticscombo' : wl.toLowerCase();
+        inner += `
+          <div class="offsite-cluster-row">
+            <span class="rs-wl rs-wl-${wlc}" style="width:28px;text-align:center;font-size:8.5px;padding:1px 4px">${wl}</span>
+            <span class="offsite-type-badge offsite-type-repl">&#8596; Replicated</span>
+            <span class="offsite-cap" style="color:#7CFFB2">to ${partner}</span>
+          </div>`;
+      });
+      if (!rows.length && (!replRows || !replRows.length)) {
+        inner += `<div class="offsite-cluster-row"><span style="color:var(--text-muted);font-size:9px">No off-site copy</span></div>`;
+      }
       inner += '</div>';
       card.innerHTML = inner;
       grid.appendChild(card);
@@ -3185,7 +3381,9 @@ function buildRegionSummary(p) {
       const itFETB = itVal
         + (otAbs && !otNull  ? (otVal  || 0) : 0)
         + (icsAbs && !icsNull ? (icsVal || 0) : 0);
-      const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+      const itStoredLocal = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+      const itReplIn = isReplSite(si, p.repl) ? replIncomingUsable(si, p, p.repl)[p.syr - 1] : 0;
+      const itStored = itStoredLocal + itReplIn;
       const itReq    = itStored * (1 + p.rsv);
       const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp, true, key, siteName); // IT cluster (region = key from REGIONS.forEach)
       const itPct    = (itStored / itCap * 100).toFixed(1);
@@ -3199,6 +3397,9 @@ function buildRegionSummary(p) {
       const absorbed = [];
       if (otAbs  && !otNull)  absorbed.push(`OT ${f(otVal)} TB → absorbed`);
       if (icsAbs && !icsNull) absorbed.push(`ICS ${f(icsVal)} TB → absorbed`);
+      const replNote = (isReplSite(si, p.repl) && itReplIn > 0)
+        ? `\u2194 +${f(itReplIn)} TB replicated in from ${replPartnerShort(si, p.repl)} (Required Usable, no reserve)`
+        : '';
 
       // Combined OT+ICS cluster (when either is at/above threshold)
       if (combined) {
@@ -3212,7 +3413,7 @@ function buildRegionSummary(p) {
         modelTally[m].count++;
       }
 
-      return { s, si, clusters, absorbed };
+      return { s, si, clusters, absorbed, replNote };
     });
 
     // Region header — with collapse toggle button
@@ -3242,7 +3443,7 @@ function buildRegionSummary(p) {
     const grid = document.createElement('div');
     grid.className = 'region-sites';
 
-    siteData.forEach(({ s, clusters, absorbed }) => {
+    siteData.forEach(({ s, clusters, absorbed, replNote }) => {
       const [num, name] = s;
       const card = document.createElement('div');
       card.className = 'rs-site';
@@ -3265,6 +3466,9 @@ function buildRegionSummary(p) {
       absorbed.forEach(note => {
         inner += `<div class="rs-absorbed">⚠ ${note}</div>`;
       });
+      if (replNote) {
+        inner += `<div class="rs-absorbed" style="color:#7CFFB2">${replNote}</div>`;
+      }
 
       inner += '</div>';
       card.innerHTML = inner;
@@ -3589,6 +3793,36 @@ function buildBJAssumptions() {
 
   let html = '<ul class="bj-list">';
 
+  // ── Site-to-site replication callout (Diegem ⇄ Tessenderlo) ──
+  const repl = p.repl;
+  if (repl.enabled && repl.aSi !== null && repl.bSi !== null) {
+    const aName = SITE_DEFAULTS[repl.aSi][1];
+    const bName = SITE_DEFAULTS[repl.bSi][1];
+    const aShort = aName.split(',')[0];
+    const bShort = bName.split(',')[0];
+    const wlSel = [repl.it?'IT':null, repl.ot?'OT':null, repl.ics?'ICS':null].filter(Boolean);
+    const aOut = replOutFETB(repl.aSi, repl);
+    const bOut = replOutFETB(repl.bSi, repl);
+    const aUsable = aOut > 0 ? calcStoredSplit(aOut, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret) : 0;
+    const bUsable = bOut > 0 ? calcStoredSplit(bOut, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret) : 0;
+    const wlBadges = wlSel.length
+      ? wlSel.map(w => `<span class="wl-badge wl-${w.toLowerCase()}" style="font-size:9px;padding:1px 6px;margin:0 2px">${w}</span>`).join('')
+      : '<span style="color:var(--text-muted)">no workloads selected</span>';
+
+    html += `<li><strong style="color:#7CFFB2">Site-to-Site Replication — ${aShort} &#8596; ${bShort}</strong>`;
+    html += ` &nbsp;<span style="font-size:10px;color:var(--text-muted)">(Year ${p.syr} sizing)</span>`;
+    html += `<div style="margin:6px 0 0 0;font-size:11.5px;color:var(--text-secondary);line-height:1.6">`;
+    html += `Bidirectional replication is enabled for ${wlBadges} workloads between <strong style="color:var(--text-primary)">${aName}</strong> and <strong style="color:var(--text-primary)">${bName}</strong>. `;
+    html += `Each site's cluster is sized to hold its own local backups <em>plus</em> the partner site's <strong style="color:#7CFFB2">Required Usable capacity (excluding reserve)</strong>; reserve is then applied on top of the combined total.`;
+    html += `</div>`;
+    html += `<ul style="margin:8px 0 0 16px;padding:0;list-style:none;font-size:11.5px">`;
+    html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#2ecc8f">&#8594;</span><strong style="color:var(--text-primary)">${aShort} &#8594; ${bShort}</strong> · replicates <span style="color:#7CFFB2;font-weight:700">${f(aUsable)} TB</span> Required Usable into the ${bShort} cluster${aOut <= 0 ? ' <span style=\"color:var(--text-muted)\">(no selected workload data at '+aShort+')</span>' : ''}</li>`;
+    html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#2ecc8f">&#8594;</span><strong style="color:var(--text-primary)">${bShort} &#8594; ${aShort}</strong> · replicates <span style="color:#7CFFB2;font-weight:700">${f(bUsable)} TB</span> Required Usable into the ${aShort} cluster${bOut <= 0 ? ' <span style=\"color:var(--text-muted)\">(no selected workload data at '+bShort+')</span>' : ''}</li>`;
+    html += `</ul>`;
+    html += `<div style="margin:8px 0 0 0;font-size:11px;color:var(--text-muted);line-height:1.6">The cross-site replica serves as the off-site copy for these workloads, so the selected ${wlSel.join('/') || '—'} data at ${aShort} and ${bShort} is <strong style="color:#7CFFB2">excluded from the Azure Cloud Cluster and RCV targets</strong> to avoid double-counting capacity and cost.</div>`;
+    html += `</li>`;
+  }
+
   if (dedicated.length > 0) {
     html += '<li><strong style="color:#FFD600">Dedicated OT+ICS Cluster Required</strong> — the following sites have OT or ICS workloads at or above the threshold:<ul style="margin:6px 0 0 16px;padding:0;list-style:none;font-size:11.5px">';
     dedicated.forEach(s => {
@@ -3648,18 +3882,20 @@ function buildBJSizing() {
     const { otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, p.thr, p.itOnly);
 
     // RCV calc (still needed for the combined RCV table at the bottom)
-    const addAllYearsRCV = (fetb) => {
+    const addAllYearsRCV = (fetb, wl) => {
+      // Replicated workloads are protected by the cross-site copy, so they drop off the RCV target.
+      if (isReplWorkload(si, wl, p.repl)) return;
       [1,2,3].forEach(yr => {
         const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, false, yr);
         regionRCVTotals[region][yr-1] += result.rcvCap || 0;
       });
     };
-    addAllYearsRCV(itVal);
+    addAllYearsRCV(itVal, 'IT');
     if (combined) {
-      if (combinedFETB > 0) addAllYearsRCV(combinedFETB);
+      if (combinedFETB > 0) addAllYearsRCV(combinedFETB, 'OT+ICS');
     } else {
-      if (!otNull)  addAllYearsRCV(otVal);
-      if (!icsNull) addAllYearsRCV(icsVal);
+      if (!otNull)  addAllYearsRCV(otVal, 'OT');
+      if (!icsNull) addAllYearsRCV(icsVal, 'ICS');
     }
 
     // ── CLUSTER LICENSING: for each year, size the IT cluster + any combined OT+ICS cluster ──
@@ -3668,13 +3904,18 @@ function buildBJSizing() {
       + (otAbs && !otNull  ? (otVal  || 0) : 0)
       + (icsAbs && !icsNull ? (icsVal || 0) : 0);
 
+    // Cross-site replication: a receiving site's IT cluster also holds the partner's
+    // Required Usable (no reserve) for the replicated workloads — sized per year.
+    const replInYears = isReplSite(si, p.repl) ? replIncomingUsable(si, p, p.repl) : [0, 0, 0];
+
     [1,2,3].forEach(yr => {
       // IT cluster selection at year yr — accumulate LICENSED capacity (not usable)
       // so the BJ Cluster Licensing table and 3yr tile reflect quotable TB.
-      if (itFETB > 0) {
-        const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
+      const replIn = replInYears[yr-1];
+      if (itFETB > 0 || replIn > 0) {
+        const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret) + replIn;
         const itReq    = itStored * (1 + p.rsv);
-        const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);  // IT cluster
+        const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);  // IT cluster (+ incoming replica)
         regionLicTotals[region][yr-1] += licensedTB(itModel, itCap);
       }
       // Combined OT+ICS cluster
@@ -3742,6 +3983,30 @@ function buildBJSizing() {
   // Update the "On-Prem Enterprise Licensing (3yr)" metric tile to match Year 3 cluster licensing total
   const licMetric = document.getElementById('bj-licensing-3yr');
   if (licMetric) licMetric.textContent = `${roundUpFive(opLicTotals[2])} TB`;
+
+  // Dynamic replication note — explains the Belgian cluster-licensing uplift and RCV reduction.
+  const replNoteEl = document.getElementById('bj-sizing-repl-note');
+  if (replNoteEl) {
+    const repl = p.repl;
+    if (repl && repl.enabled && repl.aSi !== null && repl.bSi !== null) {
+      const sel = [repl.it?'IT':null, repl.ot?'OT':null, repl.ics?'ICS':null].filter(Boolean).join(', ') || 'no workloads';
+      const aShort = (SITE_DEFAULTS[repl.aSi][1] || '').split(',')[0];
+      const bShort = (SITE_DEFAULTS[repl.bSi][1] || '').split(',')[0];
+      const aIn = replIncomingUsable(repl.aSi, p, repl)[p.syr - 1];
+      const bIn = replIncomingUsable(repl.bSi, p, repl)[p.syr - 1];
+      replNoteEl.innerHTML =
+        `<div style="margin:0 0 1rem;padding:12px 14px;border-radius:8px;` +
+        `background:rgba(46,204,143,0.10);border:1px solid rgba(46,204,143,0.35);` +
+        `font-size:12px;line-height:1.5;color:var(--text-primary)">` +
+        `<strong style="color:#2ecc8f">&#8596; Site-to-Site Replication &middot; ${aShort} &#8596; ${bShort}</strong> &mdash; ` +
+        `Cluster Licensing above reflects each site's IT cluster sized for its local data <em>plus</em> the partner's Required Usable ` +
+        `(no reserve) for the replicated workloads (${sel}): ${aShort} +${aIn.toFixed(2)} TB in, ${bShort} +${bIn.toFixed(2)} TB in ` +
+        `(Year ${p.syr}). Because the cross-site replica is the off-site copy, these workloads are excluded from the On-Prem RCV total.` +
+        `</div>`;
+    } else {
+      replNoteEl.innerHTML = '';
+    }
+  }
 }
 
 function switchBJTab(pane) {
@@ -3887,7 +4152,10 @@ function buildChadView() {
     const itFETB = itVal
       + (otAbs && !otNull  ? (otVal  || 0) : 0)
       + (icsAbs && !icsNull ? (icsVal || 0) : 0);
-    const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+    const itStoredLocal = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+    // Site-to-site replication: receiving cluster also holds partner's Required Usable (no reserve)
+    const itReplIn = isReplSite(si, p.repl) ? replIncomingUsable(si, p, p.repl)[p.syr - 1] : 0;
+    const itStored = itStoredLocal + itReplIn;
     const itReq    = itStored * (1 + p.rsv);
     const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);
     const itLic = licensedTB(itModel, itCap);
@@ -3912,6 +4180,7 @@ function buildChadView() {
 
     // Off-site: track per region using same logic as buildOffsiteSummary
     const evalRow = (wl, fetb) => {
+      if (isReplWorkload(si, wl, p.repl)) return; // replicated cross-site → not on RCV / Cloud Cluster
       const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
       const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
       if (isCC) { regionData[region].ccStoredTB += result.stored; regionData[region].ccCount++; }
@@ -3980,6 +4249,15 @@ function buildChadView() {
     const sortedModels = Object.keys(d.modelTally).sort((a,b) => d.modelTally[b].cap - d.modelTally[a].cap);
     const totalRegionLic = sortedModels.reduce((sum,m) => sum + d.modelTally[m].count * d.modelTally[m].cap, 0);
 
+    // Cross-site replication note (region containing the replication pair)
+    let chadReplNote = '';
+    if (p.repl.enabled && p.repl.aSi !== null && p.repl.bSi !== null && SITE_DEFAULTS[p.repl.aSi][5] === key) {
+      const aShort = SITE_DEFAULTS[p.repl.aSi][1].split(',')[0];
+      const bShort = SITE_DEFAULTS[p.repl.bSi][1].split(',')[0];
+      const wlSel = [p.repl.it?'IT':null, p.repl.ot?'OT':null, p.repl.ics?'ICS':null].filter(Boolean).join('/') || 'none';
+      chadReplNote = `<div class="chad-region-os-sub" style="color:#7CFFB2;margin-top:8px;line-height:1.5">${aShort} &#8596; ${bShort} cross-site replication (${wlSel}) &mdash; each cluster holds the partner's Required Usable; these workloads are excluded from off-site.</div>`;
+    }
+
     let modelsHtml = '';
     sortedModels.forEach(mdl => {
       const { count, cap } = d.modelTally[mdl];
@@ -4006,6 +4284,7 @@ function buildChadView() {
             <div class="chad-region-section-title">Off-Site (Year ${p.ofsyr})</div>
             <div class="chad-region-os ${osCls}">${osVal}</div>
             <div class="chad-region-os-sub">${osSub}</div>
+            ${chadReplNote}
           </div>
         </div>
       </div>`;
@@ -4117,6 +4396,13 @@ if (itOnlyEl) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
 });
+
+// Replication control wiring
+['repl-enable', 'repl-it', 'repl-ot', 'repl-ics'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('change', () => { updateReplUI(); recalcAll(); autoSave(); });
+});
+updateReplUI();
 
 // ── Init ───────────────────────────────────────────────────────────────────
 buildTable();
