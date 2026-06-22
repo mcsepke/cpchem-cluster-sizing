@@ -230,6 +230,7 @@
   .appl-badge.rubrik-badge { background: rgba(0,180,216,0.12); color: var(--rc); border-color: rgba(0,180,216,0.35); }
   .appl-badge.hpe-badge   { background: rgba(179,136,255,0.12); color: #B388FF; border-color: rgba(179,136,255,0.35); }
   .appl-badge.edge-badge  { background: rgba(124,255,178,0.12); color: #2E9E6B; border-color: rgba(124,255,178,0.40); }
+  .appl-badge.backup-badge { background: rgba(14,116,144,0.10); color: #0E7490; border-color: rgba(14,116,144,0.30); font-style: italic; }
   .hw-pill { display: inline-block; background: rgba(179,136,255,0.15); color: #B388FF; border: 1px solid rgba(179,136,255,0.35); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; padding: 2px 10px; border-radius: 10px; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
 
   tfoot tr td { background: var(--rb); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 11px 8px; text-align: center; border-top: 2px solid rgba(0,180,216,0.4); }
@@ -1581,6 +1582,16 @@
         </select>
       </div>
 
+      <!-- OT/ICS Consolidation Target — where Bartlesville, Conroe & Kingwood OT/ICS back up -->
+      <div class="ctl-group">
+        <div class="ctl-lbl">OT/ICS Backup Target <span style="color:var(--text-muted);font-weight:400">· Bartlesville · Conroe · Kingwood</span></div>
+        <select id="otics-target" class="ctl-select" style="border-color:rgba(14,116,144,0.5);color:#ffffff">
+          <option value="woodlands" selected>The Woodlands (HQ)</option>
+          <option value="pasadena">Pasadena</option>
+          <option value="borger">Borger</option>
+        </select>
+      </div>
+
     </div>
   </div>
 
@@ -1786,9 +1797,10 @@
         <div class="bj-card" id="bj-ot-ics-card">
           <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(255,214,0,0.15);color:#FFD600;border:1px solid rgba(255,214,0,0.35)">&#128737;</span>OT &amp; ICS Systems</div>
           <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px;line-height:1.55">
-            OT and ICS workloads are isolated per site as a dedicated <strong style="color:#FFD600">physical appliance</strong>, a
-            <strong style="color:#2E9E6B">Rubrik Edge virtual appliance</strong>, or folded into the site's IT cluster. Isolated
-            clusters outside Belgium replicate to the Rubrik <strong style="color:var(--rc)">Cloud Cluster (CCES)</strong> in Azure;
+            OT and ICS workloads are isolated per site as a dedicated <strong style="color:#FFD600">physical 1-node appliance</strong>,
+            <strong style="color:#0E7490">consolidated (backed up) to a central OT/ICS appliance</strong>, or folded into the site's IT
+            cluster. Bartlesville, Conroe and Kingwood back up to the selected consolidation target (The Woodlands HQ, Pasadena or Borger).
+            Isolated clusters outside Belgium replicate to the Rubrik <strong style="color:var(--rc)">Cloud Cluster (CCES)</strong> in Azure;
             Belgian sites use the in-region replication topology instead.
           </div>
           <div id="bj-otics-dynamic"></div>
@@ -2140,10 +2152,10 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'rubrik_dashboard_v41';
+const STORAGE_KEY = 'rubrik_dashboard_v43';
 
 const SITE_DEFAULTS = [
-  [1,  "Bartlesville, OK",         8.17,  0,     0,     "US"        ],
+  [1,  "Bartlesville, OK",         8.17,  1.1,   null,  "US"        ],
   [2,  "Cedar Bayou, TX",          104.0, 7.0,   15.0,  "US"        ],
   [3,  "Conroe, TX",               4.51,  null,  0.5,   "US"        ],
   [4,  "Kingwood, TX",             7.67,  1.14,  3.33,  "US"        ],
@@ -2157,7 +2169,7 @@ const SITE_DEFAULTS = [
   [12, "Tessenderlo, Belgium",     11.27, 1.58,  5.0,   "Belgium"   ],
   [13, "Beringen, Belgium",        4.97,  1.14,  4.5,   "Belgium"   ],
   [14, "Suntec Tower, Singapore",  2.74,  null,  null,  "Singapore" ],
-  [15, "The Woodlands, TX",        9.67,  null,  null,  "US"        ],
+  [15, "The Woodlands, TX (HQ)",   9.67,  null,  null,  "US"        ],
   [16, "GTPC",                     34.0,  null,  22.5,  "US"        ],
 ];
 
@@ -2338,19 +2350,58 @@ function selectVirtual(reqTB) {
 }
 
 // ── Static OT/ICS deployment assignment ──────────────────────────────────────
-// OT/ICS workloads are now MANUALLY assigned per site to an isolated configuration:
-//   'physical' → dedicated physical cluster / 1-node appliance (sized via selectHardware)
-//   'virtual'  → Rubrik Edge virtual appliance (sized via selectVirtual)
-//   'it'       → folded into the site's IT cluster (no separate appliance)
+// OT/ICS workloads are assigned per site to an isolated configuration:
+//   'physical'     → dedicated physical cluster / 1-node appliance (selectHardware)
+//   'virtual'      → Rubrik Edge virtual appliance (selectVirtual)
+//   'consolidated' → no local appliance; backed up to a central consolidation target
+//   'it'           → folded into the site's IT cluster (no separate appliance)
 // Non-Belgium isolated clusters replicate to Rubrik Cloud Cluster (CCES) in Azure;
 // Belgium uses the in-region site-to-site replication topology instead.
-const OTICS_PHYSICAL = ['cedar bayou', 'orange', 'port arthur', 'pasadena', 'borger', 'sweeny', 'tessenderlo', 'gtpc'];
-const OTICS_VIRTUAL  = ['bartlesville', 'conroe', 'kingwood', 'plano', 'diegem', 'suntec', 'singapore', 'woodlands', 'beringen'];
+const OTICS_PHYSICAL = ['cedar bayou', 'orange', 'port arthur', 'pasadena', 'borger', 'sweeny', 'tessenderlo', 'gtpc', 'beringen'];
+const OTICS_VIRTUAL  = ['plano', 'diegem', 'suntec', 'singapore'];
+
+// Sites whose OT/ICS is consolidated (backed up) onto a central target appliance.
+const OTICS_CONSOLIDATED = ['bartlesville', 'conroe', 'kingwood'];
+function isConsolidatedSource(si) {
+  const name = (SITE_DEFAULTS[si][1] || '').toLowerCase();
+  return OTICS_CONSOLIDATED.some(k => name.includes(k));
+}
+// Consolidation target options — keyword + label for the dropdown.
+const OTICS_TARGETS = {
+  woodlands: { key: 'woodlands', label: 'The Woodlands (HQ)' },
+  pasadena:  { key: 'pasadena',  label: 'Pasadena' },
+  borger:    { key: 'borger',    label: 'Borger' },
+};
+function getOTICSTargetKey() {
+  const el = document.getElementById('otics-target');
+  const v = el ? el.value : 'woodlands';
+  return OTICS_TARGETS[v] ? v : 'woodlands';
+}
+function getOTICSTargetSi() {
+  const key = getOTICSTargetKey();
+  let target = null;
+  SITE_DEFAULTS.forEach(([n, name], si) => { if ((name || '').toLowerCase().includes(key)) target = si; });
+  return target;
+}
+// Total OT/ICS FETB consolidated from the source sites onto the target appliance.
+function consolidatedOTICSFETB() {
+  let sum = 0;
+  SITE_DEFAULTS.forEach(([n, name], si) => {
+    if (!isConsolidatedSource(si)) return;
+    const ot  = fetbState[`${si}-OT`];
+    const ics = fetbState[`${si}-ICS`];
+    sum += (ot || 0) + (ics || 0);
+  });
+  return sum;
+}
+
 function getOTICSDeploy(si) {
   const name = (SITE_DEFAULTS[si][1] || '').toLowerCase();
+  if (isConsolidatedSource(si))        return 'consolidated';        // backed up to target
+  if (si === getOTICSTargetSi())       return 'physical';            // hosts the consolidation appliance
   if (OTICS_PHYSICAL.some(k => name.includes(k))) return 'physical';
   if (OTICS_VIRTUAL.some(k => name.includes(k)))  return 'virtual';
-  return 'it'; // default: OT/ICS folded into the IT cluster (no site currently unassigned)
+  return 'it'; // default: OT/ICS folded into the IT cluster
 }
 // Pick hardware for an OT/ICS cluster based on its assigned deployment mode.
 function selectOTICS(reqTB, mode, hwp, region, siteName) {
@@ -2375,7 +2426,9 @@ function getStateSnapshot() {
   });
   const fetb = {};
   Object.keys(fetbState).forEach(k => { fetb[k] = fetbState[k]; });
-  return { sliders, fetb, savedAt: new Date().toISOString() };
+  const selects = {};
+  ['hwp','ofs','otics-target'].forEach(id => { const el = document.getElementById(id); if (el) selects[id] = el.value; });
+  return { sliders, fetb, selects, savedAt: new Date().toISOString() };
 }
 
 function applySnapshot(snap) {
@@ -2397,6 +2450,12 @@ function applySnapshot(snap) {
         const input = document.getElementById(`fetb-${si}-${wl}`);
         if (input && v !== null) input.value = parseFloat(v).toFixed(2);
       }
+    });
+  }
+  if (snap.selects) {
+    Object.entries(snap.selects).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
     });
   }
 }
@@ -2439,6 +2498,7 @@ function resetToDefaults() {
     });
   });
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  const otEl = document.getElementById('otics-target'); if (otEl) otEl.value = 'woodlands';
   showStatus('✓ Reset to defaults');
   recalcAll();
 }
@@ -2510,14 +2570,22 @@ function getParams() {
 
 // ── OT/ICS deployment rule (static) ──────────────────────────────────────────
 // Each site's OT/ICS is isolated per its assigned mode:
-//   'it'                → absorbed into the IT cluster (Kingwood, GTPC)
+//   'it'                → absorbed into the IT cluster
 //   'physical'/'virtual'→ a dedicated combined OT+ICS cluster (separate appliance)
-// `combined` stays true whenever a separate OT/ICS appliance exists (physical or virtual).
+//   'consolidated'      → no local appliance; backed up to the consolidation target
+// `combined` stays true whenever a separate OT/ICS appliance exists here.
 function calcOTICSMode(otVal, icsVal, si) {
   let mode = getOTICSDeploy(si);
   const otNull  = otVal  === null;
   const icsNull = icsVal === null;
-  const combinedFETB = (otNull ? 0 : otVal) + (icsNull ? 0 : icsVal);
+  let combinedFETB = (otNull ? 0 : otVal) + (icsNull ? 0 : icsVal);
+  // Consolidation SOURCE: OT/ICS is backed up to the target — no local cluster.
+  if (mode === 'consolidated') {
+    return { mode, otAbs: false, icsAbs: false, combined: false, combinedFETB: 0, consolidated: true };
+  }
+  // Consolidation TARGET: absorbs the consolidated OT/ICS from the source sites.
+  const isTarget = (si === getOTICSTargetSi());
+  if (isTarget) combinedFETB += consolidatedOTICSFETB();
   // A Rubrik Edge virtual appliance is only deployed when the site actually has
   // OT/ICS FETB data. Virtual sites with no OT/ICS data get no edge (IT only).
   if (mode === 'virtual' && combinedFETB <= 0) mode = 'it';
@@ -2525,7 +2593,7 @@ function calcOTICSMode(otVal, icsVal, si) {
     return { mode, otAbs: true, icsAbs: true, combined: false, combinedFETB: 0 };
   }
   // physical or virtual (with data) → dedicated isolated OT+ICS appliance
-  return { mode, otAbs: false, icsAbs: false, combined: true, combinedFETB };
+  return { mode, otAbs: false, icsAbs: false, combined: true, combinedFETB, isTarget };
 }
 
 // Per-row offsite state: key = "si-wl", value = true (CC) / false (RCV)
@@ -2780,8 +2848,9 @@ function recalcAll() {
     const icsVal = fetbState[`${si}-ICS`];
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    // Determine OT/ICS deployment (physical appliance / virtual edge / folded into IT)
-    const { mode: oticsMode, otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, si);
+    // Determine OT/ICS deployment (physical / virtual edge / consolidated / folded)
+    const { mode: oticsMode, otAbs, icsAbs, combined, combinedFETB, consolidated, isTarget } = calcOTICSMode(otVal, icsVal, si);
+    const targetShort = (() => { const ts = getOTICSTargetSi(); return ts === null ? '' : (SITE_DEFAULTS[ts][1] || '').split(',')[0]; })();
 
     ['IT','OT','ICS'].forEach(wl => {
       const tr = document.querySelector(`tr[data-si="${si}"][data-wl="${wl}"]`);
@@ -2791,9 +2860,10 @@ function recalcAll() {
       tr.style.display = '';
 
       const isNull     = fetbState[`${si}-${wl}`] === null;
-      // In combined mode the OT row carries the OT+ICS cluster, ICS row is absorbed
-      const isAbsorbed = (wl === 'OT' && otAbs)
-                      || (wl === 'ICS' && (icsAbs || combined));
+      // In combined mode the OT row carries the OT+ICS cluster, ICS row is absorbed.
+      // Consolidated source sites have their OT/ICS backed up to the target (dimmed).
+      const isAbsorbed = (wl === 'OT' && (otAbs || consolidated))
+                      || (wl === 'ICS' && (icsAbs || combined || consolidated));
       isAbsorbed ? tr.classList.add('absorbed') : tr.classList.remove('absorbed');
 
 
@@ -2812,8 +2882,8 @@ function recalcAll() {
         const wlBadge = tr.querySelector('.wl-badge');
         if (wlBadge) { wlBadge.textContent = 'OT+ICS'; wlBadge.className = 'wl-badge wl-oticscombo'; }
         const fetbInp = tr.querySelector('.fetb-cell input');
-        if (fetbInp) { fetbInp.value = combinedFETB.toFixed(2); fetbInp.readOnly = true; fetbInp.title = 'Combined OT+ICS FETB'; fetbInp.style.color = '#FFD600'; }
-      } else if (wl === 'OT' && !otAbs) {
+        if (fetbInp) { fetbInp.value = combinedFETB.toFixed(2); fetbInp.readOnly = true; fetbInp.title = isTarget ? `Combined OT+ICS FETB incl. consolidated backups from ${OTICS_CONSOLIDATED.length} sites` : 'Combined OT+ICS FETB'; fetbInp.style.color = '#FFD600'; }
+      } else if (wl === 'OT' && !otAbs && !consolidated) {
         clusterFETB = otVal; totalOTICS += clusterFETB; totalClusters++;
         // Restore OT badge in case it was previously OT+ICS
         const wlBadge = tr.querySelector('.wl-badge');
@@ -2873,14 +2943,19 @@ function recalcAll() {
         tr.querySelector('.fb-cell').textContent = showD ? f(rawD / p.drr) : '—';
         tr.querySelector('.di-cell').textContent = showD ? f(rawD * p.dcr / p.drr) : '—';
         ['r1-cell','r2-cell','r3-cell'].forEach(c => { tr.querySelector('.' + c).textContent = '—'; tr.querySelector('.' + c).className = c + ' num'; });
-        const absLabel = (wl === 'ICS' && combined)
+        const isConsolRow = consolidated && (wl === 'OT' || wl === 'ICS') && !isNull;
+        const absLabel = isConsolRow
+          ? `<span class="appl-badge backup-badge" title="Backed up to the ${targetShort} OT/ICS consolidation appliance">&#8594; ${targetShort} (backup)</span>`
+          : (wl === 'ICS' && combined)
           ? '<span class="appl-badge absorbed-badge">→ OT+ICS cluster</span>'
           : isNull ? '<span class="appl-badge absorbed-badge">N/A</span>'
           : '<span class="appl-badge absorbed-badge">absorbed</span>';
         tr.querySelector('.app-cell').innerHTML  = absLabel;
         tr.querySelector('.cap-cell').textContent = '—';
         tr.querySelector('.lic-cell').textContent = '—';
-        tr.querySelector('.util-cell').innerHTML  = (wl === 'ICS' && combined)
+        tr.querySelector('.util-cell').innerHTML  = isConsolRow
+          ? `<span class="pct-na" style="font-size:10px">→ ${targetShort}</span>`
+          : (wl === 'ICS' && combined)
           ? '<span class="pct-na" style="font-size:10px">See OT row</span>'
           : isNull
           ? '<span class="pct-na" style="font-size:10px">No data</span>'
@@ -3455,7 +3530,7 @@ function buildRegionSummary(p) {
       const icsVal = fetbState[`${si}-ICS`];
       const otNull  = otVal  === null;
       const icsNull = icsVal === null;
-      const { mode: oticsMode, otAbs, icsAbs, combined, combinedFETB } = calcOTICSMode(otVal, icsVal, si);
+      const { mode: oticsMode, otAbs, icsAbs, combined, combinedFETB, consolidated } = calcOTICSMode(otVal, icsVal, si);
 
       const clusters = [];
 
@@ -3493,6 +3568,12 @@ function buildRegionSummary(p) {
       const absorbed = [];
       if (otAbs  && !otNull)  absorbed.push(`OT ${f(otVal)} TB → absorbed`);
       if (icsAbs && !icsNull) absorbed.push(`ICS ${f(icsVal)} TB → absorbed`);
+      if (consolidated) {
+        const ts = getOTICSTargetSi();
+        const tShort = ts === null ? 'target' : (SITE_DEFAULTS[ts][1] || '').split(',')[0];
+        const otics = (otNull ? 0 : otVal) + (icsNull ? 0 : icsVal);
+        if (otics > 0) absorbed.push(`OT/ICS ${f(otics)} TB → backed up to ${tShort}`);
+      }
       const replNote = (hubSite && hubReplIn > 0)
         ? `\u2194 Dedicated replica cluster holds ${f(hubReplIn)} TB from ${replPartnerShort(si, p.repl)} (Required Usable, no reserve)`
         : (isReplSite(si, p.repl) && itReplIn > 0)
@@ -3746,11 +3827,16 @@ function buildInputsTable() {
     // Scenario role for each workload
     const otNull  = otVal  === null;
     const icsNull = icsVal === null;
-    const { mode: oticsMode, otAbs: otA, icsAbs: icsA, combined: comb, combinedFETB: combFETB } = calcOTICSMode(otVal, icsVal, si);
+    const { mode: oticsMode, otAbs: otA, icsAbs: icsA, combined: comb, combinedFETB: combFETB, consolidated: consol } = calcOTICSMode(otVal, icsVal, si);
 
     let roleLines = [];
     roleLines.push('<span style="color:#90CAF9;font-size:9px">IT → IT Cluster</span>');
-    if (comb) {
+    if (consol) {
+      const ts = getOTICSTargetSi();
+      const tShort = ts === null ? 'target' : (SITE_DEFAULTS[ts][1] || '').split(',')[0];
+      const otics = (otNull ? 0 : otVal) + (icsNull ? 0 : icsVal);
+      roleLines.push(`<span style="color:#0E7490;font-size:9px">OT/ICS (${f(otics)}TB) → backed up to ${tShort}</span>`);
+    } else if (comb) {
       const depLabel = oticsMode === 'virtual'
         ? `OT+ICS → Rubrik Edge virtual appliance (${f(combFETB)} TB)`
         : `OT+ICS → dedicated physical appliance (${f(combFETB)} TB)`;
@@ -3890,8 +3976,10 @@ function buildBJAssumptions() {
   // Categorize each site by its OT/ICS deployment mode
   const physical = []; // { name, ot, ics, combined } — dedicated physical appliance
   const virtual  = []; // { name, ot, ics, combined } — Rubrik Edge virtual appliance
+  const consol   = []; // { name, ot, ics }           — OT/ICS backed up to consolidation target
   const folded   = []; // { name, ot, ics }           — OT/ICS folded into the IT cluster
   const noData   = []; // no OT/ICS data and folded into IT
+  const targetSi = getOTICSTargetSi();
 
   SITE_DEFAULTS.forEach(([num, name, defIT, defOT, defICS, region], si) => {
     const otVal  = fetbState[`${si}-OT`];
@@ -3901,8 +3989,10 @@ function buildBJAssumptions() {
     const ot  = otNull  ? 0 : otVal;
     const ics = icsNull ? 0 : icsVal;
     const { mode, combinedFETB } = calcOTICSMode(otVal, icsVal, si);
-    if (mode === 'physical') {
-      physical.push({ name, ot, ics, combined: combinedFETB });
+    if (mode === 'consolidated') {
+      consol.push({ name, ot, ics });
+    } else if (mode === 'physical') {
+      physical.push({ name, ot, ics, combined: combinedFETB, isTarget: si === targetSi });
     } else if (mode === 'virtual') {
       virtual.push({ name, ot, ics, combined: combinedFETB });
     } else if (ot > 0 || ics > 0) {
@@ -3944,8 +4034,23 @@ function buildBJAssumptions() {
     physical.forEach(s => {
       const otStr  = s.ot  > 0 ? `OT ${f(s.ot)}TB` : '';
       const icsStr = s.ics > 0 ? `ICS ${f(s.ics)}TB` : '';
-      const parts  = [otStr, icsStr].filter(Boolean).join(' + ');
-      html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#FFD600">▸</span><strong style="color:var(--text-primary)">${s.name}</strong> · ${parts} → <span style="color:#FFD600;font-weight:700">${f(s.combined)}TB combined appliance</span></li>`;
+      const parts  = [otStr, icsStr].filter(Boolean).join(' + ') || (s.isTarget ? 'consolidated backups' : '');
+      const tgtNote = s.isTarget ? ' <span style="color:#0E7490;font-weight:700">· consolidation target</span>' : '';
+      html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#FFD600">▸</span><strong style="color:var(--text-primary)">${s.name}</strong>${tgtNote} · ${parts} → <span style="color:#FFD600;font-weight:700">${f(s.combined)}TB combined appliance</span></li>`;
+    });
+    html += '</ul></li>';
+  }
+
+  if (consol.length > 0) {
+    const ts = getOTICSTargetSi();
+    const tName = ts === null ? 'the consolidation target' : SITE_DEFAULTS[ts][1];
+    const cTot = consol.reduce((sum, s) => sum + s.ot + s.ics, 0);
+    html += `<li><strong style="color:#0E7490">Consolidated OT/ICS Backup</strong> — these sites have no local OT/ICS appliance; their workloads are backed up to <strong style="color:var(--text-primary)">${tName}</strong> (${f(cTot)} TB combined):<ul style="margin:6px 0 0 16px;padding:0;list-style:none;font-size:11.5px">`;
+    consol.forEach(s => {
+      const otStr  = s.ot  > 0 ? `OT ${f(s.ot)}TB` : '';
+      const icsStr = s.ics > 0 ? `ICS ${f(s.ics)}TB` : '';
+      const parts  = [otStr, icsStr].filter(Boolean).join(' + ') || 'no workload data';
+      html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#0E7490">▸</span><strong style="color:var(--text-primary)">${s.name}</strong> · ${parts} → backed up to ${tName.split(',')[0]}</li>`;
     });
     html += '</ul></li>';
   }
@@ -4553,7 +4658,7 @@ function switchView(view) {
 }
 
 // ── Select dropdown wiring (hwp, ofs) ────────────────────────────────────
-['hwp', 'ofs'].forEach(id => {
+['hwp', 'ofs', 'otics-target'].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener('change', () => { recalcAll(); autoSave(); });
 });
