@@ -1776,9 +1776,8 @@
 
         <div class="bj-card">
           <div class="bj-card-title"><span class="bj-card-icon" style="background:rgba(255,214,0,0.15);color:#FFD600;border:1px solid rgba(255,214,0,0.3)">&#9881;</span>Frequency, Retention &amp; Growth</div>
-          <ul class="bj-list">
+          <ul class="bj-list" id="bj-freq-ret-list">
             <li><strong>Frequency &amp; Retention</strong> — Daily for 30 days</li>
-            <li><strong>Instant Archiving</strong> — up to 14 days for production workloads</li>
             <li><strong>Data Reduction</strong> — 2.8:1 for VMs and SQL Databases · 1.2:1 for NAS (Azure Files)</li>
             <li><strong>Annual Growth</strong> — 10% · Sized for 3 years</li>
           </ul>
@@ -3864,6 +3863,29 @@ function buildBJAssumptions() {
   const dynamicEl = document.getElementById('bj-otics-dynamic');
   if (!dynamicEl) return;
   const p = getParams();
+
+  // ── Frequency & Retention card — Production vs Non-Production treated separately ──
+  const frEl = document.getElementById('bj-freq-ret-list');
+  if (frEl) {
+    const prodPctTxt = `${Math.round(p.prodpct * 100)}%`;
+    const npPctTxt   = `${Math.round((1 - p.prodpct) * 100)}%`;
+    // Off-site copy mechanism for PRODUCTION data depends on the selected off-site mode.
+    // Instant Archiving applies ONLY to Rubrik Cloud Vault; Cloud Cluster uses DR Replication.
+    let prodOffsite;
+    if (p.ofs === 2) {
+      prodOffsite = '<strong>Off-Site Copy (Production)</strong> — DR Replication to Rubrik Cloud Cluster (CCES) in Azure';
+    } else if (p.ofs === 3) {
+      prodOffsite = '<strong>Off-Site Copy (Production)</strong> — Per-cluster selection: DR Replication to Cloud Cluster, or Instant Archiving to Rubrik Cloud Vault';
+    } else {
+      prodOffsite = '<strong>Off-Site Copy (Production)</strong> — Instant Archiving to Rubrik Cloud Vault (RCV)';
+    }
+    frEl.innerHTML = `
+      <li><strong>Production Data</strong> — ${prodPctTxt} of FETB · daily backups · ${p.ret}-day on-prem retention</li>
+      <li>${prodOffsite}</li>
+      <li><strong>Non-Production Data</strong> — ${npPctTxt} of FETB · daily backups · ${p.npret}-day retention · <span style="color:#FFAB91">not replicated off-site</span></li>
+      <li><strong>Data Reduction</strong> — ${p.drr}:1 for VMs and SQL Databases · 1.2:1 for NAS (Azure Files)</li>
+      <li><strong>Annual Growth</strong> — ${Math.round(p.agr * 100)}% · Sized for ${p.syr} years</li>`;
+  }
 
   // Categorize each site by its OT/ICS deployment mode
   const physical = []; // { name, ot, ics, combined } — dedicated physical appliance
