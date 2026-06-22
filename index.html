@@ -2346,12 +2346,12 @@ function selectVirtual(reqTB) {
 // Non-Belgium isolated clusters replicate to Rubrik Cloud Cluster (CCES) in Azure;
 // Belgium uses the in-region site-to-site replication topology instead.
 const OTICS_PHYSICAL = ['cedar bayou', 'orange', 'port arthur', 'pasadena', 'borger', 'sweeny', 'tessenderlo', 'gtpc'];
-const OTICS_VIRTUAL  = ['bartlesville', 'conroe', 'plano', 'diegem', 'suntec', 'singapore', 'woodlands', 'beringen'];
+const OTICS_VIRTUAL  = ['bartlesville', 'conroe', 'kingwood', 'plano', 'diegem', 'suntec', 'singapore', 'woodlands', 'beringen'];
 function getOTICSDeploy(si) {
   const name = (SITE_DEFAULTS[si][1] || '').toLowerCase();
   if (OTICS_PHYSICAL.some(k => name.includes(k))) return 'physical';
   if (OTICS_VIRTUAL.some(k => name.includes(k)))  return 'virtual';
-  return 'it'; // Kingwood → OT/ICS folded into the IT cluster
+  return 'it'; // default: OT/ICS folded into the IT cluster (no site currently unassigned)
 }
 // Pick hardware for an OT/ICS cluster based on its assigned deployment mode.
 function selectOTICS(reqTB, mode, hwp, region, siteName) {
