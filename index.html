@@ -1561,6 +1561,10 @@
         <div class="ctl-lbl">Non-Prod Retention (days)</div>
         <div class="ctl-row"><input type="range" id="npret" min="1" max="30" step="1" value="14"><span class="ctl-val" id="npret-v">14 days</span></div>
       </div>
+      <div class="ctl-group">
+        <div class="ctl-lbl">Storage Overhead</div>
+        <div class="ctl-row"><input type="range" id="ovh" min="0" max="30" step="0.1" value="14.7"><span class="ctl-val" id="ovh-v">14.7%</span></div>
+      </div>
 
       <!-- Hardware Platform -->
       <div class="ctl-group">
@@ -1586,9 +1590,9 @@
       <div class="ctl-group">
         <div class="ctl-lbl">OT/ICS Backup Target <span style="color:var(--text-muted);font-weight:400">· Bartlesville · Conroe · Kingwood</span></div>
         <select id="otics-target" class="ctl-select" style="border-color:rgba(14,116,144,0.5);color:#ffffff">
-          <option value="woodlands" selected>The Woodlands (HQ)</option>
+          <option value="woodlands">The Woodlands (HQ)</option>
           <option value="pasadena">Pasadena</option>
-          <option value="borger">Borger</option>
+          <option value="borger" selected>Borger</option>
         </select>
       </div>
 
@@ -1944,8 +1948,8 @@
         <!-- Year slider controls per-site data contribution sizing -->
         <div class="offsite-year-ctl" style="margin-left:auto;display:flex;align-items:center;gap:10px">
           <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Sized to:</span>
-          <input type="range" id="ofsy" min="1" max="3" step="1" value="1" style="width:90px;height:3px;background:var(--border-mid);border-radius:2px;outline:none;cursor:pointer">
-          <span class="year-val" id="ofsy-v" style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--rc);min-width:48px;text-align:right">Year 1</span>
+          <input type="range" id="ofsy" min="1" max="3" step="1" value="3" style="width:90px;height:3px;background:var(--border-mid);border-radius:2px;outline:none;cursor:pointer">
+          <span class="year-val" id="ofsy-v" style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--rc);min-width:48px;text-align:right">Year 3</span>
         </div>
       </div>
       <div class="offsite-blocks" id="offsite-blocks"></div>
@@ -1991,7 +1995,7 @@
             <th rowspan="2" style="width:72px;background:#004a6e">Appliance</th>
             <th rowspan="2" style="width:54px;background:#00324a">Cap (TB)</th>
             <th rowspan="2" style="width:58px;background:#005577" title="Licensed capacity (HPE 1-node licensed at next-higher whole TB)">Lic TB</th>
-            <th rowspan="2" style="width:130px;background:#1a3a1a">Capacity Utilized</th>
+            <th rowspan="2" style="width:130px;background:#1a3a1a" title="Required Usable INCLUDING reserve ÷ selected capacity, at the Sizing Year (default Year 3). Sizing caps: IT clusters ≤89%, combined OT+ICS clusters ≤80%.">Capacity Utilized<br><span style="font-size:8.5px;font-weight:400;color:var(--text-muted)">incl. reserve</span></th>
             <th rowspan="2" style="width:90px;background:#1a0a4e" id="offsite-col-hdr">Off-Site</th>
           </tr>
           <tr class="hdr-sub">
@@ -2011,7 +2015,7 @@
   <div class="catalog-section">
     <div class="catalog-title">
       Hardware Catalog Reference
-      <span class="catalog-pill">All available appliance &amp; node options · HPE fixed nodes sized with 20% free capacity buffer</span>
+      <span class="catalog-pill">All available appliance &amp; node options · Clusters sized to ≤89% util (IT) / ≤80% util (OT+ICS) incl. reserve at Year 3</span>
     </div>
     <div class="catalog-grid">
 
@@ -2229,7 +2233,7 @@ function flagSVG(key) {
 }
 
 
-const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, ret: 30, hwp: 2, prodpct: 70, npret: 14, ofs: 2, ofsy: 1 };
+const SLIDER_DEFAULTS = { syr: 3, drr: 2.8, dcr: 2, agr: 10, rsv: 10, ret: 30, hwp: 2, prodpct: 70, npret: 14, ovh: 14.7, ofs: 2, ofsy: 3 };
 const APPLIANCES = [["R7402",15],["R7404",30],["R7408",60],["R7412",90],["R7416",120],["R7420",150],["R7424",180]];
 
 // HPE hardware catalog
@@ -2250,14 +2254,56 @@ const HPE_SCALABLE_SIZES = [5, 10, 20, 30, 40, 50, 60]; // TB per node
 // HWP mode values: 1=Rubrik, 2=HPE, 3=Combination
 const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'HPE Hardware', 3: 'Combination' };
 
+// ── Utilization caps (incl. reserve, at the configured Sizing Year — default Year 3) ──
+// Hardware is sized so the Required Usable (WITH reserve) fills no more than these
+// fractions of the selected cluster capacity. For scalable DL360 clusters this means
+// extra nodes (e.g. a 5th node on a 4-node cluster) are added when a smaller config
+// would exceed the cap.
+const IT_UTIL_CAP    = 0.89; // IT clusters: <= 89% utilized
+const OTICS_UTIL_CAP = 0.80; // Combined OT+ICS clusters: <= 80% utilized
+function utilCapFor(isIT) { return isIT ? IT_UTIL_CAP : OTICS_UTIL_CAP; }
+
+// ── GTPC dedicated cluster minimums (customer-decided architecture) ──────────
+// GTPC's IT cluster and OT+ICS cluster are each fixed at a minimum 4-node
+// scalable configuration, regardless of the global Hardware Platform toggle —
+// same "hardcoded, not toggled" pattern as the Belgium replication topology
+// and Tessenderlo's fixed 3-appliance layout.
+//   IT cluster:     min 4 nodes × 20TB/node (80TB floor)
+//   OT+ICS cluster: min 4 nodes × 10TB/node (40TB floor)
+// Growth rule: if sized data exceeds the current floor, bump the per-node TB
+// tier first (reusing the HPE_SCALABLE_SIZES catalog) — only once the largest
+// tier (60TB/node) is reached do additional nodes get added.
+const GTPC_IT_MIN_NODES    = 4;
+const GTPC_IT_MIN_TIER     = 20; // TB per node
+const GTPC_OTICS_MIN_NODES = 4;
+const GTPC_OTICS_MIN_TIER  = 10; // TB per node
+function isGTPCSite(siteName) {
+  return (siteName || '').toLowerCase().trim() === 'gtpc';
+}
+function selectScalableFloor(reqTB, minNodes, minTierTB, utilCap = 1) {
+  // Gross the requirement up to the utilization cap so the chosen config leaves headroom.
+  const eff = reqTB / utilCap;
+  // Step 1: hold nodes at the minimum and climb the per-node TB tier.
+  const tiers = HPE_SCALABLE_SIZES.filter(t => t >= minTierTB);
+  for (const tier of tiers) {
+    const cap = minNodes * tier;
+    if (cap >= eff) return [`DL360 ${minNodes}-Node ${tier}TB`, cap, 'hpe'];
+  }
+  // Step 2: per-node tier maxed out at the largest size — add nodes from there.
+  const maxTier = tiers[tiers.length - 1];
+  const nodes = Math.max(minNodes, Math.ceil(eff / maxTier));
+  return [`DL360 ${nodes}-Node ${maxTier}TB`, nodes * maxTier, 'hpe'];
+}
+
 
 // Minimum HPE fixed-node usable capacity for IT clusters
 // IT clusters that fall below this threshold are bumped up to the 14TB single-node
 const HPE_IT_MIN_CAP = 14;
 
-function selectRubrik(reqTB) {
-  // No utilization cap on Rubrik appliances — pick the smallest SKU that meets the requirement.
-  for (const [m, c] of APPLIANCES) if (c >= reqTB) return [m, c, 'rubrik'];
+function selectRubrik(reqTB, utilCap = 1) {
+  // Pick the smallest SKU whose capacity keeps utilization within the cap.
+  const eff = reqTB / utilCap;
+  for (const [m, c] of APPLIANCES) if (c >= eff) return [m, c, 'rubrik'];
   return ["R7424+", 180, 'rubrik'];
 }
 
@@ -2281,38 +2327,34 @@ function licensedTB(model, usable) {
 // (Use exact site names as they appear in SITE_DEFAULTS.)
 const HPE_1NODE_NO_BUFFER_SITES = new Set(['Orange, TX']);
 
-function selectHPE(reqTB, isIT, region, siteName) {
-  // Fixed single-node: non-expandable, so size for 3-yr longevity.
-  // Default: Year-3 data fills no more than 90% of the node
-  // → effective requirement = reqTB / (1 - HPE_FIXED_BUFFER)
-  // Sites in HPE_1NODE_NO_BUFFER_SITES skip the buffer to allow up to 100% utilization.
+function selectHPE(reqTB, isIT, region, siteName, utilCap = 1) {
+  // Effective requirement grossed up to the utilization cap so the selected config
+  // leaves the required headroom (incl. reserve) at the sizing year. This single cap
+  // replaces the legacy fixed 10% 1-node buffer and now also governs scalable configs,
+  // so a 4-node cluster that would exceed the cap gets an additional node.
+  // Sites in HPE_1NODE_NO_BUFFER_SITES keep their exemption (no cap on their 1-node config).
   const skipBuffer = siteName && HPE_1NODE_NO_BUFFER_SITES.has(siteName);
-  const fixedReqTB = skipBuffer ? reqTB : reqTB / (1 - HPE_FIXED_BUFFER);
-  // For IT clusters, enforce a 14TB minimum fixed-node size.
-  // For US sites, enforce an additional 17.5TB minimum 1-node floor (extra buffer).
+  const effReq = skipBuffer ? reqTB : reqTB / utilCap;
+  // Fixed single-node: non-expandable.
   for (const [m, c] of HPE_FIXED) {
-    // c here is the USABLE capacity (sizing uses this; licensed comes from licensedTB())
     if (isIT && c < HPE_IT_MIN_CAP) continue;
     if (region === 'US' && c < HPE_US_1NODE_MIN_CAP) continue;
-    if (c >= fixedReqTB) return [m, c, 'hpe'];
+    if (c >= effReq) return [m, c, 'hpe'];
   }
-  // Scalable: 4-node minimum, same node size throughout.
-  // No utilization cap on scalable configs — additional nodes can be added later
-  // to address growth. Pick the smallest config that meets the raw requirement.
-  // Prefer larger node sizes (fewer nodes for same capacity).
-  const scalableReqTB = reqTB;
+  // Scalable: 4-node minimum, same node size throughout. Add nodes as needed to stay
+  // within the utilization cap. Prefer larger node sizes (fewer nodes for same capacity).
   let bestModel = null, bestCap = Infinity, bestNodes = Infinity;
   for (const nodeSize of HPE_SCALABLE_SIZES) {
     const minNodes = 4;
     const minCap   = minNodes * nodeSize;
-    if (minCap >= scalableReqTB) {
+    if (minCap >= effReq) {
       if (minNodes < bestNodes || (minNodes === bestNodes && minCap < bestCap)) {
         bestNodes = minNodes;
         bestCap   = minCap;
         bestModel = `DL360 4-Node ${nodeSize}TB`;
       }
     } else {
-      const nodesNeeded = Math.ceil(scalableReqTB / nodeSize);
+      const nodesNeeded = Math.ceil(effReq / nodeSize);
       const totalCap    = nodesNeeded * nodeSize;
       if (nodesNeeded < bestNodes || (nodesNeeded === bestNodes && totalCap < bestCap)) {
         bestNodes = nodesNeeded;
@@ -2324,20 +2366,35 @@ function selectHPE(reqTB, isIT, region, siteName) {
   if (bestModel) return [bestModel, bestCap, 'hpe'];
   // Fallback: largest scalable option with enough nodes
   const nodeSize = 60;
-  const nodes = Math.ceil(reqTB / nodeSize);
+  const nodes = Math.ceil(effReq / nodeSize);
   return [`DL360 ${nodes}-Node 60TB`, nodes * nodeSize, 'hpe'];
 }
 
-function selectCombination(reqTB, isIT, region, siteName) {
+function selectCombination(reqTB, isIT, region, siteName, utilCap = 1) {
   // Combination: HPE for < 20TB required, Rubrik for >= 20TB
-  if (reqTB < 20) return selectHPE(reqTB, isIT, region, siteName);
-  return selectRubrik(reqTB);
+  if (reqTB < 20) return selectHPE(reqTB, isIT, region, siteName, utilCap);
+  return selectRubrik(reqTB, utilCap);
+}
+
+// ── Site-specific IT cluster hardware overrides (customer-directed architecture) ──
+// These force a specific node configuration for a site's IT cluster, regardless of the
+// auto-sizer. The override must still hold the requirement; for Cedar Bayou the year-3
+// Required Usable + reserve (~84 TB) fits the 100 TB (5-node × 20 TB) config at ~84% util.
+const IT_HARDWARE_OVERRIDE = {
+  'cedar bayou': ['DL360 5-Node 20TB', 100, 'hpe'],
+};
+function itHardwareOverride(siteName) {
+  const key = (siteName || '').toLowerCase().split(',')[0].trim();
+  return IT_HARDWARE_OVERRIDE[key] || null;
 }
 
 function selectHardware(reqTB, hwp, isIT, region, siteName) {
-  if (hwp === 1) return selectRubrik(reqTB);
-  if (hwp === 2) return selectHPE(reqTB, isIT, region, siteName);
-  return selectCombination(reqTB, isIT, region, siteName);
+  if (isIT) { const ov = itHardwareOverride(siteName); if (ov) return ov.slice(); }
+  const utilCap = utilCapFor(isIT); // IT => 89%, OT/ICS (isIT=false) => 80%
+  if (isIT && isGTPCSite(siteName)) return selectScalableFloor(reqTB, GTPC_IT_MIN_NODES, GTPC_IT_MIN_TIER, utilCap);
+  if (hwp === 1) return selectRubrik(reqTB, utilCap);
+  if (hwp === 2) return selectHPE(reqTB, isIT, region, siteName, utilCap);
+  return selectCombination(reqTB, isIT, region, siteName, utilCap);
 }
 
 // ── Rubrik Edge — Virtual Appliance catalog ──────────────────────────────────
@@ -2374,8 +2431,8 @@ const OTICS_TARGETS = {
 };
 function getOTICSTargetKey() {
   const el = document.getElementById('otics-target');
-  const v = el ? el.value : 'woodlands';
-  return OTICS_TARGETS[v] ? v : 'woodlands';
+  const v = el ? el.value : 'borger';
+  return OTICS_TARGETS[v] ? v : 'borger';
 }
 function getOTICSTargetSi() {
   const key = getOTICSTargetKey();
@@ -2405,8 +2462,9 @@ function getOTICSDeploy(si) {
 }
 // Pick hardware for an OT/ICS cluster based on its assigned deployment mode.
 function selectOTICS(reqTB, mode, hwp, region, siteName) {
+  if (isGTPCSite(siteName)) return selectScalableFloor(reqTB, GTPC_OTICS_MIN_NODES, GTPC_OTICS_MIN_TIER, OTICS_UTIL_CAP);
   if (mode === 'virtual') return selectVirtual(reqTB);
-  return selectHardware(reqTB, hwp, false, region, siteName); // physical
+  return selectHardware(reqTB, hwp, false, region, siteName); // physical → isIT=false → 80% cap
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -2498,7 +2556,7 @@ function resetToDefaults() {
     });
   });
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  const otEl = document.getElementById('otics-target'); if (otEl) otEl.value = 'woodlands';
+  const otEl = document.getElementById('otics-target'); if (otEl) otEl.value = 'borger';
   showStatus('✓ Reset to defaults');
   recalcAll();
 }
@@ -2533,14 +2591,32 @@ function calcStored(fetb, drr, dcr, agr, yr, ret) {
   return (fetb * Math.pow(1 + agr, yr - 1) / drr) * (1 + (ret - 1) * dcr);
 }
 
-// Split prod/non-prod, each with its own retention
-function calcStoredSplit(fetb, drr, dcr, agr, yr, ret, prodpct, npret) {
+// Split prod/non-prod, each with its own retention model.
+//
+// Both tiers = 1 full backup of their slice + (days-1) daily incrementals,
+// where each daily incremental = (slice * dcr) / drr (change rate on that slice).
+//   stored = (sliceFETB / drr) * (1 + (days - 1) * dcr)
+//
+// PRODUCTION (ret-day retention):
+//   prod = ((fetb*prodpct)/drr) * (1 + (ret-1)*dcr)
+//   e.g. Cedar Bayou: ((104*0.7)/2.8) + 29*((104*0.7*0.02)/2.8) = 26 + 15.08 = 41.08 TB
+//
+// NON-PRODUCTION (npret-day retention):
+//   np = ((fetb*(1-prodpct))/drr) * (1 + (npret-1)*dcr)
+//   e.g. Cedar Bayou: ((104*0.3)/2.8) + 13*((104*0.3*0.02)/2.8) = 11.14 + 2.90 = 14.04 TB
+//
+// grown = AGR compounding factor applied to the source FETB each sizing year.
+// ovh   = storage overhead factor (e.g. 0.147 = +14.7%) applied to the final
+//         stored capacity to align with the standard sizing tool. It does NOT
+//         change the data reduction ratio or daily change rate — it is a uniform
+//         uplift on the computed usable capacity (metadata/index/filesystem overhead).
+function calcStoredSplit(fetb, drr, dcr, agr, yr, ret, prodpct, npret, ovh = 0) {
   const prodFETB = fetb * prodpct;
   const npFETB   = fetb * (1 - prodpct);
   const grown    = Math.pow(1 + agr, yr - 1);
   const prod = (prodFETB * grown / drr) * (1 + (ret   - 1) * dcr);
   const np   = (npFETB   * grown / drr) * (1 + (npret - 1) * dcr);
-  return prod + np;
+  return (prod + np) * (1 + ovh);
 }
 function utilColor(pct) {
   if (pct >= 90) return ['util-high','pct-high'];
@@ -2559,6 +2635,7 @@ function getParams() {
     hwp:     parseInt(document.getElementById('hwp').value),
     prodpct: parseInt(document.getElementById('prodpct').value) / 100,
     npret:   parseInt(document.getElementById('npret').value),
+    ovh:     parseFloat(document.getElementById('ovh').value) / 100,
     ofs:     parseInt(document.getElementById('ofs').value),
     repl:    getReplConfig(),
     ofsyr:   parseInt(document.getElementById('ofsy').value),
@@ -2708,6 +2785,36 @@ function getReplConfig() {
   };
 }
 
+// ── OT+ICS cross-site replication (Belgium) ─────────────────────────────────
+// Tessenderlo's OT+ICS cluster replicates to Beringen's OT+ICS cluster. This
+// off-loads Tessenderlo's OT+ICS copy from the hub→Diegem stream (which had
+// inflated the Diegem IT cluster) onto Beringen's dedicated OT+ICS appliance,
+// reducing required capacity on Diegem. Resolved by name so order is irrelevant.
+const OTICS_REPL = (() => {
+  let from = null, to = null;
+  SITE_DEFAULTS.forEach(([num, name], si) => {
+    if (/tessenderlo/i.test(name))   from = si;
+    else if (/beringen/i.test(name)) to   = si;
+  });
+  return { from, to };
+})();
+// OT+ICS FETB a site replicates out (its combined OT+ICS workloads).
+function oticsReplOutFETB(si) {
+  const ot  = fetbState[`${si}-OT`];
+  const ics = fetbState[`${si}-ICS`];
+  return (ot || 0) + (ics || 0);
+}
+// Per-year Required Usable (NO reserve) that `si`'s OT+ICS cluster RECEIVES.
+function oticsReplInUsable(si, p) {
+  if (si !== OTICS_REPL.to || OTICS_REPL.from === null) return [0, 0, 0];
+  const srcFETB = oticsReplOutFETB(OTICS_REPL.from);
+  if (srcFETB <= 0) return [0, 0, 0];
+  return [1, 2, 3].map(yr => calcStoredSplit(srcFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret, p.ovh));
+}
+function oticsReplSourceShort() {
+  return OTICS_REPL.from === null ? '' : (SITE_DEFAULTS[OTICS_REPL.from][1] || '').split(',')[0];
+}
+
 // Sites that SEND a replica into `si` (incoming).
 function replIncomingPartners(si, repl) {
   if (!repl || !repl.enabled) return [];
@@ -2754,10 +2861,14 @@ function isReplWorkload(si, wl, repl) {
 
 // Sum of replicated-out FETB a site sends (selected + present workloads).
 function replOutFETB(si, repl) {
+  // The OTICS_REPL source (Tessenderlo) routes its OT+ICS to Beringen's OT+ICS
+  // cluster via OTICS_REPL — so exclude it from the generic hub→spoke stream
+  // (otherwise it would also be counted onto the Diegem IT cluster).
+  const dropOTICS = (si === OTICS_REPL.from);
   let fetb = 0;
-  if (repl.it)  { const v = fetbState[`${si}-IT`];  if (v) fetb += v; }
-  if (repl.ot)  { const v = fetbState[`${si}-OT`];  if (v) fetb += v; }
-  if (repl.ics) { const v = fetbState[`${si}-ICS`]; if (v) fetb += v; }
+  if (repl.it)               { const v = fetbState[`${si}-IT`];  if (v) fetb += v; }
+  if (repl.ot  && !dropOTICS) { const v = fetbState[`${si}-OT`];  if (v) fetb += v; }
+  if (repl.ics && !dropOTICS) { const v = fetbState[`${si}-ICS`]; if (v) fetb += v; }
   return fetb;
 }
 
@@ -2767,7 +2878,7 @@ function replIncomingBreakdown(si, p, repl) {
   return replIncomingPartners(si, repl).map(pi => {
     const srcFETB = replOutFETB(pi, repl);
     const perYear = srcFETB > 0
-      ? [1, 2, 3].map(yr => calcStoredSplit(srcFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret))
+      ? [1, 2, 3].map(yr => calcStoredSplit(srcFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret, p.ovh))
       : [0, 0, 0];
     return { si: pi, short: (SITE_DEFAULTS[pi][1] || '').split(',')[0], perYear };
   });
@@ -2900,7 +3011,9 @@ function recalcAll() {
         const isReplicatedRow = clusterFETB !== null && wl !== 'IT' && isReplWorkload(si, replWl, p.repl);
         if (isReplicatedRow) {
           // Replicated in-region (Belgium) — no Cloud Cluster / RCV copy
-          const outShort = replOutgoingPartners(si, p.repl).map(pi => (SITE_DEFAULTS[pi][1] || '').split(',')[0]).join(' & ');
+          const outShort = (replWl === 'OT+ICS' && si === OTICS_REPL.from && OTICS_REPL.to !== null)
+            ? (SITE_DEFAULTS[OTICS_REPL.to][1] || '').split(',')[0] // OT+ICS replicates to Beringen's OT+ICS cluster
+            : replOutgoingPartners(si, p.repl).map(pi => (SITE_DEFAULTS[pi][1] || '').split(',')[0]).join(' & ');
           osCell.innerHTML = `<div class="repl-cell"><span class="repl-pill" title="Replicated in-region to ${outShort} — no Cloud Cluster / RCV copy">&#8594; ${outShort}</span></div>`;
         } else if (clusterFETB !== null && !p.osAll) {
           // Manual mode — per-row RCV/CC mini toggle
@@ -2964,11 +3077,13 @@ function recalcAll() {
       }
 
       // Calculate all 3 years with prod/non-prod split
-      const y = [1,2,3].map(yr => calcStoredSplit(clusterFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret));
+      const y = [1,2,3].map(yr => calcStoredSplit(clusterFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret, p.ovh));
       // Site-to-site replication: the receiving cluster (IT row) must also hold the
       // partner's replicated copy — added as Required Usable WITHOUT reserve.
       let replIn = [0, 0, 0];
       if (wl === 'IT' && isReplSite(si, p.repl) && !isReplHub(si, p.repl)) replIn = replIncomingUsable(si, p, p.repl);
+      // Combined OT+ICS cluster also receives the cross-site OT+ICS replica (Tessenderlo → Beringen).
+      if (wl === 'OT' && combined) replIn = oticsReplInUsable(si, p);
       const yTot = y.map((v, i) => v + replIn[i]);
       const replInTB = replIn[p.syr - 1];
       const r = yTot.map(v => v * (1 + p.rsv));
@@ -2993,7 +3108,7 @@ function recalcAll() {
       totalUsable += appCap;
       if (appVendor === 'edge') { edgeCount++; edgeLic += appLic; }
       else                      { physCount++; physLic += appLic; }
-      const pctUsed   = (yTot[p.syr - 1] / appCap) * 100;
+      const pctUsed   = (r[p.syr - 1] / appCap) * 100; // utilization incl. reserve
       const pctCapped = Math.min(pctUsed, 100);
       const [barCls, txtCls] = utilColor(pctUsed);
       const vendorClass = appVendor === 'hpe' ? 'hpe-badge' : appVendor === 'edge' ? 'edge-badge' : 'rubrik-badge';
@@ -3049,7 +3164,7 @@ function recalcAll() {
         const rLic = licensedTB(rModel, rCap);
         totalLic += rLic; totalUsable += rCap; totalClusters++;
         physCount++; physLic += rLic;
-        const rPct = (hubIn[p.syr - 1] / rCap) * 100;
+        const rPct = (rReq[p.syr - 1] / rCap) * 100; // utilization incl. reserve
         const [rBar, rTxt] = utilColor(rPct);
         const rVendorClass = rVendor === 'hpe' ? 'hpe-badge' : 'rubrik-badge';
         const partner = replPartnerShort(si, p.repl);
@@ -3096,7 +3211,7 @@ function recalcAll() {
     const evalRow = (wl, fetb) => {
       if (isReplWorkload(si, wl, p.repl)) return; // replicated cross-site → not on RCV / Cloud Cluster
       const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
-      const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
+      const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr, p.ovh);
       offsiteTotalTB += result.stored;
     };
 
@@ -3152,17 +3267,18 @@ function recalcAll() {
 // Required capacity = Required Usable WITHOUT reserve (prod FETB only)
 // RCV = 2.0 × prod FETB
 
-function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC, ofsyr) {
+function calcOffsiteCapacity(clusterFETB, prodpct, drr, dcr, agr, ret, isCC, ofsyr, ovh = 0) {
   // Off-site sizing year (1, 2, or 3) — applies AGR^year compounding
   const yr = ofsyr || 1;
   const prodFETB = clusterFETB * prodpct;
   const grown    = prodFETB * Math.pow(1 + agr, yr);
   if (isCC) {
-    // Required usable without reserve — 30-day retention, prod only, year-N growth
-    const stored = (grown / drr) * (1 + (30 - 1) * dcr);
+    // Required usable without reserve — 30-day retention, prod only, year-N growth.
+    // Apply the same storage overhead factor as the local clusters (metadata/index/filesystem).
+    const stored = (grown / drr) * (1 + (30 - 1) * dcr) * (1 + ovh);
     return { stored, rcvCap: null };
   } else {
-    // RCV = 2.0 × prod FETB at year-N growth
+    // RCV = 2.0 × prod FETB at year-N growth (object-storage rule — overhead not applied)
     const rcvCap = grown * 2.0;
     return { stored: rcvCap, rcvCap };
   }
@@ -3279,7 +3395,7 @@ function buildOffsiteSummary(p) {
           return;
         }
         const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
-        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
+        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr, p.ovh);
         if (isCC) {
           regionCCStoredTB += result.stored;
           anyCCInRegion = true;
@@ -3537,7 +3653,7 @@ function buildRegionSummary(p) {
       const itFETB = itVal
         + (otAbs && !otNull  ? (otVal  || 0) : 0)
         + (icsAbs && !icsNull ? (icsVal || 0) : 0);
-      const itStoredLocal = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+      const itStoredLocal = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret, p.ovh);
       const hubSite = isReplHub(si, p.repl);
       // Spokes merge their single incoming replica into the IT cluster; the hub keeps
       // its primary IT cluster local-only and receives spoke replicas on a separate cluster.
@@ -3545,7 +3661,7 @@ function buildRegionSummary(p) {
       const itStored = itStoredLocal + itReplIn;
       const itReq    = itStored * (1 + p.rsv);
       const [itModel, itCap, itVendor] = selectHardware(itReq, p.hwp, true, key, siteName); // IT cluster (region = key from REGIONS.forEach)
-      const itPct    = (itStored / itCap * 100).toFixed(1);
+      const itPct    = (itReq / itCap * 100).toFixed(1); // utilization incl. reserve
       clusters.push({ wl:'IT', model:itModel, cap:itCap, vendor:itVendor, pct:itPct });
       regionClusters++; regionLic += itCap;
       if (itVendor === 'hpe') regionHPE++; else regionRubrik++;
@@ -3557,7 +3673,7 @@ function buildRegionSummary(p) {
       if (hubSite && hubReplIn > 0) {
         const rReq = hubReplIn * (1 + p.rsv);
         const [rModel, rCap, rVendor] = selectHardware(rReq, p.hwp, true, key, siteName); // replica-target cluster
-        clusters.push({ wl:'REPL', model:rModel, cap:rCap, vendor:rVendor, pct:(hubReplIn / rCap * 100).toFixed(1) });
+        clusters.push({ wl:'REPL', model:rModel, cap:rCap, vendor:rVendor, pct:(rReq / rCap * 100).toFixed(1) });
         regionClusters++; regionLic += rCap;
         if (rVendor === 'hpe') regionHPE++; else regionRubrik++;
         modelTally[rModel] = modelTally[rModel] || { count:0, vendor:rVendor };
@@ -3582,10 +3698,11 @@ function buildRegionSummary(p) {
 
       // Combined OT+ICS cluster — dedicated physical appliance or virtual edge license
       if (combined) {
-        const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+        const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret, p.ovh)
+                     + oticsReplInUsable(si, p)[p.syr - 1]; // + cross-site OT+ICS replica (Tessenderlo → Beringen)
         const req    = stored * (1 + p.rsv);
         const [m, c, v] = selectOTICS(req, oticsMode, p.hwp, key, siteName); // physical appliance or Rubrik Edge
-        clusters.push({ wl:'OT+ICS', model:m, cap:c, vendor:v, pct:(c > 0 ? stored/c*100 : 0).toFixed(1) });
+        clusters.push({ wl:'OT+ICS', model:m, cap:c, vendor:v, pct:(c > 0 ? req/c*100 : 0).toFixed(1) });
         regionClusters++; regionLic += c;
         if (v === 'hpe') regionHPE++; else if (v === 'edge') regionEdge++; else regionRubrik++;
         modelTally[m] = modelTally[m] || { count:0, vendor:v };
@@ -3752,10 +3869,11 @@ const sliderFmts = {
   hwp:     v => HW_LABELS[parseInt(v)] || 'Rubrik',
   prodpct: v => `${v}%`,
   npret:   v => `${v} days`,
+  ovh:     v => `${parseFloat(v).toFixed(1)}%`,
   ofs:     v => ({ 1:'Instant Archive → RCV', 2:'Rep to Cloud Cluster', 3:'Manual (per-row)' }[parseInt(v)] || 'RCV'),
   ofsy:    v => `Year ${v}`,
 };
-['syr','drr','dcr','agr','rsv','ret','prodpct','npret','ofsy'].forEach(id => {
+['syr','drr','dcr','agr','rsv','ret','prodpct','npret','ovh','ofsy'].forEach(id => {
   const el  = document.getElementById(id);
   const out = document.getElementById(id + '-v');
   el.addEventListener('input', () => {
@@ -4008,7 +4126,7 @@ function buildBJAssumptions() {
   const repl = p.repl;
   if (repl.enabled && REPL_TOPOLOGY.edges.length > 0) {
     const short = si => (SITE_DEFAULTS[si][1] || '').split(',')[0];
-    const usableOf = si => { const o = replOutFETB(si, repl); return o > 0 ? calcStoredSplit(o, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret) : 0; };
+    const usableOf = si => { const o = replOutFETB(si, repl); return o > 0 ? calcStoredSplit(o, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret, p.ovh) : 0; };
     const hubShort = short(REPL_TOPOLOGY.hub);
     const flows = REPL_TOPOLOGY.edges.map(([fr, to]) => ({
       from: short(fr), to: short(to), usable: usableOf(fr), out: replOutFETB(fr, repl)
@@ -4018,12 +4136,16 @@ function buildBJAssumptions() {
     html += `<li><strong style="color:#7CFFB2">Site-to-Site Replication — Belgium region (directional)</strong>`;
     html += ` &nbsp;<span style="font-size:10px;color:var(--text-muted)">(Year ${p.syr} sizing)</span>`;
     html += `<div style="margin:6px 0 0 0;font-size:11.5px;color:var(--text-secondary);line-height:1.6">`;
-    html += `Belgian IT, OT and ICS workloads replicate in-region instead of to the Azure Cloud Cluster. <strong style="color:var(--text-primary)">Beringen</strong> and <strong style="color:var(--text-primary)">Diegem</strong> both replicate into <strong style="color:var(--text-primary)">${hubShort}</strong>, and ${hubShort} replicates back to <strong style="color:var(--text-primary)">Diegem</strong> only. ${hubShort} receives spoke replicas on a <strong style="color:#7CFFB2">dedicated 1-node replica-target appliance</strong> holding <strong style="color:#7CFFB2">${f(hubIncoming)} TB</strong> combined Required Usable.`;
+    html += `Belgian IT, OT and ICS workloads replicate in-region instead of to the Azure Cloud Cluster. <strong style="color:var(--text-primary)">Beringen</strong> and <strong style="color:var(--text-primary)">Diegem</strong> both replicate into <strong style="color:var(--text-primary)">${hubShort}</strong>; ${hubShort} replicates its <strong style="color:var(--text-primary)">IT</strong> back to <strong style="color:var(--text-primary)">Diegem</strong>, while its <strong style="color:var(--text-primary)">OT+ICS</strong> replicates to <strong style="color:var(--text-primary)">Beringen's</strong> OT+ICS cluster (off-loading Diegem). ${hubShort} receives spoke replicas on a <strong style="color:#7CFFB2">dedicated 1-node replica-target appliance</strong> holding <strong style="color:#7CFFB2">${f(hubIncoming)} TB</strong> combined Required Usable.`;
     html += `</div>`;
     html += `<ul style="margin:8px 0 0 16px;padding:0;list-style:none;font-size:11.5px">`;
     flows.forEach(fl => {
       html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#2ecc8f">&#8594;</span><strong style="color:var(--text-primary)">${fl.from} &#8594; ${fl.to}</strong> · replicates <span style="color:#7CFFB2;font-weight:700">${f(fl.usable)} TB</span> Required Usable into the ${fl.to} cluster${fl.out <= 0 ? ' <span style="color:var(--text-muted)">(no workload data at '+fl.from+')</span>' : ''}</li>`;
     });
+    if (OTICS_REPL.from !== null && OTICS_REPL.to !== null && oticsReplOutFETB(OTICS_REPL.from) > 0) {
+      const otUsable = oticsReplInUsable(OTICS_REPL.to, p)[p.syr - 1];
+      html += `<li style="padding:3px 0 3px 14px;position:relative;color:var(--text-secondary)"><span style="position:absolute;left:0;color:#2ecc8f">&#8594;</span><strong style="color:var(--text-primary)">${short(OTICS_REPL.from)} OT+ICS &#8594; ${short(OTICS_REPL.to)}</strong> · replicates <span style="color:#7CFFB2;font-weight:700">${f(otUsable)} TB</span> Required Usable into the ${short(OTICS_REPL.to)} OT+ICS cluster</li>`;
+    }
     html += `</ul>`;
     html += `<div style="margin:8px 0 0 0;font-size:11px;color:var(--text-muted);line-height:1.6">The in-region replica serves as the off-site copy for these workloads, so Belgian IT/OT/ICS data is <strong style="color:#7CFFB2">excluded from the Azure Cloud Cluster and RCV targets</strong> to avoid double-counting capacity and cost.</div>`;
     html += `</li>`;
@@ -4119,7 +4241,7 @@ function buildBJSizing() {
       // Replicated workloads are protected by the cross-site copy, so they drop off the RCV target.
       if (isReplWorkload(si, wl, p.repl)) return;
       [1,2,3].forEach(yr => {
-        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, false, yr);
+        const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, false, yr, p.ovh);
         regionRCVTotals[region][yr-1] += result.rcvCap || 0;
       });
     };
@@ -4149,7 +4271,7 @@ function buildBJSizing() {
       // so the BJ Cluster Licensing table and 3yr tile reflect quotable TB.
       const replIn = replInYears[yr-1];
       if (itFETB > 0 || replIn > 0) {
-        const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret) + replIn;
+        const itStored = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret, p.ovh) + replIn;
         const itReq    = itStored * (1 + p.rsv);
         const [itModel, itCap] = selectHardware(itReq, p.hwp, true, region, name);  // IT cluster (+ spoke incoming replica)
         regionLicTotals[region][yr-1] += licensedTB(itModel, itCap);
@@ -4163,7 +4285,8 @@ function buildBJSizing() {
       }
       // Combined OT+ICS cluster — physical appliance or Rubrik Edge virtual license
       if (combined && combinedFETB > 0) {
-        const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret);
+        const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, yr, p.ret, p.prodpct, p.npret, p.ovh)
+                     + oticsReplInUsable(si, p)[yr-1]; // + cross-site OT+ICS replica (Tessenderlo → Beringen)
         const req    = stored * (1 + p.rsv);
         const [otModel, cap] = selectOTICS(req, oticsMode, p.hwp, region, name);  // OT+ICS appliance / Edge
         regionLicTotals[region][yr-1] += licensedTB(otModel, cap);
@@ -4403,7 +4526,7 @@ function buildChadView() {
     const itFETB = itVal
       + (otAbs && !otNull  ? (otVal  || 0) : 0)
       + (icsAbs && !icsNull ? (icsVal || 0) : 0);
-    const itStoredLocal = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+    const itStoredLocal = calcStoredSplit(itFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret, p.ovh);
     // Site-to-site replication: spokes hold the hub's Required Usable (no reserve) in their IT
     // cluster; the hub keeps its primary IT cluster local-only and gets a separate replica cluster.
     const hubSite = isReplHub(si, p.repl);
@@ -4435,7 +4558,8 @@ function buildChadView() {
 
     // Combined OT+ICS cluster — physical appliance or Rubrik Edge virtual license
     if (combined) {
-      const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret);
+      const stored = calcStoredSplit(combinedFETB, p.drr, p.dcr, p.agr, p.syr, p.ret, p.prodpct, p.npret, p.ovh)
+                   + oticsReplInUsable(si, p)[p.syr - 1]; // + cross-site OT+ICS replica (Tessenderlo → Beringen)
       const req    = stored * (1 + p.rsv);
       const [m, c] = selectOTICS(req, oticsMode, p.hwp, region, name);
       const oLic = licensedTB(m, c);
@@ -4452,7 +4576,7 @@ function buildChadView() {
     const evalRow = (wl, fetb) => {
       if (isReplWorkload(si, wl, p.repl)) return; // replicated cross-site → not on RCV / Cloud Cluster
       const isCC = p.osAll ? p.osCC : getOsRowCC(si, wl);
-      const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr);
+      const result = calcOffsiteCapacity(fetb, p.prodpct, p.drr, p.dcr, p.agr, p.ret, isCC, p.ofsyr, p.ovh);
       if (isCC) { regionData[region].ccStoredTB += result.stored; regionData[region].ccCount++; }
       else      { regionData[region].rcvCapTB   += result.rcvCap;  regionData[region].rcvCount++; }
     };
