@@ -1995,7 +1995,7 @@
             <th rowspan="2" style="width:72px;background:#004a6e">Appliance</th>
             <th rowspan="2" style="width:54px;background:#00324a">Cap (TB)</th>
             <th rowspan="2" style="width:58px;background:#005577" title="Licensed capacity (HPE 1-node licensed at next-higher whole TB)">Lic TB</th>
-            <th rowspan="2" style="width:130px;background:#1a3a1a" title="Required Usable INCLUDING reserve ÷ selected capacity, at the Sizing Year (default Year 3). Sizing caps: IT clusters ≤89%, combined OT+ICS clusters ≤80%.">Capacity Utilized<br><span style="font-size:8.5px;font-weight:400;color:var(--text-muted)">incl. reserve</span></th>
+            <th rowspan="2" style="width:130px;background:#1a3a1a" title="Required Usable INCLUDING reserve ÷ selected capacity, at the Sizing Year (default Year 3). Sizing caps: IT clusters ≤89%, combined OT+ICS clusters ≤80%, and any fixed 1-node config ≤80%.">Capacity Utilized<br><span style="font-size:8.5px;font-weight:400;color:var(--text-muted)">incl. reserve</span></th>
             <th rowspan="2" style="width:90px;background:#1a0a4e" id="offsite-col-hdr">Off-Site</th>
           </tr>
           <tr class="hdr-sub">
@@ -2015,7 +2015,7 @@
   <div class="catalog-section">
     <div class="catalog-title">
       Hardware Catalog Reference
-      <span class="catalog-pill">All available appliance &amp; node options · Clusters sized to ≤89% util (IT) / ≤80% util (OT+ICS) incl. reserve at Year 3</span>
+      <span class="catalog-pill">All available appliance &amp; node options · Clusters sized to ≤89% util (IT) / ≤80% util (OT+ICS) · fixed 1-node configs ≤80% · incl. reserve at Year 3</span>
     </div>
     <div class="catalog-grid">
 
@@ -2261,6 +2261,17 @@ const HW_LABELS = { 1: 'Rubrik Appliances', 2: 'HPE Hardware', 3: 'Combination' 
 // would exceed the cap.
 const IT_UTIL_CAP    = 0.89; // IT clusters: <= 89% utilized
 const OTICS_UTIL_CAP = 0.80; // Combined OT+ICS clusters: <= 80% utilized
+const ONE_NODE_UTIL_CAP = 0.80; // Fixed single-node configs (non-expandable): <= 80% utilized
+// Site-specific 1-node utilization overrides — keyed by "<site>|IT" or "<site>|OTICS".
+// These replace the global 1-node cap for that site/workload, letting it keep a
+// 1-node config at a looser ceiling. Pasadena IT is allowed up to 90% incl. reserve.
+const ONE_NODE_UTIL_OVERRIDE = {
+  'pasadena|IT': 0.90,
+};
+function oneNodeOverride(isIT, siteName) {
+  const key = (siteName || '').toLowerCase().split(',')[0].trim() + '|' + (isIT ? 'IT' : 'OTICS');
+  return ONE_NODE_UTIL_OVERRIDE[key] !== undefined ? ONE_NODE_UTIL_OVERRIDE[key] : null;
+}
 function utilCapFor(isIT) { return isIT ? IT_UTIL_CAP : OTICS_UTIL_CAP; }
 
 // ── GTPC dedicated cluster minimums (customer-decided architecture) ──────────
@@ -2334,12 +2345,18 @@ function selectHPE(reqTB, isIT, region, siteName, utilCap = 1) {
   // so a 4-node cluster that would exceed the cap gets an additional node.
   // Sites in HPE_1NODE_NO_BUFFER_SITES keep their exemption (no cap on their 1-node config).
   const skipBuffer = siteName && HPE_1NODE_NO_BUFFER_SITES.has(siteName);
-  const effReq = skipBuffer ? reqTB : reqTB / utilCap;
-  // Fixed single-node: non-expandable.
+  // Fixed single-node configs are non-expandable, so they carry a tighter ceiling:
+  // the smaller of the cluster cap and the 1-node cap (80% incl. reserve). A per-site
+  // override (e.g. Pasadena IT at 90%) replaces this when present.
+  const ovr = oneNodeOverride(isIT, siteName);
+  const oneNodeCap = ovr !== null ? ovr : Math.min(utilCap, ONE_NODE_UTIL_CAP);
+  const fixedReq = skipBuffer ? reqTB : reqTB / oneNodeCap;
+  const effReq   = skipBuffer ? reqTB : reqTB / utilCap; // scalable path
+  // Fixed single-node: non-expandable, capped at ONE_NODE_UTIL_CAP.
   for (const [m, c] of HPE_FIXED) {
     if (isIT && c < HPE_IT_MIN_CAP) continue;
     if (region === 'US' && c < HPE_US_1NODE_MIN_CAP) continue;
-    if (c >= effReq) return [m, c, 'hpe'];
+    if (c >= fixedReq) return [m, c, 'hpe'];
   }
   // Scalable: 4-node minimum, same node size throughout. Add nodes as needed to stay
   // within the utilization cap. Prefer larger node sizes (fewer nodes for same capacity).
