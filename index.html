@@ -2367,9 +2367,9 @@ function selectCombination(reqTB, isIT, region, siteName) {
 // requirements. DO NOT add, remove, or modify any entry below without first
 // obtaining explicit approval from the customer / account owner.
 //   • Cedar Bayou, TX — IT cluster     — fixed DL360 5-Node 20TB (100 TB usable).
-//   • GTPC            — IT cluster     — fixed DL360 4-Node mixed 3×10TB + 1×20TB (50 TB usable).
+//   • GTPC            — IT cluster     — fixed DL360 4-Node 20TB (80 TB usable).
 //   • GTPC            — OT+ICS cluster — fixed DL360 1-Node 21TB (21 TB usable).
-//   • Sweeny, TX      — IT cluster     — fixed DL360 4-Node mixed 2×20TB + 2×10TB (60 TB usable).
+//   • Sweeny, TX      — IT cluster     — fixed DL360 4-Node 20TB (80 TB usable).
 //   • Bartlesville,OK — IT cluster     — fixed DL360 1-Node 14TB (14 TB usable).
 //   • Conroe, TX      — IT cluster     — fixed DL360 1-Node 7TB (7 TB usable).
 //   • Kingwood, TX    — IT cluster     — fixed DL360 1-Node 7TB (7 TB usable).
@@ -2381,9 +2381,9 @@ function selectCombination(reqTB, isIT, region, siteName) {
 // ─────────────────────────────────────────────────────────────────────────────
 const HARDWARE_OVERRIDES = [
   { site: 'Cedar Bayou, TX',         isIT: true,  model: 'DL360 5-Node 20TB',                 cap: 100, vendor: 'hpe' },
-  { site: 'GTPC',                    isIT: true,  model: 'DL360 4-Node Mixed (3×10TB + 1×20TB)', cap: 50, vendor: 'hpe' },
+  { site: 'GTPC',                    isIT: true,  model: 'DL360 4-Node 20TB',                  cap: 80,  vendor: 'hpe' },
   { site: 'GTPC',                    isIT: false, model: 'DL360 1-Node 21TB',                 cap: 21,  vendor: 'hpe' },
-  { site: 'Sweeny, TX',              isIT: true,  model: 'DL360 4-Node Mixed (2×20TB + 2×10TB)', cap: 60, vendor: 'hpe' },
+  { site: 'Sweeny, TX',              isIT: true,  model: 'DL360 4-Node 20TB',                  cap: 80,  vendor: 'hpe' },
   { site: 'Bartlesville, OK',        isIT: true,  model: 'DL360 1-Node 14TB',                 cap: 14,  vendor: 'hpe' },
   { site: 'Conroe, TX',              isIT: true,  model: 'DL360 1-Node 7TB',                  cap: 7,   vendor: 'hpe' },
   { site: 'Kingwood, TX',            isIT: true,  model: 'DL360 1-Node 7TB',                  cap: 7,   vendor: 'hpe' },
