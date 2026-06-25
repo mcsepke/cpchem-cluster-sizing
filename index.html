@@ -841,6 +841,11 @@
   }
   .chad-model-name { color: var(--text-primary); }
   .chad-model-cap { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text-muted); margin-left: auto; }
+  .chad-model-entry { display: flex; flex-direction: column; gap: 2px; }
+  .chad-model-ucid {
+    font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500;
+    color: var(--text-muted); letter-spacing: 0.3px; margin-left: 46px;
+  }
   .chad-region-os {
     font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
     line-height: 1.1; letter-spacing: -0.5px;
@@ -4516,6 +4521,26 @@ function toggleChadMode() {
   if (on) buildChadView();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// UCID assignment for the executive (Chad) view — keyed by region and whether the
+// model is a single-node appliance or a multi-node cluster. Node count is parsed
+// from the model string ("DL360 1-Node …" vs "DL360 4-Node …"). Combinations with
+// no assigned UCID (e.g. Belgium/Singapore multi-node, Rubrik appliances, Edge)
+// return null and render no UCID line. Update only with customer approval.
+const UCID_MAP = {
+  US:        { single: '5147790956-01', multi: '5147790952-01' },
+  Belgium:   { single: '5153125507-01' },
+  Singapore: { single: '5147791814-01' },
+};
+function ucidFor(model, regionKey) {
+  const m = (model || '').match(/(\d+)-Node/);
+  const nodes = m ? parseInt(m[1], 10) : null;
+  const reg = UCID_MAP[regionKey];
+  if (!reg || nodes === null) return null;
+  if (nodes === 1) return reg.single || null;
+  return reg.multi || null;
+}
+
 function buildChadView() {
   const p = getParams();
   const yrLabel = `Year ${p.syr}`;
@@ -4677,11 +4702,15 @@ function buildChadView() {
     let modelsHtml = '';
     sortedModels.forEach(mdl => {
       const { count, cap } = d.modelTally[mdl];
+      const ucid = ucidFor(mdl, key);
       modelsHtml += `
-        <div class="chad-model-row">
-          <span class="chad-model-count">${count}×</span>
-          <span class="chad-model-name">${mdl}</span>
-          <span class="chad-model-cap">${cap} TB usable</span>
+        <div class="chad-model-entry">
+          <div class="chad-model-row">
+            <span class="chad-model-count">${count}×</span>
+            <span class="chad-model-name">${mdl}</span>
+            <span class="chad-model-cap">${cap} TB usable</span>
+          </div>
+          ${ucid ? `<div class="chad-model-ucid">UCID - ${ucid}</div>` : ''}
         </div>`;
     });
 
